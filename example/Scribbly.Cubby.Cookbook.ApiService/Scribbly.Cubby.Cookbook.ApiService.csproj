@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.MicrosoftHosting\Scribbly.Cubby.MicrosoftHosting.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.OpenTelemetry\Scribbly.Cubby.OpenTelemetry.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby\Scribbly.Cubby.csproj" />
+    <ProjectReference Include="..\Scribbly.Cubby.Cookbook.ServiceDefaults\Scribbly.Cubby.Cookbook.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scribbly.Stencil" />
+  </ItemGroup>
+
+</Project>

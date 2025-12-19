@@ -1,0 +1,7 @@
+﻿services:
+  scribbly.cubby.hosted:
+    image: scribbly.cubby.hosted
+    build:
+      context: .
+      dockerfile: Scribbly.Cubby.Hosted/Dockerfile
+

@@ -1,0 +1,37 @@
+<Solution>
+  <Folder Name="/.setup/">
+    <File Path=".github/workflows/auto-assign.yml" />
+    <File Path=".github/workflows/dotnet-beta.yml" />
+    <File Path=".github/workflows/dotnet-release.yml" />
+    <File Path=".github/workflows/dotnet-test.yml" />
+    <File Path=".github/workflows/format.yml" />
+    <File Path="Directory.Packages.props" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/app/">
+    <Project Path="Scribbly.Cubby.Hosted/Scribbly.Cubby.Hosted.csproj" />
+  </Folder>
+  <Folder Name="/example/">
+    <File Path="example/Directory.Build.props" />
+    <Project Path="example/Scribbly.Cubby.Cookbook.ApiService/Scribbly.Cubby.Cookbook.ApiService.csproj" />
+    <Project Path="example/Scribbly.Cubby.Cookbook.AppHost/Scribbly.Cubby.Cookbook.AppHost.csproj" />
+    <Project Path="example/Scribbly.Cubby.Cookbook.ServiceDefaults/Scribbly.Cubby.Cookbook.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/lib/">
+    <File Path="source/Directory.Build.props" />
+    <Project Path="source/Scribbly.Cubby.Contract/Scribbly.Cubby.Contract.csproj" />
+    <Project Path="source/Scribbly.Cubby.MicrosoftHosting/Scribbly.Cubby.MicrosoftHosting.csproj" />
+    <Project Path="source/Scribbly.Cubby.OpenTelemetry/Scribbly.Cubby.OpenTelemetry.csproj" />
+    <Project Path="source/Scribbly.Cubby/Scribbly.Cubby.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.yaml" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <Project Path="tests/Scribbly.Cubby.Benchmarks/Scribbly.Cubby.Benchmarks.csproj" />
+    <Project Path="tests/Scribbly.Cubby.IntegrationTests/Scribbly.Cubby.IntegrationTests.csproj" />
+    <Project Path="tests/Scribbly.Cubby.UnitTests/Scribbly.Cubby.UnitTests.csproj" />
+  </Folder>
+</Solution>

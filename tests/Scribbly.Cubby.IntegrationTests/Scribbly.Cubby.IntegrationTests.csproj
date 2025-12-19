@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.Contract\Scribbly.Cubby.Contract.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.MicrosoftHosting\Scribbly.Cubby.MicrosoftHosting.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.OpenTelemetry\Scribbly.Cubby.OpenTelemetry.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby\Scribbly.Cubby.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

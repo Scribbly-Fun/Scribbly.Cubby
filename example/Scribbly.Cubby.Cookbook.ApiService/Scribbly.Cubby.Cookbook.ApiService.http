@@ -1,0 +1,5 @@
+﻿@Scribbly.Cubby.Cookbook.ApiService_HostAddress = https://localhost:7514
+
+GET {{Scribbly.Cubby.Cookbook.ApiService_HostAddress}}/weather
+
+###

@@ -1,0 +1,16 @@
+name: dotnet format
+on:
+  workflow_call:
+  workflow_dispatch:
+          
+jobs:
+  dotnet-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: dotnet format
+        run: dotnet format ./**.slnx --verify-no-changes
