@@ -11,7 +11,9 @@
 
 # Scribbly Cubby
 
-A distributed caching service built on dotnet.
+A distributed caching service built on dotnet.  You know take stuff out and put stuff away.
+
+![cubby.png](./docs/cubby.png)
 
 ![Static Badge](https://img.shields.io/badge/CACHE-blue)
 
