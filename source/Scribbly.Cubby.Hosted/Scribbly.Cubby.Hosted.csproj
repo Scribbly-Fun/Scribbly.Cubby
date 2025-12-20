@@ -21,6 +21,10 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
     </ItemGroup>
 
+  <PropertyGroup>
+    <Protobuf_ToolsPath>$(NuGetPackageRoot)grpc.tools/2.76.0/tools</Protobuf_ToolsPath>
+  </PropertyGroup>
+
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>

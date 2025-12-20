@@ -8,40 +8,40 @@ namespace Scribbly.Cubby.Store;
 
 public sealed class CacheServiceImpl : CacheService.CacheServiceBase
 {
-    private readonly DictionaryCacheStore _store = new();
+    //private readonly DictionaryCacheStore _store = new();
 
 
-    public override Task<GetResponse> Get(
-        GetRequest request,
-        ServerCallContext context)
-    {
-        var keyBytes = request.Key.CopyFrom();
-        var key = new BytesKey(keyBytes);
+    //public override Task<GetResponse> Get(
+    //    GetRequest request,
+    //    ServerCallContext context)
+    //{
+    //    var keyBytes = request.Key.CopyFrom();
+    //    var key = new BytesKey(keyBytes);
 
-        if (_store.TryGet(key, out var value))
-        {
-            return Task.FromResult(new GetResponse
-            {
-                Found = true,
-                Value = ByteString.CopyFrom(value.Data.Span)
-            });
-        }
+    //    if (_store.TryGet(key, out var value))
+    //    {
+    //        return Task.FromResult(new GetResponse
+    //        {
+    //            Found = true,
+    //            Value = ByteString.CopyFrom(value.Data.Span)
+    //        });
+    //    }
 
-        return Task.FromResult(new GetResponse { Found = false });
-    }
+    //    return Task.FromResult(new GetResponse { Found = false });
+    //}
 
-    public override Task<PutResponse> Put(
-        PutRequest request,
-        ServerCallContext context)
-    {
-        var keyBytes = request.Key.CopyFrom();
-        var valueBytes = request.Value.CopyFrom();
+    //public override Task<PutResponse> Put(
+    //    PutRequest request,
+    //    ServerCallContext context)
+    //{
+    //    var keyBytes = request.Key.CopyFrom();
+    //    var valueBytes = request.Value.CopyFrom();
 
-        var key = new BytesKey(keyBytes);
-        var value = new BytesValue(valueBytes);
+    //    var key = new BytesKey(keyBytes);
+    //    var value = new BytesValue(valueBytes);
 
-        _store.Put(key, value);
+    //    _store.Put(key, value);
 
-        return Task.FromResult(new PutResponse());
-    }
+    //    return Task.FromResult(new PutResponse());
+    //}
 }
