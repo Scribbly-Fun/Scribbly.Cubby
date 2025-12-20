@@ -24,9 +24,9 @@
       </Content>
     </ItemGroup>
 
-  <PropertyGroup>
-    <Protobuf_ToolsPath>$(NuGetPackageRoot)grpc.tools/2.76.0/tools</Protobuf_ToolsPath>
-  </PropertyGroup>
+    <PropertyGroup>
+      <Protobuf_ToolsPath>$(NuGetPackageRoot)grpc.tools/2.76.0/tools</Protobuf_ToolsPath>
+    </PropertyGroup>
 
     <ItemGroup>
       <Protobuf Include="Protos\cubby.proto" GrpcServices="Server" />
