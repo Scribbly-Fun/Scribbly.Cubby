@@ -1,7 +1,6 @@
 ﻿using System.Buffers;
-using Scribbly.Cubby.Values;
 
-namespace Scribbly.Cubby.Stores;
+namespace Scribbly.Cubby.Stores.LockFree;
 
 sealed class LockFreeHashTable
 {

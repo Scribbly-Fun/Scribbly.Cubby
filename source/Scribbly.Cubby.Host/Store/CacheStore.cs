@@ -1,22 +1,22 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
-using Scribbly.Cubby.Keys;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
-using Scribbly.Cubby.Values;
+using Scribbly.Cubby.Stores.Concurrent;
 
-namespace Scribbly.Cubby.Hosted.Store;
+namespace Scribbly.Cubby.Store;
 
 public sealed class CacheServiceImpl : CacheService.CacheServiceBase
 {
     private readonly DictionaryCacheStore _store = new();
+
 
     public override Task<GetResponse> Get(
         GetRequest request,
         ServerCallContext context)
     {
         var keyBytes = request.Key.CopyFrom();
-        var key = new ByteKey(keyBytes);
+        var key = new BytesKey(keyBytes);
 
         if (_store.TryGet(key, out var value))
         {
@@ -37,8 +37,8 @@ public sealed class CacheServiceImpl : CacheService.CacheServiceBase
         var keyBytes = request.Key.CopyFrom();
         var valueBytes = request.Value.CopyFrom();
 
-        var key = new ByteKey(keyBytes);
-        var value = new CacheValue(valueBytes);
+        var key = new BytesKey(keyBytes);
+        var value = new BytesValue(valueBytes);
 
         _store.Put(key, value);
 

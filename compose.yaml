@@ -5,3 +5,9 @@
       context: .
       dockerfile: Scribbly.Cubby.Hosted/Dockerfile
 
+  scribbly.cubby.host:
+    image: scribbly.cubby.host
+    build:
+      context: .
+      dockerfile: source/Scribbly.Cubby.Host/Dockerfile
+

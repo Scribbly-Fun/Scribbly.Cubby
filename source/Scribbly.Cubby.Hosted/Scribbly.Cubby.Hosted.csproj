@@ -1,17 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <Nullable>enable</Nullable>
+      <TargetFramework>net10.0</TargetFramework>
+      <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <InvariantGlobalization>true</InvariantGlobalization>
-        <PublishAot>true</PublishAot>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 
         <!-- gRPC + AOT -->
+        <PublishAot>true</PublishAot>
+        <InvariantGlobalization>true</InvariantGlobalization>
         <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,14 +28,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\cache.proto" GrpcServices="Server" />
+        <Protobuf Include="Protos\cubby.proto" GrpcServices="Server" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\source\Scribbly.Cubby.Contract\Scribbly.Cubby.Contract.csproj" />
-      <ProjectReference Include="..\source\Scribbly.Cubby.MicrosoftHosting\Scribbly.Cubby.MicrosoftHosting.csproj" />
-      <ProjectReference Include="..\source\Scribbly.Cubby.OpenTelemetry\Scribbly.Cubby.OpenTelemetry.csproj" />
-      <ProjectReference Include="..\source\Scribbly.Cubby\Scribbly.Cubby.csproj" />
+      <ProjectReference Include="..\Scribbly.Cubby.Contract\Scribbly.Cubby.Contract.csproj" />
+      <ProjectReference Include="..\Scribbly.Cubby.MicrosoftHosting\Scribbly.Cubby.MicrosoftHosting.csproj" />
+      <ProjectReference Include="..\Scribbly.Cubby.OpenTelemetry\Scribbly.Cubby.OpenTelemetry.csproj" />
+      <ProjectReference Include="..\Scribbly.Cubby\Scribbly.Cubby.csproj" />
     </ItemGroup>
 
 </Project>

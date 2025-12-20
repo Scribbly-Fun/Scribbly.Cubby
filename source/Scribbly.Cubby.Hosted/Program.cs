@@ -1,4 +1,4 @@
-using Scribbly.Cubby.Hosted.Store;
+ using Scribbly.Cubby.Store;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -17,6 +17,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapGrpcService<CacheServiceImpl>();
+ app.MapGrpcService<CacheServiceImpl>();
 
 app.Run();

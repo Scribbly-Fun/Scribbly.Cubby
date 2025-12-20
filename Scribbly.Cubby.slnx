@@ -5,12 +5,14 @@
     <File Path=".github/workflows/dotnet-release.yml" />
     <File Path=".github/workflows/dotnet-test.yml" />
     <File Path=".github/workflows/format.yml" />
+    <File Path="compose.yaml" />
     <File Path="Directory.Packages.props" />
     <File Path="nuget.config" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/app/">
-    <Project Path="Scribbly.Cubby.Hosted/Scribbly.Cubby.Hosted.csproj" />
+    <Project Path="source/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj" />
+    <Project Path="source/Scribbly.Cubby.Hosted/Scribbly.Cubby.Hosted.csproj" />
   </Folder>
   <Folder Name="/example/">
     <File Path="example/Directory.Build.props" />
@@ -24,9 +26,6 @@
     <Project Path="source/Scribbly.Cubby.MicrosoftHosting/Scribbly.Cubby.MicrosoftHosting.csproj" />
     <Project Path="source/Scribbly.Cubby.OpenTelemetry/Scribbly.Cubby.OpenTelemetry.csproj" />
     <Project Path="source/Scribbly.Cubby/Scribbly.Cubby.csproj" />
-  </Folder>
-  <Folder Name="/Solution Items/">
-    <File Path="compose.yaml" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Directory.Build.props" />

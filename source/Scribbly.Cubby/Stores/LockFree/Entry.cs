@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Scribbly.Cubby.Values;
+namespace Scribbly.Cubby.Stores.LockFree;
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct Entry
