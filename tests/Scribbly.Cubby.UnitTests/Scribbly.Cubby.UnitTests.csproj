@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\source\Scribbly.Cubby.Contract\Scribbly.Cubby.Contract.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.Client\Scribbly.Cubby.Client.csproj" />
     <ProjectReference Include="..\..\source\Scribbly.Cubby\Scribbly.Cubby.csproj" />
   </ItemGroup>
 

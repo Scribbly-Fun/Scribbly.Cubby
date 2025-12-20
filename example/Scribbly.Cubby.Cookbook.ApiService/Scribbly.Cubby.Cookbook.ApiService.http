@@ -1,5 +1,15 @@
 ﻿@Scribbly.Cubby.Cookbook.ApiService_HostAddress = https://localhost:7514
 
-GET {{Scribbly.Cubby.Cookbook.ApiService_HostAddress}}/weather
+POST {{host}}/entry/my_key
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
+###
+
+GET {{host}}/entry/my_key
 
 ###

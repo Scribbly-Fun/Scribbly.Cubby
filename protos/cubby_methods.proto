@@ -1,0 +1,22 @@
+﻿syntax = "proto3";
+
+package cubby;
+
+option csharp_namespace = "Scribbly.Cubby.Proto";
+
+import "cubby_messages.proto";
+
+/**
+ * Reads and writes data from the cached store
+ */
+service CacheService {
+  /**
+   * Gets an item from the cache
+   */
+  rpc Get (GetRequest) returns (GetResponse);
+
+  /**
+   * Inserts or updates an item in the cache
+   */
+  rpc Put (PutRequest) returns (PutResponse);
+}

@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Scribbly.Cubby.Contract\Scribbly.Cubby.Contract.csproj" />
+    <ProjectReference Include="..\Scribbly.Cubby.Client\Scribbly.Cubby.Client.csproj" />
   </ItemGroup>
 
 </Project>

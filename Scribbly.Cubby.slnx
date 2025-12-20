@@ -12,7 +12,6 @@
   </Folder>
   <Folder Name="/app/">
     <Project Path="source/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj" />
-    <Project Path="source/Scribbly.Cubby.Hosted/Scribbly.Cubby.Hosted.csproj" />
   </Folder>
   <Folder Name="/example/">
     <File Path="example/Directory.Build.props" />
@@ -22,10 +21,15 @@
   </Folder>
   <Folder Name="/lib/">
     <File Path="source/Directory.Build.props" />
-    <Project Path="source/Scribbly.Cubby.Contract/Scribbly.Cubby.Contract.csproj" />
+    <Project Path="source/Scribbly.Cubby.Client/Scribbly.Cubby.Client.csproj" />
     <Project Path="source/Scribbly.Cubby.MicrosoftHosting/Scribbly.Cubby.MicrosoftHosting.csproj" />
     <Project Path="source/Scribbly.Cubby.OpenTelemetry/Scribbly.Cubby.OpenTelemetry.csproj" />
+    <Project Path="source/Scribbly.Cubby.Server/Scribbly.Cubby.Server.csproj" />
     <Project Path="source/Scribbly.Cubby/Scribbly.Cubby.csproj" />
+  </Folder>
+  <Folder Name="/protos/">
+    <File Path="protos/cubby_messages.proto" />
+    <File Path="protos/cubby_methods.proto" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Directory.Build.props" />

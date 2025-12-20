@@ -1,6 +1,8 @@
-using Scribbly.Cubby.Store;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Stores;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -8,7 +10,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddOpenApi();
-builder.Services.AddGrpc();
+builder.AddCubbyServer(ops =>
+{
+    ops.Store = Store.Sharded;
+});
 
 var app = builder.Build();
 
@@ -17,6 +22,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapGrpcService<CacheServiceImpl>();
+app.MapCubby();
 
 app.Run();

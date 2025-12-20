@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -23,16 +23,11 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
-
+    
     <ItemGroup>
-      <Protobuf Include="Protos\cubby.proto" GrpcServices="Server" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Scribbly.Cubby.Contract\Scribbly.Cubby.Contract.csproj" />
+      <ProjectReference Include="..\Scribbly.Cubby.Server\Scribbly.Cubby.Server.csproj" />
       <ProjectReference Include="..\Scribbly.Cubby.MicrosoftHosting\Scribbly.Cubby.MicrosoftHosting.csproj" />
       <ProjectReference Include="..\Scribbly.Cubby.OpenTelemetry\Scribbly.Cubby.OpenTelemetry.csproj" />
-      <ProjectReference Include="..\Scribbly.Cubby\Scribbly.Cubby.csproj" />
     </ItemGroup>
     
 </Project>
