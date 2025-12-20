@@ -18,12 +18,18 @@ A distributed caching service built on dotnet.  You know take stuff out and put 
 ![Static Badge](https://img.shields.io/badge/CACHE-blue)
 
 ## Table of Contents
-1. [🎁 Example](#Example)
+1. [Example](#Example)
+2. [Benchmarks](#Benchmarks)
 
 ## Example
 
 Below is a brief snip of code to get you started before reading more.
 
+# Benchmarks
+
+### 2025.12.20 Store Comparisons
+
+The initial benchmarks to help select a default starting point for a in-memory caching mechanism
 
 | Method                          | Threads | EntryCount | Mean      | Error     | StdDev    | Median    | Ratio | RatioSD | Completed Work Items | Lock Contentions | Allocated | Alloc Ratio |
 |-------------------------------- |-------- |----------- |----------:|----------:|----------:|----------:|------:|--------:|---------------------:|-----------------:|----------:|------------:|
