@@ -2,12 +2,7 @@
 
 option csharp_namespace = "Scribbly.Cubby.Proto";
 
-package cache;
-
-service CacheService {
-  rpc Get (GetRequest) returns (GetResponse);
-  rpc Put (PutRequest) returns (PutResponse);
-}
+package cubby;
 
 message GetRequest {
   bytes key = 1;

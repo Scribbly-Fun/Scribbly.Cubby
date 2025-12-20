@@ -1,0 +1,27 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Scribbly.Cubby.Store;
+
+namespace Scribbly.Cubby.Builder;
+
+/// <summary>
+/// Extensions used to setup and configure the applications gRPC mapping.
+/// </summary>
+public static class EndpointRouteBuilderExtensions
+{
+    /// <summary>
+    /// The endpoint route builder to extend.
+    /// </summary>
+    /// <param name="builder">Endpoints to bind the GRPC service to.</param>
+    extension(IEndpointRouteBuilder builder)
+    {
+        /// <summary>
+        /// Maps the Cubby services to the application host.
+        /// </summary>
+        /// <returns></returns>
+        public GrpcServiceEndpointConventionBuilder MapCubby()
+        {
+            return builder.MapGrpcService<CubbyGrpcServer>();
+        }
+    }
+}

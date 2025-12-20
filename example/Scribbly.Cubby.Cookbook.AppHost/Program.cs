@@ -1,7 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cacheService = builder.AddProject<Projects.Scribbly_Cubby_Hosted>("scrb-cubby");
+var cacheService = builder.AddProject<Projects.Scribbly_Cubby_Host>("scrb-cubby");
 
-var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook");
+var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook")
+    .WithReference(cacheService)
+    .WaitFor(cacheService);
 
 builder.Build().Run();

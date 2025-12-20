@@ -2,15 +2,12 @@
 using Grpc.Core;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
-using Scribbly.Cubby.Stores.Concurrent;
 
 namespace Scribbly.Cubby.Store;
 
-public sealed class CacheServiceImpl : CacheService.CacheServiceBase
+internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheServiceBase
 {
-    private readonly DictionaryCacheStore _store = new();
-
-
+    /// <inheritdoc />
     public override Task<GetResponse> Get(
         GetRequest request,
         ServerCallContext context)
@@ -18,7 +15,7 @@ public sealed class CacheServiceImpl : CacheService.CacheServiceBase
         var keyBytes = request.Key.CopyFrom();
         var key = new BytesKey(keyBytes);
 
-        if (_store.TryGet(key, out var value))
+        if (store.TryGet(key, out var value))
         {
             return Task.FromResult(new GetResponse
             {
@@ -30,6 +27,7 @@ public sealed class CacheServiceImpl : CacheService.CacheServiceBase
         return Task.FromResult(new GetResponse { Found = false });
     }
 
+    /// <inheritdoc />
     public override Task<PutResponse> Put(
         PutRequest request,
         ServerCallContext context)
@@ -40,7 +38,7 @@ public sealed class CacheServiceImpl : CacheService.CacheServiceBase
         var key = new BytesKey(keyBytes);
         var value = new BytesValue(valueBytes);
 
-        _store.Put(key, value);
+        store.Put(key, value);
 
         return Task.FromResult(new PutResponse());
     }

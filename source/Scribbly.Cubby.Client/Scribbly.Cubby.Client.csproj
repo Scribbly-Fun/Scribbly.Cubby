@@ -7,16 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" />
-    <PackageReference Include="Grpc.AspNetCore" />
+    <ProjectReference Include="..\Scribbly.Cubby\Scribbly.Cubby.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Grpc.Tools">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\..\protos\cubby_messages.proto" GrpcServices="None" />
+    <Protobuf Include="..\..\protos\cubby_methods.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>

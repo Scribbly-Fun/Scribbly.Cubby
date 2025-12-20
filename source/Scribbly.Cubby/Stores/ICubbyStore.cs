@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Scribbly.Cubby.Stores.Sharded;
 
 namespace Scribbly.Cubby.Stores;
 
@@ -50,44 +49,4 @@ public interface ICubbyStore
     /// </summary>
     /// <param name="key">The key</param>
     bool TryEvict(BytesKey key);
-}
-
-/// <summary>
-/// The supported store types
-/// </summary>
-public enum CubbyStores
-{
-    /// <summary>
-    /// The lock free store
-    /// </summary>
-    LockFree,
-    /// <summary>
-    /// The sharded store
-    /// </summary>
-    Sharded,
-    /// <summary>
-    /// The basic concurrent dictionary
-    /// </summary>
-    Concurrent
-}
-
-/// <summary>
-/// Factory used to create stores
-/// </summary>
-public sealed class CubbyStoreFactory
-{
-    /// <summary>
-    /// Creates  a new cubby store
-    /// </summary>
-    /// <param name="store">The type of store. <remarks>This will become part of the builder</remarks></param>
-    /// <returns>A store used to store the cached data</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when the requested store type doesn't exist.</exception>
-    public ICubbyStore CreateStore(CubbyStores store)
-    {
-        return store switch
-        {
-            CubbyStores.Sharded => ShardedConcurrentStore.FromCores,
-            _ => throw new ArgumentOutOfRangeException(nameof(store), store, null)
-        };
-    }
 }
