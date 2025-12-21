@@ -20,7 +20,7 @@ public class Entry_Expiration_Tests
         var now = DateTimeOffset.UtcNow.UtcTicks;
         var expected = now + ticks;
         
-        using var entry = CacheEntry.CreateWithTtl(array, TimeSpan.FromTicks(ticks), now);
+        using var entry = PooledCacheEntry.CreateWithTtl(array, TimeSpan.FromTicks(ticks), now);
 
         entry.ExpirationUtcTicks.Should().Be(expected);
     }

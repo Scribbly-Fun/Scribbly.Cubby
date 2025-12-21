@@ -17,7 +17,7 @@ public class Entry_Length_Tests
         
         Random.Shared.NextBytes(array);
         
-        using var entry = CacheEntry.CreateNeverExpiring(array);
+        using var entry = PooledCacheEntry.CreateNeverExpiring(array);
 
         entry.ValueLength.Should().Be(length);
     }

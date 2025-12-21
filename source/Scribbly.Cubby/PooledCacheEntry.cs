@@ -8,7 +8,7 @@ namespace Scribbly.Cubby;
 /// A cached entry is a collection of bytes with a formatted header.
 /// [0-8 Expiration][9-12 Value Length][13-16 Flags][Value]
 /// </summary>
-public sealed class CacheEntry : IDisposable
+public sealed class PooledCacheEntry : ICacheEntry
 {
     /// <summary>
     /// The size of the header.
@@ -37,7 +37,7 @@ public sealed class CacheEntry : IDisposable
         => new(_buffer, HeaderSize, ValueLength);
     
 
-    private CacheEntry(byte[] buffer, ArrayPool<byte> pool)
+    private PooledCacheEntry(byte[] buffer, ArrayPool<byte> pool)
     {
         _buffer = buffer;
         _pool = pool;
@@ -51,7 +51,7 @@ public sealed class CacheEntry : IDisposable
     /// <param name="flags">Flags to define how the cache will be used.</param>
     /// <param name="pool">An array pool used for the cached buffer</param>
     /// <returns>The new cache entry</returns>
-    public static CacheEntry Create(
+    public static PooledCacheEntry Create(
         ReadOnlySpan<byte> value,
         long expirationUtcTicks = 0,
         CacheEntryFlags flags = CacheEntryFlags.None,
@@ -69,7 +69,7 @@ public sealed class CacheEntry : IDisposable
         BinaryPrimitives.WriteInt16LittleEndian(span[12..], (short)flags);
         
         value.CopyTo(span[HeaderSize..]);
-        return new CacheEntry(buffer, pool);
+        return new PooledCacheEntry(buffer, pool);
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public sealed class CacheEntry : IDisposable
     /// <param name="value">The value to cache</param>
     /// <param name="pool">An array pool</param>
     /// <returns>The new cache entry</returns>
-    public static CacheEntry CreateNeverExpiring(
+    public static PooledCacheEntry CreateNeverExpiring(
         ReadOnlySpan<byte> value, 
         ArrayPool<byte>? pool = null) 
         => Create(value, expirationUtcTicks: 0, pool: pool);
@@ -92,7 +92,7 @@ public sealed class CacheEntry : IDisposable
     /// <param name="pool">An array pool</param>
     /// <returns>The new cache entry</returns>
     /// <exception cref="ArgumentOutOfRangeException">When the ttl provided is less than 0</exception>
-    public static CacheEntry CreateWithTtl(
+    public static PooledCacheEntry CreateWithTtl(
         ReadOnlySpan<byte> value,
         TimeSpan ttl,
         long nowUtcTicks,

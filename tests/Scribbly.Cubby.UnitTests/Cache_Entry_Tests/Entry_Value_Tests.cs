@@ -17,7 +17,7 @@ public class Entry_Value_Tests
         
         Random.Shared.NextBytes(array);
         
-        var entry = CacheEntry.CreateNeverExpiring(array);
+        var entry = PooledCacheEntry.CreateNeverExpiring(array);
 
         entry.ValueMemory.ToArray().SequenceEqual(array).Should().BeTrue();
     }
@@ -35,7 +35,7 @@ public class Entry_Value_Tests
         
         Random.Shared.NextBytes(array);
         
-        using var entry = CacheEntry.CreateNeverExpiring(array);
+        using var entry = PooledCacheEntry.CreateNeverExpiring(array);
 
         entry.Value.ToArray().SequenceEqual(array).Should().BeTrue();
     }
