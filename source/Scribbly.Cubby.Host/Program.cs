@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Stores;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateSlimBuilder(args);
+
+builder.WebHost.UseKestrelHttpsConfiguration();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
-
+  // TODO: add all JSON context for admin APIs
 });
 
 builder.Services.AddOpenApi();
