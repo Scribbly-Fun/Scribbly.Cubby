@@ -13,7 +13,7 @@ public sealed record CacheEntryOptions
 /// A common abstraction used by all cubby stores.
 /// Stores hold the cached values matched against keys.
 /// </summary>
-public interface ICubbyStore
+public interface ICubbyStore : IDisposable
 {
     /// <summary>
     /// True when the value exists.

@@ -1,4 +1,5 @@
-﻿using System.Buffers.Binary;
+﻿using System.Buffers;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 
 namespace Scribbly.Cubby;
@@ -7,25 +8,59 @@ namespace Scribbly.Cubby;
 /// A cached entry is a collection of bytes with a formatted header.
 /// [0-8 Expiration][9-12 Value Length][13-16 Flags][Value]
 /// </summary>
-public readonly record struct CacheEntry
+public sealed class CacheEntry : IDisposable
 {
-    public const int HeaderSize = 16;
+    /// <summary>
+    /// The size of the header.
+    /// </summary>
+    private const int HeaderSize = 16;
     
-    private readonly byte[] _buffer;
+    private byte[]? _buffer;
+    private readonly ArrayPool<byte> _pool;
     
-    private CacheEntry(byte[] buffer)
+    public long ExpirationUtcTicks 
+        => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
+
+    public bool NeverExpires 
+        => ExpirationUtcTicks == 0;
+
+    public int ValueLength 
+        => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(8));
+
+    public CacheEntryFlags Flags 
+        => (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(12));
+    
+    public ReadOnlySpan<byte> Value 
+        => _buffer.AsSpan(HeaderSize, ValueLength);
+
+    public ReadOnlyMemory<byte> ValueMemory
+        => new(_buffer, HeaderSize, ValueLength);
+    
+
+    private CacheEntry(byte[] buffer, ArrayPool<byte> pool)
     {
         _buffer = buffer;
+        _pool = pool;
     }
-    
+
+    /// <summary>
+    /// Creates a new cache entry with custom configuration.
+    /// </summary>
+    /// <param name="value">The data to cache</param>
+    /// <param name="expirationUtcTicks">An optional expiration</param>
+    /// <param name="flags">Flags to define how the cache will be used.</param>
+    /// <param name="pool">An array pool used for the cached buffer</param>
+    /// <returns>The new cache entry</returns>
     public static CacheEntry Create(
         ReadOnlySpan<byte> value,
         long expirationUtcTicks = 0,
-        CacheEntryFlags flags = CacheEntryFlags.None)
+        CacheEntryFlags flags = CacheEntryFlags.None,
+        ArrayPool<byte>? pool = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(expirationUtcTicks);
-
-        var buffer = new byte[HeaderSize + value.Length];
+        
+        pool ??= ArrayPool<byte>.Shared;
+        var buffer = pool.Rent(HeaderSize + value.Length);
 
         var span = buffer.AsSpan();
 
@@ -34,37 +69,43 @@ public readonly record struct CacheEntry
         BinaryPrimitives.WriteInt16LittleEndian(span[12..], (short)flags);
         
         value.CopyTo(span[HeaderSize..]);
-        return new CacheEntry(buffer);
+        return new CacheEntry(buffer, pool);
     }
 
-    public static CacheEntry CreateNeverExpiring(ReadOnlySpan<byte> value)
-        => Create(value, expirationUtcTicks: 0);
+    /// <summary>
+    /// Creates a new cache entry that never expires
+    /// </summary>
+    /// <param name="value">The value to cache</param>
+    /// <param name="pool">An array pool</param>
+    /// <returns>The new cache entry</returns>
+    public static CacheEntry CreateNeverExpiring(
+        ReadOnlySpan<byte> value, 
+        ArrayPool<byte>? pool = null) 
+        => Create(value, expirationUtcTicks: 0, pool: pool);
 
+    /// <summary>
+    /// Creates a new cached entry with a time to live.
+    /// </summary>
+    /// <param name="value">The data to cache</param>
+    /// <param name="ttl">The time in ticks before the cache should be marked for eviction</param>
+    /// <param name="nowUtcTicks">The current time</param>
+    /// <param name="pool">An array pool</param>
+    /// <returns>The new cache entry</returns>
+    /// <exception cref="ArgumentOutOfRangeException">When the ttl provided is less than 0</exception>
     public static CacheEntry CreateWithTtl(
         ReadOnlySpan<byte> value,
         TimeSpan ttl,
-        long nowUtcTicks)
-    {
-        return ttl <= TimeSpan.Zero 
+        long nowUtcTicks,
+        ArrayPool<byte>? pool = null) 
+        => ttl <= TimeSpan.Zero 
             ? throw new ArgumentOutOfRangeException(nameof(ttl)) 
-            : Create(value, nowUtcTicks + ttl.Ticks);
-    }
+            : Create(value, nowUtcTicks + ttl.Ticks, pool: pool);
 
-    /* =========================
-       Header Accessors
-       ========================= */
-
-    public long ExpirationUtcTicks
-        => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
-
-    public bool NeverExpires => ExpirationUtcTicks == 0;
-
-    public int ValueLength
-        => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(8));
-
-    public CacheEntryFlags Flags
-        => (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(12));
-    
+    /// <summary>
+    /// True when the cache entry has expired.
+    /// </summary>
+    /// <param name="nowUtcTicks">The current time in ticks</param>
+    /// <returns>True if expired.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsExpired(long nowUtcTicks)
     {
@@ -73,18 +114,13 @@ public readonly record struct CacheEntry
         return expiresAt != 0 && expiresAt <= nowUtcTicks;
     }
 
-    public ReadOnlySpan<byte> Value
-        => _buffer.AsSpan(HeaderSize, ValueLength);
-
-    public ReadOnlyMemory<byte> ValueMemory
-        => new(_buffer, HeaderSize, ValueLength);
-}
-
-[Flags]
-public enum CacheEntryFlags : short
-{
-    None            = 0,
-    Compressed      = 1 << 0,
-    Sliding         = 1 << 1,
-    Tombstone       = 1 << 2
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        var buffer = Interlocked.Exchange(ref _buffer, null);
+        if (buffer != null)
+        {
+            _pool.Return(buffer, clearArray: false);
+        }
+    }
 }

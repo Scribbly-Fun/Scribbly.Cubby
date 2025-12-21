@@ -23,7 +23,7 @@ public class Entry_Flags_Tests
         
         Random.Shared.NextBytes(array);
         
-        var entry = CacheEntry.Create(array, 0, flag);
+        using var entry = CacheEntry.Create(array, 0, flag);
 
         entry.Flags.Should().Be(flag);
     }
@@ -36,7 +36,7 @@ public class Entry_Flags_Tests
         
         Random.Shared.NextBytes(array);
         
-        var entry = CacheEntry.Create(array, 0, flags);
+        using var entry = CacheEntry.Create(array, 0, flags);
 
         entry.Flags.Should().Be(flags);
     }
