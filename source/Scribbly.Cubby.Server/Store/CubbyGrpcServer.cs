@@ -12,15 +12,15 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
         GetRequest request,
         ServerCallContext context)
     {
-        var keyBytes = request.Key.CopyFrom();
-        var key = new BytesKey(keyBytes);
+        // var keyBytes = request.Key.CopyFrom();
+        var key = new BytesKey(request.Key.ToByteArray());
 
         if (store.TryGet(key, out var value))
         {
             return Task.FromResult(new GetResponse
             {
                 Found = true,
-                Value = ByteString.CopyFrom(value.Data.Span)
+                Value = ByteString.CopyFrom(value.Value.Span)
             });
         }
 
@@ -32,14 +32,25 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
         PutRequest request,
         ServerCallContext context)
     {
-        var keyBytes = request.Key.CopyFrom();
-        var valueBytes = request.Value.CopyFrom();
+        var key = new BytesKey(request.Key.ToByteArray());
 
-        var key = new BytesKey(keyBytes);
-        var value = new BytesValue(valueBytes);
+        store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.Never);
 
-        store.Put(key, value);
+        return Task.FromResult(new PutResponse
+        {
+            Result = PutResult.Updated
+        });
+    }
 
-        return Task.FromResult(new PutResponse());
+    /// <inheritdoc />
+    public override Task<EvictResponse> Evict(EvictRequest request, ServerCallContext context)
+    {
+        var key = new BytesKey(request.Key.ToByteArray());
+        store.Evict(key);
+
+        return Task.FromResult(new EvictResponse
+        {
+            Result = EvictResult.Removed
+        });
     }
 }

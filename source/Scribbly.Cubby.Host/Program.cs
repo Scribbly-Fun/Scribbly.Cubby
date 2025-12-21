@@ -1,10 +1,15 @@
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Setup;
 using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.WebHost.UseKestrelHttpsConfiguration();
+var useHttps = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(CubbyEnvironment.UseHttpsEnv));
+
+if (useHttps)
+{
+    builder.WebHost.UseKestrelHttpsConfiguration();
+}
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {

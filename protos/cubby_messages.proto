@@ -4,19 +4,101 @@ option csharp_namespace = "Scribbly.Cubby.Proto";
 
 package cubby;
 
+/**
+ * A request object used to query a cache entry
+ */
 message GetRequest {
   bytes key = 1;
 }
 
+/**
+ * The results of a cache query
+ */
 message GetResponse {
+ /**
+  * When true the value will have data
+  */
   bool found = 1;
+  /**
+  * The value returned from the cache
+  */
   bytes value = 2;
 }
 
+/**
+ * A request object used to insert a new cache record
+ */
 message PutRequest {
+  /**
+  * The cache entry key
+  */
   bytes key = 1;
+  /**
+  * The value to store inside the cache
+  */
   bytes value = 2;
+  /**
+  * The amount of time before the cache should expire.
+  */
+  int64 expiration = 3;
 }
 
+/**
+ * A response message when executing the PUT request
+ */
 message PutResponse {
+  /**
+  * The results
+  */
+  PutResult Result = 1;
+}
+
+/**
+ * The results of a insert or update request
+ */
+enum PutResult {
+ /**
+  * Unknown
+  */
+  PUT_RESULT_UNDEFINED = 0;
+ /**
+  * The PUT resulted in a new record
+  */
+  PUT_RESULT_CREATED = 1;
+ /**
+  * The PUT resulted in a existing record update
+  */
+  PUT_RESULT_UPDATED = 2;
+}
+
+/**
+ * A request object used to evict cache records
+ */
+message EvictRequest {
+  bytes key = 1;
+}
+
+/**
+ * The results of a eviction attempt
+ */
+message EvictResponse {
+  EvictResult Result = 1;
+}
+
+/**
+ * The results of a attempted eviction
+ */
+enum EvictResult {
+  /**
+   * Unknown
+   */
+  EVICT_RESULT_UNDEFINED = 0;
+  /**
+   * The EVICT resulted in a removed record
+   */
+  EVICT_RESULT_REMOVED = 1;
+  /**
+   * The EVICT key was unknown
+   */
+  EVICT_RESULT_UNKNOWN = 2;
 }

@@ -33,8 +33,6 @@ app.MapPost("/entry/{key}", (IDistributedCache cache, string key, Item item) =>
 {
     var value = JsonSerializer.SerializeToUtf8Bytes(item);
     
-    var test = JsonSerializer.Deserialize<Item>(value);
-    
     cache.Set(key, value);
 });
 

@@ -19,4 +19,9 @@ service CacheService {
    * Inserts or updates an item in the cache
    */
   rpc Put (PutRequest) returns (PutResponse);
+
+  /**
+   * Revokes and removes a entry from the cache.
+   */
+  rpc Evict (EvictRequest) returns (EvictResponse);
 }

@@ -19,9 +19,9 @@ public class StoreBenchmarks
     [Params(100, 1000)] public int EntryCount;
 
     private BytesKey[] _keys = null!;
-    private BytesValue[] _values = null!;
+    private byte[][] _values = null!;
 
-    private ConcurrentDictionary<BytesKey, BytesValue> _concurrent = null!;
+    private ConcurrentDictionary<BytesKey, CacheEntry> _concurrent = null!;
     
     private ShardedConcurrentStore _shardedConcurrent = null!;
     
@@ -29,21 +29,21 @@ public class StoreBenchmarks
     public void Setup()
     {
         _keys = new BytesKey[EntryCount];
-        _values = new BytesValue[EntryCount];
+        _values = new byte[EntryCount][];
 
         for (int i = 0; i < EntryCount; i++)
         {
             _keys[i] = new BytesKey(BitConverter.GetBytes(i));
-            _values[i] = new BytesValue(new byte[64]);
+            _values[i] = new byte[64];
         }
 
-        _concurrent = new ConcurrentDictionary<BytesKey, BytesValue>();
+        _concurrent = new ConcurrentDictionary<BytesKey, CacheEntry>();
         _shardedConcurrent = ShardedConcurrentStore.FromCores;
 
         for (int i = 0; i < EntryCount; i++)
         {
-            _concurrent[_keys[i]] = _values[i];
-            _shardedConcurrent.Put(_keys[i], _values[i]);
+            _concurrent[_keys[i]] = CacheEntry.CreateNeverExpiring(_values[i]);
+            _shardedConcurrent.Put(_keys[i], _values[i], new CacheEntryOptions());
         }
     }
     

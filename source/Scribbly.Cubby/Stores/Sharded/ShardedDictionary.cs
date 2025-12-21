@@ -14,15 +14,15 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     /// </summary>
     internal static ShardedConcurrentStore FromCores => new ShardedConcurrentStore(Environment.ProcessorCount);
     
-    private readonly ConcurrentDictionary<BytesKey, BytesValue>[] _shards;
+    private readonly ConcurrentDictionary<BytesKey, CacheEntry>[] _shards;
 
     private ShardedConcurrentStore(int shardCount)
     {
-        _shards = new ConcurrentDictionary<BytesKey, BytesValue>[shardCount];
+        _shards = new ConcurrentDictionary<BytesKey, CacheEntry>[shardCount];
         
         for (var i = 0; i < shardCount; i++)
         {
-            _shards[i] = new ConcurrentDictionary<BytesKey, BytesValue>();
+            _shards[i] = new ConcurrentDictionary<BytesKey, CacheEntry>();
         }
     }
     
@@ -30,23 +30,24 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     public bool Exists(BytesKey key) => GetShard(key).ContainsKey(key);
 
     /// <inheritdoc />
-    public BytesValue Get(BytesKey key) => GetShard(key)[key];
+    public ReadOnlyMemory<byte> Get(BytesKey key) => GetShard(key)[key].ValueMemory;
 
     /// <inheritdoc />
-    public bool TryGet(BytesKey key, [NotNullWhen(true)] out BytesValue? value)
+    public bool TryGet(BytesKey key, [NotNullWhen(true)] out ReadOnlyMemory<byte>? value)
     {
-        if (!GetShard(key).TryGetValue(key, out var bytesValue))
+        var shard = GetShard(key);
+        if (!shard.TryGetValue(key, out var entry))
         {
             value = null;
             return false;
         }
 
-        value = bytesValue;
+        value = entry.ValueMemory;
         return true;
     }
-
+    
     /// <inheritdoc />
-    public void Put(BytesKey key, BytesValue value) => GetShard(key)[key] = value;
+    public void Put(BytesKey key, byte[] value, CacheEntryOptions options) => GetShard(key)[key] = CacheEntry.Create(value, options.Tll);
 
     /// <inheritdoc />
     public void Evict(BytesKey key) => GetShard(key).Remove(key, out _);
@@ -54,6 +55,6 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     /// <inheritdoc />
     public bool TryEvict(BytesKey key) => GetShard(key).TryRemove(key, out _);
 
-    private ConcurrentDictionary<BytesKey, BytesValue> GetShard(BytesKey key)
+    private ConcurrentDictionary<BytesKey, CacheEntry> GetShard(BytesKey key)
         => _shards[(key[0] & int.MaxValue) % _shards.Length];
 }
