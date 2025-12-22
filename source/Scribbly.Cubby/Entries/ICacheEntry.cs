@@ -4,7 +4,7 @@
 /// An entry stored in the cache.
 /// </summary>
 /// <remarks>The primary purpose of this abstraction is to facilitate benchmarking storage operations.</remarks>
-public interface ICacheEntry : IDisposable
+public interface ICacheEntry
 {
     /// <summary>
     /// The time when the entry should be considered stale and removed.

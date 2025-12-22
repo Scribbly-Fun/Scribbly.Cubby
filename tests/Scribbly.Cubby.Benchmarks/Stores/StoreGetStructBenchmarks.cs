@@ -6,7 +6,7 @@ namespace Scribbly.Cubby.Benchmarks.Stores;
 
 [MemoryDiagnoser]
 [ThreadingDiagnoser]
-public class StorePutStructBenchmarks
+public class StoreGetStructBenchmarks
 {
     [Params(4)] public int Threads;
     [Params(100)] public int EntryCount;
@@ -21,7 +21,7 @@ public class StorePutStructBenchmarks
     public void Setup()
     {
         var options = new CubbyOptions();
-
+        
         _keys = new BytesKey[EntryCount];
         _values = new byte[EntryCount][];
 
@@ -33,10 +33,16 @@ public class StorePutStructBenchmarks
 
         _classPooledEntries = ShardedConcurrentStore.FromOptions(options);
         _refStructEntries = RefStructConcurrentStore.FromOptions(options);
+        
+        for (int i = 0; i < EntryCount; i++)
+        {
+            _classPooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
+            _refStructEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
+        }
     }
     
     [Benchmark(Baseline = true)]
-    public void Class_PooledArrayStore_Put()
+    public void Class_PooledArrayStore_Get()
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
@@ -45,7 +51,7 @@ public class StorePutStructBenchmarks
     }
 
     [Benchmark]
-    public void Struct_PooledArrayStore_Put()
+    public void Struct_PooledArrayStore_Get()
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {

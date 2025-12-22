@@ -2,6 +2,10 @@
 using Grpc.Core;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
+using CSharpPutResult = Scribbly.Cubby.Stores.PutResult;
+using GrpcPutResult = Scribbly.Cubby.Proto.PutResult;
+using CSharpEvictResult = Scribbly.Cubby.Stores.EvictResult;
+using GrpcEvictResult = Scribbly.Cubby.Proto.EvictResult;
 
 namespace Scribbly.Cubby.Store;
 
@@ -33,11 +37,17 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
     {
         var key = new BytesKey(request.Key.ToByteArray());
 
-        store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.Never);
+        var result = store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.Never);
 
         return Task.FromResult(new PutResponse
         {
-            Result = PutResult.Updated
+            Result = result switch
+            {
+                CSharpPutResult.Undefined => GrpcPutResult.Undefined,
+                CSharpPutResult.Created => GrpcPutResult.Created,
+                CSharpPutResult.Updated => GrpcPutResult.Updated,
+                _ => throw new ArgumentOutOfRangeException()
+            }
         });
     }
 
@@ -45,11 +55,17 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
     public override Task<EvictResponse> Evict(EvictRequest request, ServerCallContext context)
     {
         var key = new BytesKey(request.Key.ToByteArray());
-        store.Evict(key);
+        var result = store.Evict(key);
 
         return Task.FromResult(new EvictResponse
         {
-            Result = EvictResult.Removed
+            Result = result switch
+            {
+                CSharpEvictResult.Undefined => GrpcEvictResult.Undefined,
+                CSharpEvictResult.Removed => GrpcEvictResult.Removed,
+                CSharpEvictResult.Unknown => GrpcEvictResult.Unknown,
+                _ => throw new ArgumentOutOfRangeException()
+            }
         });
     }
 }

@@ -32,7 +32,7 @@ public static class HostApplicationBuilderExtensions
             {
                 var ops = sp.GetRequiredService<CubbyOptions>();
                 var factory = new CubbyStoreFactory();
-                return factory.CreateStore(ops.Store);
+                return factory.CreateStore(ops);
             });
         
             builder.Services.AddGrpc(ops =>

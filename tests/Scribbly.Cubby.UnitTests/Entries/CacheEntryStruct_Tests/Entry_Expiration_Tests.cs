@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
+using Scribbly.Cubby.Stores;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.CacheEntryStruct_Tests;
 
 public class Entry_Expiration_Tests
 {
@@ -20,8 +21,13 @@ public class Entry_Expiration_Tests
         var now = DateTimeOffset.UtcNow.UtcTicks;
         var expected = now + ticks;
         
-        using var entry = PooledCacheEntry.CreateWithTtl(array, TimeSpan.FromTicks(ticks), now);
-
-        entry.ExpirationUtcTicks.Should().Be(expected);
+        var entry = array.LayoutEntry(new CacheEntryOptions
+        {
+            TimeToLive = TimeSpan.FromTicks(ticks).Ticks + now
+        });
+        
+        var str = new CacheEntryStruct(entry);
+        
+        str.ExpirationUtcTicks.Should().Be(expected);
     }
 }
