@@ -1,4 +1,5 @@
-﻿using Google.Protobuf;
+﻿using System.Buffers;
+using Google.Protobuf;
 using Grpc.Core;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
@@ -32,9 +33,11 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
         PutRequest request,
         ServerCallContext context)
     {
-        var key = new BytesKey(request.Key.ToByteArray());
+        var buffer = ArrayPool<byte>.Shared.Rent(16 + request.Key.Length + request.Value.Length);
 
-        store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.Never);
+        var entry = BufferedCacheEntry.Create(buffer, request.Key.ToByteArray(), request.Value.ToByteArray(), request.Expiration, CacheEntryFlags.None);
+        
+        store.Put(entry);
 
         return Task.FromResult(new PutResponse
         {

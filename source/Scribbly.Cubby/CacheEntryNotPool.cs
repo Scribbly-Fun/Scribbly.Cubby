@@ -14,7 +14,14 @@ public sealed class CacheEntryNotPool : ICacheEntry
     /// </summary>
     private const int HeaderSize = 16;
     
+    private const int ValueLengthPosition = 8;
+    private const int KeyLengthPosition = 12;
+    private const int FlagPosition = 14;
+    
     private readonly byte[] _buffer;
+    
+    /// <inheritdoc />
+    public byte[] Buffer => _buffer ?? [];
     
     public long ExpirationUtcTicks 
         => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
@@ -23,17 +30,24 @@ public sealed class CacheEntryNotPool : ICacheEntry
         => ExpirationUtcTicks == 0;
 
     public int ValueLength 
-        => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(8));
+        => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(ValueLengthPosition));
 
-    public CacheEntryFlags Flags 
-        => (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(12));
+    public int KeyLength 
+        => BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(KeyLengthPosition));
     
-    public ReadOnlySpan<byte> Value 
+    public CacheEntryFlags Flags 
+        => (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(FlagPosition));
+
+    /// <inheritdoc />
+    public ReadOnlySpan<byte> Key
         => _buffer.AsSpan(HeaderSize, ValueLength);
+
+    public ReadOnlySpan<byte> Value 
+        => _buffer.AsSpan(HeaderSize + KeyLength, ValueLength);
 
     public ReadOnlyMemory<byte> ValueMemory
         => new(_buffer, HeaderSize, ValueLength);
-    
+
 
     private CacheEntryNotPool(byte[] buffer)
     {
@@ -43,11 +57,13 @@ public sealed class CacheEntryNotPool : ICacheEntry
     /// <summary>
     /// Creates a new cache entry with custom configuration.
     /// </summary>
+    /// <param name="key"></param>
     /// <param name="value">The data to cache</param>
     /// <param name="expirationUtcTicks">An optional expiration</param>
     /// <param name="flags">Flags to define how the cache will be used.</param>
     /// <returns>The new cache entry</returns>
     public static CacheEntryNotPool Create(
+        ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value,
         long expirationUtcTicks = 0,
         CacheEntryFlags flags = CacheEntryFlags.None)
@@ -69,27 +85,31 @@ public sealed class CacheEntryNotPool : ICacheEntry
     /// <summary>
     /// Creates a new cache entry that never expires
     /// </summary>
+    /// <param name="key"></param>
     /// <param name="value">The value to cache</param>
     /// <returns>The new cache entry</returns>
     public static CacheEntryNotPool CreateNeverExpiring(
+        ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value) 
-        => Create(value, expirationUtcTicks: 0);
+        => Create(key, value, expirationUtcTicks: 0);
 
     /// <summary>
     /// Creates a new cached entry with a time to live.
     /// </summary>
+    /// <param name="key"></param>
     /// <param name="value">The data to cache</param>
     /// <param name="ttl">The time in ticks before the cache should be marked for eviction</param>
     /// <param name="nowUtcTicks">The current time</param>
     /// <returns>The new cache entry</returns>
     /// <exception cref="ArgumentOutOfRangeException">When the ttl provided is less than 0</exception>
     public static CacheEntryNotPool CreateWithTtl(
+        ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value,
         TimeSpan ttl,
         long nowUtcTicks) 
         => ttl <= TimeSpan.Zero 
             ? throw new ArgumentOutOfRangeException(nameof(ttl)) 
-            : Create(value, nowUtcTicks + ttl.Ticks);
+            : Create(key, value, nowUtcTicks + ttl.Ticks);
 
     /// <summary>
     /// True when the cache entry has expired.

@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.Pooled_Cache_Entry_Tests;
 
 public class Entry_Length_Tests
 {
@@ -13,11 +13,13 @@ public class Entry_Length_Tests
     [InlineData(98752)]
     public void Given_ByteArrayValue_LengthBytes_Should_Be_ArrayLength(int length)
     {
-        byte[] array = new byte[length];
+        byte[] key = new byte[12];
+        byte[] value = new byte[length];
         
-        Random.Shared.NextBytes(array);
+        Random.Shared.NextBytes(key);
+        Random.Shared.NextBytes(value);
         
-        using var entry = PooledCacheEntry.CreateNeverExpiring(array);
+        var entry = PooledCacheEntry.CreateNeverExpiring(key, value);
 
         entry.ValueLength.Should().Be(length);
     }

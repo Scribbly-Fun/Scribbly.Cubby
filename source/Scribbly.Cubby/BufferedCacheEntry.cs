@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Buffers.Binary;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 namespace Scribbly.Cubby;
@@ -8,7 +9,7 @@ namespace Scribbly.Cubby;
 /// A cached entry is a collection of bytes with a formatted header.
 /// [0-7 Expiration][8-11 Value Length][12-13 Key Length][14-15 Flags][Key ^ Length][Value ^ Length]
 /// </summary>
-public sealed class PooledCacheEntry : ICacheEntry
+public sealed class BufferedCacheEntry : ICacheEntry
 {
     /// <summary>
     /// The size of the header.
@@ -18,13 +19,12 @@ public sealed class PooledCacheEntry : ICacheEntry
     private const int ValueLengthPosition = 8;
     private const int KeyLengthPosition = 12;
     private const int FlagPosition = 14;
-    
+
     private byte[]? _buffer;
-    private readonly ArrayPool<byte> _pool;
-    
+
     /// <inheritdoc />
     public byte[] Buffer => _buffer ?? [];
-    
+
     public long ExpirationUtcTicks 
         => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
 
@@ -48,81 +48,61 @@ public sealed class PooledCacheEntry : ICacheEntry
         => _buffer.AsSpan(HeaderSize + KeyLength, ValueLength);
 
     public ReadOnlyMemory<byte> ValueMemory
-        => new(_buffer, HeaderSize + KeyLength, ValueLength);
+        => new(_buffer, HeaderSize, ValueLength);
+    
 
-
-    private PooledCacheEntry(byte[] buffer, ArrayPool<byte> pool)
+    private BufferedCacheEntry(Span<byte> buffer)
     {
-        _buffer = buffer;
-        _pool = pool;
+        _buffer = buffer.ToArray();
     }
 
     /// <summary>
     /// Creates a new cache entry with custom configuration.
     /// </summary>
-    /// <param name="key"></param>
-    /// <param name="value">The data to cache</param>
-    /// <param name="expirationUtcTicks">An optional expiration</param>
-    /// <param name="flags">Flags to define how the cache will be used.</param>
-    /// <param name="pool">An array pool used for the cached buffer</param>
     /// <returns>The new cache entry</returns>
-    public static PooledCacheEntry Create(
+    public static BufferedCacheEntry Create(
+        Span<byte> buffer,
         ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value,
         long expirationUtcTicks = 0,
-        CacheEntryFlags flags = CacheEntryFlags.None,
-        ArrayPool<byte>? pool = null)
+        CacheEntryFlags flags = CacheEntryFlags.None)
     {
+        if (buffer.Length < (HeaderSize + key.Length + value.Length))
+        {
+            throw new ArgumentOutOfRangeException(nameof(buffer), "The buffer provided is not large enough to hold all data.");
+        }
+        
         ArgumentOutOfRangeException.ThrowIfNegative(expirationUtcTicks);
         
-        pool ??= ArrayPool<byte>.Shared;
-        var buffer = pool.Rent(HeaderSize + key.Length + value.Length);
-
-        var span = buffer.AsSpan();
-
-        BinaryPrimitives.WriteInt64LittleEndian(span, expirationUtcTicks);
-        BinaryPrimitives.WriteInt32LittleEndian(span[ValueLengthPosition..], value.Length);
-        BinaryPrimitives.WriteInt32LittleEndian(span[KeyLengthPosition..], key.Length);
-        BinaryPrimitives.WriteInt16LittleEndian(span[FlagPosition..], (short)flags);
+        BinaryPrimitives.WriteInt64LittleEndian(buffer, expirationUtcTicks);
+        BinaryPrimitives.WriteInt32LittleEndian(buffer[ValueLengthPosition..], value.Length);
+        BinaryPrimitives.WriteInt32LittleEndian(buffer[KeyLengthPosition..], key.Length);
+        BinaryPrimitives.WriteInt16LittleEndian(buffer[FlagPosition..], (short)flags);
         
-        key.CopyTo(span[HeaderSize..]);
-        value.CopyTo(span[(HeaderSize + key.Length)..]);
-
-        return new PooledCacheEntry(buffer, pool);
+        key.CopyTo(buffer[HeaderSize..]);
+        value.CopyTo(buffer[(HeaderSize + key.Length)..]);
+        
+        return new BufferedCacheEntry(buffer);
     }
 
     /// <summary>
     /// Creates a new cache entry that never expires
     /// </summary>
-    /// <param name="key"></param>
-    /// <param name="value">The value to cache</param>
-    /// <param name="pool">An array pool</param>
-    /// <returns>The new cache entry</returns>
-    public static PooledCacheEntry CreateNeverExpiring(
-        ReadOnlySpan<byte> key, 
-        ReadOnlySpan<byte> value, 
-        ArrayPool<byte>? pool = null) 
-        => Create(key, value, expirationUtcTicks: 0, pool: pool);
+    public static BufferedCacheEntry CreateNeverExpiring(Span<byte> buffer, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value) 
+        => Create(buffer, key, value, expirationUtcTicks: 0);
 
     /// <summary>
     /// Creates a new cached entry with a time to live.
     /// </summary>
-    /// <param name="key"></param>
-    /// <param name="value">The data to cache</param>
-    /// <param name="ttl">The time in ticks before the cache should be marked for eviction</param>
-    /// <param name="nowUtcTicks">The current time</param>
-    /// <param name="pool">An array pool</param>
-    /// <returns>The new cache entry</returns>
-    /// <exception cref="ArgumentOutOfRangeException">When the ttl provided is less than 0</exception>
-    public static PooledCacheEntry CreateWithTtl(
-        ReadOnlySpan<byte> key,
+    public static BufferedCacheEntry CreateWithTtl(
+        Span<byte> buffer, 
+        ReadOnlySpan<byte> key, 
         ReadOnlySpan<byte> value,
         TimeSpan ttl,
-        long nowUtcTicks,
-        ArrayPool<byte>? pool = null) 
+        long nowUtcTicks) 
         => ttl <= TimeSpan.Zero 
             ? throw new ArgumentOutOfRangeException(nameof(ttl)) 
-            : Create(key, value, nowUtcTicks + ttl.Ticks, pool: pool);
+            : Create(buffer, key, value, nowUtcTicks + ttl.Ticks);
 
     /// <summary>
     /// True when the cache entry has expired.
@@ -140,10 +120,6 @@ public sealed class PooledCacheEntry : ICacheEntry
     /// <inheritdoc />
     public void Dispose()
     {
-        var buffer = Interlocked.Exchange(ref _buffer, null);
-        if (buffer != null)
-        {
-            _pool.Return(buffer, clearArray: false);
-        }
+        _buffer = null;
     }
 }

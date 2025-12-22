@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Scribbly.Cubby.Stores.Sharded;
@@ -47,20 +48,20 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     }
     
     /// <inheritdoc />
-    public void Put(BytesKey key, byte[] value, CacheEntryOptions options)
+    public void Put(ICacheEntry entry)
     {
+        var key = new BytesKey(entry.Key.ToArray());
         var shard = GetShard(key);
-        var newEntry = PooledCacheEntry.Create(value, options.Tll);
-        
+
         shard.AddOrUpdate(
             key,
             static (_, entry) => entry,
             static (_, oldEntry, entry) =>
             {
-                oldEntry.Dispose();
+                ArrayPool<byte>.Shared.Return(oldEntry.Buffer);
                 return entry;
             },
-            newEntry);
+            entry);
     }
 
     /// <inheritdoc />
@@ -69,7 +70,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
         var shard = GetShard(key);
         if (shard.TryRemove(key, out var entry))
         {
-            entry.Dispose();
+            ArrayPool<byte>.Shared.Return(entry.Buffer);
         }
     }
 
@@ -82,7 +83,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
             return false;
         }
         
-        entry.Dispose();
+        ArrayPool<byte>.Shared.Return(entry.Buffer);
         return true;
     }
 
@@ -96,7 +97,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
         {
             foreach (var (_, entry) in shard)
             {
-                entry.Dispose();
+                ArrayPool<byte>.Shared.Return(entry.Buffer);
             }
 
             shard.Clear();

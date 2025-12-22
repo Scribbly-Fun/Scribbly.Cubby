@@ -2,13 +2,6 @@
 
 namespace Scribbly.Cubby.Stores;
 
-public sealed record CacheEntryOptions
-{
-    public long Tll { get; } = 0;
-
-    public static CacheEntryOptions Never => new ();
-}
-
 /// <summary>
 /// A common abstraction used by all cubby stores.
 /// Stores hold the cached values matched against keys.
@@ -41,10 +34,7 @@ public interface ICubbyStore : IDisposable
     /// <summary>
     /// Inserts or updates a cached value.
     /// </summary>
-    /// <param name="key">The key used from the cache</param>
-    /// <param name="value">The cached value to update or create </param>
-    /// <param name="options">Options declaring how the cache will be stored.</param>
-    void Put(BytesKey key, byte[] value, CacheEntryOptions options);
+    void Put(ICacheEntry entry);
 
     /// <summary>
     /// removes the cached value

@@ -69,4 +69,25 @@ public readonly struct BytesKey : IEquatable<BytesKey>
             return hash;
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="array"></param>
+    /// <returns></returns>
+    public static implicit operator BytesKey(byte[] array) => new (array);
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="span"></param>
+    /// <returns></returns>
+    public static implicit operator BytesKey(Span<byte> span) => new (span.ToArray());
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="span"></param>
+    /// <returns></returns>
+    public static implicit operator BytesKey(ReadOnlySpan<byte> span) => new (span.ToArray());
 }

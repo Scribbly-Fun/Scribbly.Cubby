@@ -1,12 +1,23 @@
 ﻿namespace Scribbly.Cubby;
 
-public interface ICacheEntry : IDisposable
+public interface ICacheEntry
 {
+    byte[] Buffer { get; }
+    
     long ExpirationUtcTicks { get; }
+    
     bool NeverExpires { get; }
+    
+    int KeyLength { get; }
+    
     int ValueLength { get; }
+    
     CacheEntryFlags Flags { get; }
+    
+    ReadOnlySpan<byte> Key { get; }
+    
     ReadOnlySpan<byte> Value { get; }
+    
     ReadOnlyMemory<byte> ValueMemory { get; }
 
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.Pooled_Cache_Entry_Tests;
 
 public class Entry_Expiration_Tests
 {
@@ -13,14 +13,16 @@ public class Entry_Expiration_Tests
     [InlineData(98752, 78846381)]
     public void Given_ExpirationValue_ExpirationBytes_Should_Be_ExpirationTicks(int length, long ticks)
     {
-        byte[] array = new byte[length];
+        byte[] key = new byte[length];
+        byte[] value = new byte[length];
         
-        Random.Shared.NextBytes(array);
+        Random.Shared.NextBytes(key);
+        Random.Shared.NextBytes(value);
 
         var now = DateTimeOffset.UtcNow.UtcTicks;
         var expected = now + ticks;
         
-        using var entry = PooledCacheEntry.CreateWithTtl(array, TimeSpan.FromTicks(ticks), now);
+        var entry = PooledCacheEntry.CreateWithTtl(key, value, TimeSpan.FromTicks(ticks), now);
 
         entry.ExpirationUtcTicks.Should().Be(expected);
     }

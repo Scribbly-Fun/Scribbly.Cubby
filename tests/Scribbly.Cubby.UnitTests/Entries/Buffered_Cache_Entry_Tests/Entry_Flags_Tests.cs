@@ -1,6 +1,7 @@
-﻿using FluentAssertions;
+﻿using System.Buffers;
+using FluentAssertions;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.Buffered_Cache_Entry_Tests;
 
 public class Entry_Flags_Tests
 {
@@ -19,25 +20,35 @@ public class Entry_Flags_Tests
     [InlineData(1000520, CacheEntryFlags.Tombstone)]
     public void Given_Flag_FlagBytes_Should_Be_FlagValue(int length, CacheEntryFlags flag)
     {
-        byte[] array = new byte[length];
+        byte[] key = new byte[length];
+        byte[] value = new byte[length];
         
-        Random.Shared.NextBytes(array);
+        Random.Shared.NextBytes(key);
+        Random.Shared.NextBytes(value);
         
-        using var entry = PooledCacheEntry.Create(array, 0, flag);
+        var buffer = ArrayPool<byte>.Shared.Rent(16 + key.Length + value.Length);
+        var entry = BufferedCacheEntry.Create(buffer, key, value, 0, flag);
 
         entry.Flags.Should().Be(flag);
+        
+        ArrayPool<byte>.Shared.Return(buffer);
     }
 
     [Theory]
     [InlineData(0, CacheEntryFlags.None & CacheEntryFlags.Sliding & CacheEntryFlags.Tombstone)]
     public void Given_Combined_FlagBytes_Should_Be_FlagValue(int length, CacheEntryFlags flags)
     {
-        byte[] array = new byte[length];
+        byte[] key = new byte[length];
+        byte[] value = new byte[length];
         
-        Random.Shared.NextBytes(array);
+        Random.Shared.NextBytes(key);
+        Random.Shared.NextBytes(value);
         
-        using var entry = PooledCacheEntry.Create(array, 0, flags);
+        var buffer = ArrayPool<byte>.Shared.Rent(16 + key.Length + value.Length);
+        var entry = BufferedCacheEntry.Create(buffer, key, value, 0, flags);
 
         entry.Flags.Should().Be(flags);
+        
+        ArrayPool<byte>.Shared.Return(buffer);
     }
 }
