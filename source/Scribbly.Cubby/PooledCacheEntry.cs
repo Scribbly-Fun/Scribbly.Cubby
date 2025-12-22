@@ -17,26 +17,35 @@ public sealed class PooledCacheEntry : ICacheEntry
     
     private byte[]? _buffer;
     private readonly ArrayPool<byte> _pool;
-    
+
+    /// <inheritdoc />
     public long ExpirationUtcTicks 
         => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
 
+    /// <inheritdoc />
     public bool NeverExpires 
         => ExpirationUtcTicks == 0;
 
+    /// <inheritdoc />
+    public CacheEntryEncoding Encoding 
+        => CacheEntryEncoding.None;
+
+    /// <inheritdoc />
     public int ValueLength 
         => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(8));
 
+    /// <inheritdoc />
     public CacheEntryFlags Flags 
         => (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(12));
     
+    /// <inheritdoc />
     public ReadOnlySpan<byte> Value 
         => _buffer.AsSpan(HeaderSize, ValueLength);
 
+    /// <inheritdoc />
     public ReadOnlyMemory<byte> ValueMemory
         => new(_buffer, HeaderSize, ValueLength);
     
-
     private PooledCacheEntry(byte[] buffer, ArrayPool<byte> pool)
     {
         _buffer = buffer;
@@ -113,7 +122,7 @@ public sealed class PooledCacheEntry : ICacheEntry
         var expiresAt = BinaryPrimitives.ReadInt64LittleEndian(span);
         return expiresAt != 0 && expiresAt <= nowUtcTicks;
     }
-
+    
     /// <inheritdoc />
     public void Dispose()
     {

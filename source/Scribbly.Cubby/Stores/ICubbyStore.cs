@@ -2,6 +2,7 @@
 
 namespace Scribbly.Cubby.Stores;
 
+
 public sealed record CacheEntryOptions
 {
     public long Tll { get; } = 0;
