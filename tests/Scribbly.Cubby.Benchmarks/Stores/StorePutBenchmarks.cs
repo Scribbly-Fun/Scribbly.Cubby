@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Buffers;
+using BenchmarkDotNet.Attributes;
 using Scribbly.Cubby.Stores;
 using Scribbly.Cubby.Stores.Concurrent;
 using Scribbly.Cubby.Stores.Sharded;
@@ -7,7 +8,7 @@ namespace Scribbly.Cubby.Benchmarks.Stores;
 
 [MemoryDiagnoser]
 [ThreadingDiagnoser]
-public class StoreGetBenchmarks
+public class StorePutBenchmarks
 {
     [Params(1, 4)] public int Threads;
     [Params(100, 1_000)] public int EntryCount;
@@ -34,39 +35,33 @@ public class StoreGetBenchmarks
         _concurrent = new ConcurrentStore();
         _pooledEntries = ShardedConcurrentStore.FromCores;
         _staticPooledEntries = StaticPooledConcurrentStore.FromCores;
-
-        for (int i = 0; i < EntryCount; i++)
-        {
-            _concurrent.Put(_keys[i], _values[i], new CacheEntryOptions());
-            _pooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
-            _staticPooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
-        }
     }
     
     [Benchmark(Baseline = true)]
-    public void ConcurrentDictionary_Get()
+    public void ConcurrentDictionary_Put()
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _ = _concurrent.TryGet(_keys[i], out _);
+            _concurrent.Put(_keys[i], _values[i], new CacheEntryOptions());
         });
     }
     
     [Benchmark]
-    public void PooledArrayStore_Get()
+    public void PooledArrayStore_Put()
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _ = _pooledEntries.TryGet(_keys[i], out _);
+            _pooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
         });
     }
 
     [Benchmark]
-    public void StaticPooledArrayStore_Get()
+    public void StaticPooledArrayStore_Put()
     {
+        
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _ = _staticPooledEntries.TryGet(_keys[i], out _);
+            _staticPooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
         });
     }
 }

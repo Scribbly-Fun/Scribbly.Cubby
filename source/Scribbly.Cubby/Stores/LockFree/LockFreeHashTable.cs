@@ -105,7 +105,7 @@ sealed class CacheEngine
 
 sealed class CacheShard
 {
-    private readonly LockFreeHashTable _table;
+    private readonly LockFreeHashTable _table = new LockFreeHashTable(2);
     private int _clockHand;
     
     internal void EvictIfNeeded()

@@ -2,14 +2,6 @@
 
 namespace Scribbly.Cubby.Stores;
 
-
-public sealed record CacheEntryOptions
-{
-    public long Tll { get; } = 0;
-
-    public static CacheEntryOptions Never => new ();
-}
-
 /// <summary>
 /// A common abstraction used by all cubby stores.
 /// Stores hold the cached values matched against keys.

@@ -58,7 +58,6 @@ public sealed class PooledStaticCacheEntry : ICacheEntry
     /// <param name="value">The data to cache</param>
     /// <param name="expirationUtcTicks">An optional expiration</param>
     /// <param name="flags">Flags to define how the cache will be used.</param>
-    /// <param name="pool">An array pool used for the cached buffer</param>
     /// <returns>The new cache entry</returns>
     public static PooledStaticCacheEntry Create(
         ReadOnlySpan<byte> value,
