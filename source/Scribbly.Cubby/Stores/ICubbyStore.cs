@@ -29,7 +29,7 @@ public interface ICubbyStore : IDisposable
     /// <param name="key">The key for the value requested</param>
     /// <param name="value">The value from the store</param>
     /// <returns>True when found, false when not</returns>
-    bool TryGet(BytesKey key, [NotNullWhen(returnValue: true)] out ReadOnlyMemory<byte>? value);
+    bool TryGet(BytesKey key, out ReadOnlySpan<byte> value);
 
     /// <summary>
     /// Inserts or updates a cached value.

@@ -12,7 +12,6 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
         GetRequest request,
         ServerCallContext context)
     {
-        // var keyBytes = request.Key.CopyFrom();
         var key = new BytesKey(request.Key.ToByteArray());
 
         if (store.TryGet(key, out var value))
@@ -20,7 +19,7 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
             return Task.FromResult(new GetResponse
             {
                 Found = true,
-                Value = ByteString.CopyFrom(value.Value.Span)
+                Value = ByteString.CopyFrom(value)
             });
         }
 

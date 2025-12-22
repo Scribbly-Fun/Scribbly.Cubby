@@ -33,7 +33,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     public ReadOnlyMemory<byte> Get(BytesKey key) => GetShard(key)[key].ValueMemory;
 
     /// <inheritdoc />
-    public bool TryGet(BytesKey key, [NotNullWhen(true)] out ReadOnlyMemory<byte>? value)
+    public bool TryGet(BytesKey key, out ReadOnlySpan<byte> value)
     {
         var shard = GetShard(key);
         if (!shard.TryGetValue(key, out var entry))
@@ -42,7 +42,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
             return false;
         }
 
-        value = entry.ValueMemory;
+        value = entry.Value;
         return true;
     }
     

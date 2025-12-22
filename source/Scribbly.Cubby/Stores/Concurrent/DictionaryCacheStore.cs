@@ -17,7 +17,7 @@ internal sealed class ConcurrentStore : ICubbyStore
     public ReadOnlyMemory<byte> Get(BytesKey key) => _store[key].ValueMemory;
 
     /// <inheritdoc />
-    public bool TryGet(BytesKey key, [NotNullWhen(true)] out ReadOnlyMemory<byte>? value)
+    public bool TryGet(BytesKey key, out ReadOnlySpan<byte> value)
     {
         if (!_store.TryGetValue(key, out var entry))
         {
@@ -25,7 +25,7 @@ internal sealed class ConcurrentStore : ICubbyStore
             return false;
         }
 
-        value = entry.ValueMemory;
+        value = entry.Value;
         return true;
     }
     

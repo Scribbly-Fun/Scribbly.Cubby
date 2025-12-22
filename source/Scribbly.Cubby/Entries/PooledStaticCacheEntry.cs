@@ -4,6 +4,48 @@ using System.Runtime.CompilerServices;
 
 namespace Scribbly.Cubby;
 
+public readonly ref struct PooledCacheEntryStruct
+{
+    private readonly byte[] _buffer;
+
+    private const int HeaderSize = 16;
+
+    public bool IsEmpty => _buffer is null;
+
+    public long ExpirationUtcTicks
+        => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
+
+    public bool NeverExpires
+        => ExpirationUtcTicks == 0;
+    
+    public CacheEntryEncoding Encoding => CacheEntryEncoding.None;
+
+    public int ValueLength
+        => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(8));
+
+    public CacheEntryFlags Flags
+        => (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(_buffer.AsSpan(12));
+
+    public ReadOnlySpan<byte> Value
+        => _buffer.AsSpan(HeaderSize, ValueLength);
+
+    public ReadOnlyMemory<byte> ValueMemory
+        => new(_buffer, HeaderSize, ValueLength);
+
+    public PooledCacheEntryStruct(byte[] buffer)
+    {
+        _buffer = buffer;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsExpired(long nowUtcTicks)
+    {
+        var expiresAt = BinaryPrimitives.ReadInt64LittleEndian(_buffer);
+        return expiresAt != 0 && expiresAt <= nowUtcTicks;
+    }
+}
+
+
 /// <summary>
 /// A cached entry is a collection of bytes with a formatted header.
 /// [0-8 Expiration][9-12 Value Length][13-16 Flags][Value]
