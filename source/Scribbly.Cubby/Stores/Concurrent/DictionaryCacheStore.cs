@@ -6,7 +6,7 @@ namespace Scribbly.Cubby.Stores.Concurrent;
 /// <summary>
 /// A cache storage that uses arrays of concurrent dictionaries to improve multithreaded locking contention.
 /// </summary>
-internal sealed class ShardedConcurrentStore : ICubbyStore
+internal sealed class ConcurrentStore : ICubbyStore
 {
     private readonly ConcurrentDictionary<BytesKey, ICacheEntry> _store = new();
     
@@ -30,7 +30,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     }
     
     /// <inheritdoc />
-    public void Put(BytesKey key, byte[] value, CacheEntryOptions options)
+    public void Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
         var newEntry = PooledCacheEntry.Create(value, options.Tll);
         

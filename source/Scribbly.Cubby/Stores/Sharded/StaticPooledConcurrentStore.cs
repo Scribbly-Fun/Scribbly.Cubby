@@ -7,16 +7,16 @@ namespace Scribbly.Cubby.Stores.Sharded;
 /// A cache storage that uses arrays of concurrent dictionaries to improve multithreaded locking contention.
 /// </summary>
 /// <remarks>As of 12.20.2025 this will be the initial store implementation as it seems to be the safest while still being fast</remarks>
-internal sealed class ShardedConcurrentStore : ICubbyStore
+internal sealed class StaticPooledConcurrentStore : ICubbyStore
 {
     /// <summary>
     /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
     /// </summary>
-    internal static ShardedConcurrentStore FromCores => new(Environment.ProcessorCount);
+    internal static StaticPooledConcurrentStore FromCores => new(Environment.ProcessorCount);
     
     private readonly ConcurrentDictionary<BytesKey, ICacheEntry>[] _shards;
 
-    private ShardedConcurrentStore(int shardCount)
+    private StaticPooledConcurrentStore(int shardCount)
     {
         _shards = new ConcurrentDictionary<BytesKey, ICacheEntry>[shardCount];
         
@@ -50,7 +50,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     public void Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
         var shard = GetShard(key);
-        var newEntry = PooledCacheEntry.Create(value, options.Tll);
+        var newEntry = PooledStaticCacheEntry.Create(value, options.Tll);
         
         shard.AddOrUpdate(
             key,

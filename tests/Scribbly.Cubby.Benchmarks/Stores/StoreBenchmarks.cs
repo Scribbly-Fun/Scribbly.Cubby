@@ -102,7 +102,7 @@ public class StorePutBenchmarks
 
         _concurrent = new ConcurrentDictionary<BytesKey, PooledCacheEntry>();
         _shardedConcurrent = ShardedConcurrentStore.FromCores;
-        _shardedNoPoolConcurrent = ShardedConcurrentStoreNoPool.FromCores;
+        _shardedNoPoolConcurrent = StaticPooledConcurrentStore.FromCores;
 
         for (int i = 0; i < EntryCount; i++)
         {
@@ -117,7 +117,7 @@ public class StorePutBenchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _concurrent[_keys[i]] = PooledCacheEntry.CreateNeverExpiring(_values[i]);
+            _concurrent.Put(_keys[i], _values[i], new CacheEntryOptions());
         });
     }
     

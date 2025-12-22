@@ -45,7 +45,7 @@ public interface ICubbyStore : IDisposable
     /// <param name="key">The key used from the cache</param>
     /// <param name="value">The cached value to update or create </param>
     /// <param name="options">Options declaring how the cache will be stored.</param>
-    void Put(BytesKey key, byte[] value, CacheEntryOptions options);
+    void Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options);
 
     /// <summary>
     /// removes the cached value
