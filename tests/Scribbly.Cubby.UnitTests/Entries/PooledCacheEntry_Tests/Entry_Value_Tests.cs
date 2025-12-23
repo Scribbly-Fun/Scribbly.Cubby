@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.PooledCacheEntry_Tests;
 
 public class Entry_Value_Tests
 {
@@ -17,7 +17,7 @@ public class Entry_Value_Tests
         
         Random.Shared.NextBytes(array);
         
-        var entry = PooledCacheEntry.CreateNeverExpiring(array);
+        using var entry = PooledCacheEntry.CreateNeverExpiring(array);
 
         entry.ValueMemory.ToArray().SequenceEqual(array).Should().BeTrue();
     }

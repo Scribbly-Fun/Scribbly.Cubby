@@ -6,29 +6,28 @@ namespace Scribbly.Cubby.Stores.Sharded;
 /// <summary>
 /// A cache storage that uses arrays of concurrent dictionaries to improve multithreaded locking contention.
 /// </summary>
-/// <remarks>As of 12.20.2025 this will be the initial store implementation as it seems to be the safest while still being fast</remarks>
-internal sealed class ShardedConcurrentStore : ICubbyStore
+internal sealed class RefStructConcurrentStore : ICubbyStore
 {
     /// <summary>
     /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
     /// </summary>
-    internal static ShardedConcurrentStore FromOptions(CubbyOptions options) => new(options);
+    internal static RefStructConcurrentStore FromOptions(CubbyOptions options) => new(options);
     
-    private readonly ConcurrentDictionary<BytesKey, ICacheEntry>[] _shards;
+    private readonly ConcurrentDictionary<BytesKey, byte[]>[] _shards;
 
-    private ShardedConcurrentStore(CubbyOptions options)
+    private RefStructConcurrentStore(CubbyOptions options)
     {
-        _shards = new ConcurrentDictionary<BytesKey, ICacheEntry>[options.Cores];
+        _shards = new ConcurrentDictionary<BytesKey, byte[]>[options.Cores];
         
         for (var i = 0; i < options.Cores; i++)
         {
             if (options.Capacity == int.MinValue)
             {
-                _shards[i] = new ConcurrentDictionary<BytesKey, ICacheEntry>();
+                _shards[i] = new ConcurrentDictionary<BytesKey, byte[]>();
             }
             else
             {
-                _shards[i] = new ConcurrentDictionary<BytesKey, ICacheEntry>(
+                _shards[i] = new ConcurrentDictionary<BytesKey, byte[]>(
                     concurrencyLevel: Environment.ProcessorCount,
                     capacity: options.Capacity);
             }
@@ -39,7 +38,11 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     public bool Exists(BytesKey key) => GetShard(key).ContainsKey(key);
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> Get(BytesKey key) => GetShard(key)[key].ValueMemory;
+    public ReadOnlyMemory<byte> Get(BytesKey key)
+    {
+        var shared = GetShard(key)[key];
+        return new CacheEntryStruct(shared).ValueMemory;
+    }
 
     /// <inheritdoc />
     public bool TryGet(BytesKey key, out ReadOnlySpan<byte> value)
@@ -51,7 +54,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
             return false;
         }
 
-        value = entry.Value;
+        value = new CacheEntryStruct(entry).Value;
         return true;
     }
     
@@ -59,20 +62,16 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     public PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
         var shard = GetShard(key);
-        var newEntry = PooledCacheEntry.Create(value, options.TimeToLive);
-        
+        var buffer = value.LayoutEntry(options);
+
         if (!shard.TryGetValue(key, out var existing))
         {
-            return shard.TryAdd(key, newEntry) ? PutResult.Created : PutResult.Undefined;
+            return shard.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
         }
         
-        if(shard.TryUpdate(key, newEntry, existing))
+        if(shard.TryUpdate(key, buffer, existing))
         {
-            if (existing is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-            
+            ArrayPool<byte>.Shared.Return(existing, clearArray: false);
             return PutResult.Updated;
         }
 
@@ -85,17 +84,13 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
         var shard = GetShard(key);
         if (shard.TryRemove(key, out var entry))
         {
-            if (entry is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-
+            ArrayPool<byte>.Shared.Return(entry, clearArray: false);
             return EvictResult.Removed;
         }
 
         return EvictResult.Unknown;
     }
-
+    
     /// <inheritdoc />
     public bool TryEvict(BytesKey key, out EvictResult result)
     {
@@ -106,16 +101,12 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
             return false;
         }
         
-        if (entry is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-        
+        ArrayPool<byte>.Shared.Return(entry, clearArray: false);
         result = EvictResult.Removed;
         return true;
     }
 
-    private ConcurrentDictionary<BytesKey, ICacheEntry> GetShard(BytesKey key)
+    private ConcurrentDictionary<BytesKey, byte[]> GetShard(BytesKey key)
         => _shards[(key[0] & int.MaxValue) % _shards.Length];
 
     /// <inheritdoc />
@@ -125,12 +116,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
         {
             foreach (var (_, entry) in shard)
             {
-                if (entry is not IDisposable disposable)
-                {
-                    continue;
-                }
-                
-                disposable.Dispose();
+                ArrayPool<byte>.Shared.Return(entry, clearArray: false);
             }
 
             shard.Clear();

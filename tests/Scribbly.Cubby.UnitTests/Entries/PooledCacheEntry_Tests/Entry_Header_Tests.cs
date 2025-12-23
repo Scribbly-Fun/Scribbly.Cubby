@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.PooledCacheEntry_Tests;
 
 public class Entry_Header_Tests
 {

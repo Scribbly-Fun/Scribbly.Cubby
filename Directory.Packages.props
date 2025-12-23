@@ -4,8 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- ASPIRE -->
+    <PackageVersion Include="Aspire.Hosting" Version="13.1.0" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.1.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.0.1" />
     <!-- ASP.NET EXTENSIONS AND FRAMEWORK -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Google.Protobuf" Version="3.33.2" />

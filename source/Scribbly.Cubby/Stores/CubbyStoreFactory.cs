@@ -1,4 +1,5 @@
-﻿using Scribbly.Cubby.Stores.Sharded;
+﻿using Scribbly.Cubby.Stores.Concurrent;
+using Scribbly.Cubby.Stores.Sharded;
 
 namespace Scribbly.Cubby.Stores;
 
@@ -8,17 +9,29 @@ namespace Scribbly.Cubby.Stores;
 public sealed class CubbyStoreFactory
 {
     /// <summary>
-    /// Creates  a new cubby store
+    ///     Creates  a new cubby store
     /// </summary>
-    /// <param name="store">The type of store. <remarks>This will become part of the builder</remarks></param>
-    /// <returns>A store used to store the cached data</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when the requested store type doesn't exist.</exception>
-    public ICubbyStore CreateStore(Store store)
+    /// <param name="options">
+    ///     The type of store.
+    ///     <remarks>
+    ///         This will become part of the builder
+    ///     </remarks>
+    /// </param>
+    /// <returns>
+    ///     A store used to store the cached data
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when the requested store type doesn't exist.
+    /// </exception>
+    public ICubbyStore CreateStore(CubbyOptions options)
     {
-        return store switch
+        return options switch
         {
-            Store.Sharded => ShardedConcurrentStore.FromCores,
-            _ => throw new ArgumentOutOfRangeException(nameof(store), store, null)
+            { Store: CubbyOptions.StoreType.RefStruct } => RefStructConcurrentStore.FromOptions(options),
+            { Store: CubbyOptions.StoreType.Sharded } => ShardedConcurrentStore.FromOptions(options),
+            { Store: CubbyOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(options),
+            
+            _ => throw new ArgumentOutOfRangeException(nameof(options), options, null)
         };
     }
 }

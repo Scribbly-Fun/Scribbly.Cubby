@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
+using Scribbly.Cubby.Stores;
 
-namespace Scribbly.Cubby.UnitTests.Cache_Entry_Tests;
+namespace Scribbly.Cubby.UnitTests.Entries.CacheEntryStruct_Tests;
 
 public class Entry_Length_Tests
 {
@@ -17,8 +18,10 @@ public class Entry_Length_Tests
         
         Random.Shared.NextBytes(array);
         
-        using var entry = PooledCacheEntry.CreateNeverExpiring(array);
+        var entry = array.LayoutEntry(new CacheEntryOptions());
+        
+        var str = new CacheEntryStruct(entry);
 
-        entry.ValueLength.Should().Be(length);
+        str.ValueLength.Should().Be(length);
     }
 }

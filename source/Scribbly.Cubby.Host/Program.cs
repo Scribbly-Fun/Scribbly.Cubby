@@ -4,6 +4,8 @@ using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+builder.Services.AddLogging();
+
 var useHttps = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(CubbyEnvironment.UseHttpsEnv));
 
 if (useHttps)
@@ -19,7 +21,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddOpenApi();
 builder.AddCubbyServer(ops =>
 {
-    ops.Store = Store.Sharded;
+    ops.Store = CubbyOptions.StoreType.RefStruct;
+    ops.Capacity = int.MinValue;
+    ops.Cores = Environment.ProcessorCount;
 });
 
 var app = builder.Build();
