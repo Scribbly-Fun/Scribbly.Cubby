@@ -10,6 +10,6 @@ Content-Type: application/json
 
 ###
 
-GET {{host}}/entry/my_key
+GET {{host}}/entry/my_key2
 
 ###

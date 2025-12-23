@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using Scribbly.Cubby.Builder;
@@ -31,16 +32,28 @@ app.MapDefaultEndpoints();
 
 app.MapPost("/entry/{key}", (IDistributedCache cache, string key, Item item) =>
 {
+    var watch = Stopwatch.StartNew();
     var value = JsonSerializer.SerializeToUtf8Bytes(item);
-    
     cache.Set(key, value);
+    
+    watch.Stop();
+
+    return watch.Elapsed;
 });
 
 app.MapGet("/entry/{key}", (IDistributedCache cache, string key) =>
 {
+    var watch = Stopwatch.StartNew();
     var entry = cache.Get(key);
+    
+    watch.Stop();
 
-    return JsonSerializer.Deserialize<Item>(entry);
+    var item = JsonSerializer.Deserialize<Item>(entry);
+    return new
+    {
+        time = watch.Elapsed,
+        item = item,
+    };
 });
 
 app.Run();
