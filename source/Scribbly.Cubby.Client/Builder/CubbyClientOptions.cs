@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Scribbly.Cubby.Client.Serializer;
 
 namespace Scribbly.Cubby.Client;
 
@@ -7,6 +8,8 @@ namespace Scribbly.Cubby.Client;
 /// </summary>
 public class CubbyClientOptions
 {
+    internal Type SerializerImplementation { get; private set; } = typeof(SystemTextCubbySerializer);
+    
     /// <summary>
     /// The URL for the Cubby host.
     /// </summary>
@@ -16,4 +19,13 @@ public class CubbyClientOptions
     /// The caching service's scope
     /// </summary>
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
+
+    /// <summary>
+    /// Configures the Cubby serializer implementation.
+    /// </summary>
+    /// <typeparam name="TSerializer"></typeparam>
+    public void AddSerializer<TSerializer>() where TSerializer : ICubbySerializer
+    {
+        SerializerImplementation = typeof(TSerializer);
+    }
 }

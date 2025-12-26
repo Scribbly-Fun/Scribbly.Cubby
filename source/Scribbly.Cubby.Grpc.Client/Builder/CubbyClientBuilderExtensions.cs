@@ -30,6 +30,7 @@ public static class CubbyClientBuilderExtensions
             });
             
             builder.HostBuilder.Services.AddSingleton<IDistributedCache, CubbyDistributedCache>();
+            builder.HostBuilder.Services.AddSingleton<ICubbyStoreTransport, CubbyGrpcCache>();
             
             return builder;
         }

@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
+using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapDefaultEndpoints();
 
-app.MapPost("/entry/{key}", (IDistributedCache cache, string key, Item item) =>
+app.MapPost("/entry/{key}", (IDistributedCache cache, string key, [FromBody] Item item) =>
 {
     var watch = Stopwatch.StartNew();
     var value = JsonSerializer.SerializeToUtf8Bytes(item);
@@ -52,6 +54,35 @@ app.MapGet("/entry/{key}", (IDistributedCache cache, string key) =>
     watch.Stop();
 
     var item = JsonSerializer.Deserialize<Item>(entry);
+    return new
+    {
+        time = watch.Elapsed,
+        item = item,
+    };
+});
+
+app.MapPost("cubby/entry/{key}", async (ICubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+
+    var results = await cache.Put(key, item, new CacheEntryOptions(), token);
+    
+    watch.Stop();
+
+    return new
+    {
+        time = watch.Elapsed,
+        result = results
+    };
+});
+
+app.MapGet("cubby/entry/{key}", async (ICubbyClient cache, string key, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+    var item = await cache.Get<Item>(key, token);
+    
+    watch.Stop();
+    
     return new
     {
         time = watch.Elapsed,

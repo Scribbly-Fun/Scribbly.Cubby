@@ -75,7 +75,7 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     /// <summary>
     /// Assigns a string from the value of the internal buffer in the key.
     /// </summary>
-    /// <param name="key">The bytes key to covnert to a string</param>
+    /// <param name="key">The bytes key to covert to a string</param>
     /// <returns>A string encoded as UTF8</returns>
     public static implicit operator string(BytesKey key) => Encoding.UTF8.GetString(key._data);
     
@@ -85,4 +85,32 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     /// <param name="value">A string used to encode a UTF 8 byte array used as the key.</param>
     /// <returns>A new bytes key</returns>
     public static implicit operator BytesKey(string value) => new BytesKey(Encoding.UTF8.GetBytes(value));
+
+    /// <summary>
+    /// Assigns a string from the value of the internal buffer in the key.
+    /// </summary>
+    /// <param name="key">The bytes key to covert to a string</param>
+    /// <returns>A string encoded as UTF8</returns>
+    public static implicit operator byte[](BytesKey key) => key._data;
+    
+    /// <summary>
+    /// Assigns a key from the value of a string.
+    /// </summary>
+    /// <param name="value">A string used to encode a UTF 8 byte array used as the key.</param>
+    /// <returns>A new bytes key</returns>
+    public static implicit operator BytesKey(byte[] value) => new BytesKey(value);
+
+    /// <summary>
+    /// Assigns a string from the value of the internal buffer in the key.
+    /// </summary>
+    /// <param name="key">The bytes key to covert to a string</param>
+    /// <returns>A string encoded as UTF8</returns>
+    public static implicit operator ReadOnlySpan<byte>(BytesKey key) => key._data.AsSpan();
+    
+    /// <summary>
+    /// Assigns a key from the value of a string.
+    /// </summary>
+    /// <param name="value">A string used to encode a UTF 8 byte array used as the key.</param>
+    /// <returns>A new bytes key</returns>
+    public static implicit operator BytesKey(ReadOnlySpan<byte> value) => new BytesKey(value.ToArray());
 }

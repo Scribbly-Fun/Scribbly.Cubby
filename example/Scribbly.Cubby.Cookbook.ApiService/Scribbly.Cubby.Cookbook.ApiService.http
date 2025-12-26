@@ -13,3 +13,17 @@ Content-Type: application/json
 GET {{host}}/entry/my_key2
 
 ###
+
+POST {{host}}/cubby/entry/my_key
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
+###
+
+GET {{host}}/cubby/entry/my_key
+
+###

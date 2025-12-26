@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Scribbly.Cubby.Client.Serializer;
 
 namespace Scribbly.Cubby.Client;
 
@@ -29,6 +30,9 @@ public static class HostApplicationBuilderExtensions
             hostBuilder.Services.AddSingleton(options);
 
             var cubbyBuilder = new CubbyClientBuilder(options, hostBuilder);
+            
+            hostBuilder.Services.Add(ServiceDescriptor.Singleton(typeof(ICubbySerializer), options.SerializerImplementation));
+            hostBuilder.Services.AddScoped<ICubbyClient, CubbyClient>();
             
             return cubbyBuilder;
         }
