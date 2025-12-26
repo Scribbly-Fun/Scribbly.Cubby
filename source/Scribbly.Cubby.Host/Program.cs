@@ -1,4 +1,5 @@
 using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Server;
 using Scribbly.Cubby.Setup;
 using Scribbly.Cubby.Stores;
 
@@ -19,12 +20,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddOpenApi();
-builder.AddCubbyServer(ops =>
-{
-    ops.Store = CubbyOptions.StoreType.RefStruct;
-    ops.Capacity = int.MinValue;
-    ops.Cores = Environment.ProcessorCount;
-});
+
+builder
+    .AddCubbyServer(ops =>
+    {
+        ops.Store = CubbyOptions.StoreType.RefStruct;
+        ops.Capacity = int.MinValue;
+        ops.Cores = Environment.ProcessorCount;
+    })
+    .WithCubbyGrpcServer();
 
 var app = builder.Build();
 
@@ -33,6 +37,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapCubby();
+app.MapCubbyGrpc();
 
 app.Run();

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Scribbly.Cubby.Builder;
+namespace Scribbly.Cubby.Client;
 
 /// <summary>
 /// Options used to setup the client.

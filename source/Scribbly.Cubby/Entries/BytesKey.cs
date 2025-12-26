@@ -1,4 +1,6 @@
-﻿namespace Scribbly.Cubby;
+﻿using System.Text;
+
+namespace Scribbly.Cubby;
 
 /// <summary>
 /// A key used to locate an item in the cache.
@@ -69,4 +71,18 @@ public readonly struct BytesKey : IEquatable<BytesKey>
             return hash;
         }
     }
+
+    /// <summary>
+    /// Assigns a string from the value of the internal buffer in the key.
+    /// </summary>
+    /// <param name="key">The bytes key to covnert to a string</param>
+    /// <returns>A string encoded as UTF8</returns>
+    public static implicit operator string(BytesKey key) => Encoding.UTF8.GetString(key._data);
+    
+    /// <summary>
+    /// Assigns a key from the value of a string.
+    /// </summary>
+    /// <param name="value">A string used to encode a UTF 8 byte array used as the key.</param>
+    /// <returns>A new bytes key</returns>
+    public static implicit operator BytesKey(string value) => new BytesKey(Encoding.UTF8.GetBytes(value));
 }

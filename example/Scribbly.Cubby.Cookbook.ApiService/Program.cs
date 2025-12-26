@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,13 +12,15 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddOpenApi();
 
-builder.AddCubbyClient(ops =>
-{
-    var host = Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTPS") ?? Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTP");
-    ops.Host = new Uri(host?? throw new InvalidOperationException());
-    
-    ops.Lifetime = ServiceLifetime.Singleton;
-});
+builder
+    .AddCubbyClient(ops =>
+    {
+        var host = Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTPS") ?? Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTP");
+        ops.Host = new Uri(host?? throw new InvalidOperationException());
+        
+        ops.Lifetime = ServiceLifetime.Singleton;
+    })
+    .WithCubbyGrpcClient();
 
 var app = builder.Build();
 
