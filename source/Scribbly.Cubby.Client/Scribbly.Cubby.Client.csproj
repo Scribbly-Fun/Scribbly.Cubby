@@ -2,11 +2,11 @@
 
     <PropertyGroup>
         <RootNamespace>Scribbly.Cubby.Client</RootNamespace>
-        <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="Scribbly.Cubby.Grpc.Client" />
+        <InternalsVisibleTo Include="Scribbly.Cubby.UnitTests" />
     </ItemGroup>
 
     <ItemGroup>

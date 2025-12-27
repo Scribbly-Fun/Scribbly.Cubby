@@ -30,8 +30,10 @@ public static class HostApplicationBuilderExtensions
             hostBuilder.Services.AddSingleton(options);
 
             var cubbyBuilder = new CubbyClientBuilder(options, hostBuilder);
+
+            hostBuilder.Services.AddSingleton<ICubbyCompressor>(options.Compressor);
+            hostBuilder.Services.AddSingleton<ICubbySerializer>(options.Serializer);
             
-            hostBuilder.Services.Add(ServiceDescriptor.Singleton(typeof(ICubbySerializer), options.SerializerImplementation));
             hostBuilder.Services.AddScoped<ICubbyClient, CubbyClient>();
             
             return cubbyBuilder;

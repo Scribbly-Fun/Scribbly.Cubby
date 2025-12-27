@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 using Scribbly.Cubby.Client.Serializer;
 
 namespace Scribbly.Cubby.Client;
@@ -8,7 +10,11 @@ namespace Scribbly.Cubby.Client;
 /// </summary>
 public class CubbyClientOptions
 {
-    internal Type SerializerImplementation { get; private set; } = typeof(SystemTextCubbySerializer);
+    internal ICubbySerializer Serializer { get; private set; } 
+        = new SystemTextCubbySerializer(JsonSerializerOptions.Default, new BrotliCubbyCompressor());
+
+    internal ICubbyCompressor Compressor { get; private set; } 
+        = new BrotliCubbyCompressor();
     
     /// <summary>
     /// The URL for the Cubby host.
@@ -24,8 +30,38 @@ public class CubbyClientOptions
     /// Configures the Cubby serializer implementation.
     /// </summary>
     /// <typeparam name="TSerializer"></typeparam>
-    public void AddSerializer<TSerializer>() where TSerializer : ICubbySerializer
+    internal void AddSerializer<TSerializer>(
+        TSerializer serializer, 
+        ICubbyCompressor? compressor = null) where TSerializer : ICubbySerializer
     {
-        SerializerImplementation = typeof(TSerializer);
+        Compressor = compressor ?? new BrotliCubbyCompressor();
+        Serializer = serializer;
+    }
+
+    /// <summary>
+    /// Configures the Cubby JSON serializer implementation.
+    /// </summary>
+    internal void AddSerializer<TSerializer>(
+        Action<JsonSerializerOptions> optionsCallback,
+        ICubbyCompressor? compressor = null) where TSerializer : ICubbySerializer
+    {
+        Compressor = compressor ?? new BrotliCubbyCompressor();
+        
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = null,
+            DictionaryKeyPolicy = null,
+            WriteIndented = false,
+            
+            ReadCommentHandling = JsonCommentHandling.Disallow,
+            AllowTrailingCommas = false,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            
+            TypeInfoResolver = JsonTypeInfoResolver.Combine()
+        };
+        
+        optionsCallback.Invoke(options);
+
+        Serializer = new SystemTextCubbySerializer(options, Compressor);
     }
 }

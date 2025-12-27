@@ -23,7 +23,7 @@ public interface ICubbyClient
     /// <remarks>
     ///     Data will be serialized using the select serializer.
     /// </remarks>
-    ValueTask<PutResult> Put<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default);
+    ValueTask<PutResult> Put<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default) where T;
     
     /// <summary>
     /// Gets data from the cache for a specific key

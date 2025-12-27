@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ###
 
-GET {{host}}/entry/my_key2
+GET {{host}}/entry/my_key
 
 ###
 
