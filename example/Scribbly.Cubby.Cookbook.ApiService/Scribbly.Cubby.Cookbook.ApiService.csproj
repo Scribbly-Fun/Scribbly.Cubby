@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\source\Scribbly.Cubby.Grpc.Client\Scribbly.Cubby.Grpc.Client.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.MessagePack\Scribbly.Cubby.MessagePack.csproj" />
     <ProjectReference Include="..\Scribbly.Cubby.Cookbook.ServiceDefaults\Scribbly.Cubby.Cookbook.ServiceDefaults.csproj" />
   </ItemGroup>
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
+using Scribbly.Cubby.MessagePack;
 using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -20,6 +20,7 @@ internal sealed class CubbyClient(ICubbyStoreTransport store, ICubbySerializer s
 
     /// <inheritdoc />
     public async ValueTask<PutResult> Put<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default)
+        where T : notnull
     {
         var encodedValue = serializer.Serialize<T>(value);
         
@@ -34,6 +35,7 @@ internal sealed class CubbyClient(ICubbyStoreTransport store, ICubbySerializer s
 
     /// <inheritdoc />
     public async ValueTask<T> Get<T>(BytesKey key, CancellationToken token = default)
+        where T : notnull
     {
         var data = await store.Get(key, token);
 

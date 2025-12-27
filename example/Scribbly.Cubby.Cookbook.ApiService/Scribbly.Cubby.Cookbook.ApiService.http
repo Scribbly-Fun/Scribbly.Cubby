@@ -27,3 +27,19 @@ Content-Type: application/json
 GET {{host}}/cubby/entry/my_key
 
 ###
+
+###
+
+POST {{host}}/cubby/entry/my_key/raw
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
+###
+
+GET {{host}}/cubby/entry/my_key/raw
+
+###

@@ -23,7 +23,7 @@ public interface ICubbyClient
     /// <remarks>
     ///     Data will be serialized using the select serializer.
     /// </remarks>
-    ValueTask<PutResult> Put<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default) where T;
+    ValueTask<PutResult> Put<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default) where T : notnull;
     
     /// <summary>
     /// Gets data from the cache for a specific key
@@ -34,5 +34,5 @@ public interface ICubbyClient
     /// Gets decoded data from the cache.
     /// </summary>
     // TODO: In order to handle encoded or compressed data the cubby store must return the flags for a given record so we know how to decompress and decode
-    ValueTask<T> Get<T>(BytesKey key, CancellationToken token = default);
+    ValueTask<T> Get<T>(BytesKey key, CancellationToken token = default) where T : notnull;
 }
