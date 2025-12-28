@@ -19,7 +19,7 @@ public static class EndpointRouteBuilderExtensions
         /// Maps the Cubby services to the application host.
         /// </summary>
         /// <returns></returns>
-        public GrpcServiceEndpointConventionBuilder MapCubby()
+        public GrpcServiceEndpointConventionBuilder MapCubbyGrpc()
         {
             return builder.MapGrpcService<CubbyGrpcServer>();
         }

@@ -1,24 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsAotCompatible>true</IsAotCompatible>
-  </PropertyGroup>
+    <PropertyGroup>
+        <RootNamespace>Scribbly.Cubby.Client</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Scribbly.Cubby\Scribbly.Cubby.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Scribbly.Cubby.Grpc.Client" />
+        <InternalsVisibleTo Include="Scribbly.Cubby.MessagePack" />
+        <InternalsVisibleTo Include="Scribbly.Cubby.UnitTests" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Grpc.Tools">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
-  </ItemGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="..\..\protos\cubby_methods.proto" GrpcServices="Client" />
-  </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Scribbly.Cubby\Scribbly.Cubby.csproj" />
+    </ItemGroup>
+    
 </Project>

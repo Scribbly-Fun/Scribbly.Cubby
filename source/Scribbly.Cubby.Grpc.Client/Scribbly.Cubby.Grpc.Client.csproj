@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Scribbly.Cubby.Client\Scribbly.Cubby.Client.csproj" />
+        <ProjectReference Include="..\Scribbly.Cubby.Grpc\Scribbly.Cubby.Grpc.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Grpc.AspNetCore" />
+        <PackageReference Include="Grpc.Tools">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="..\..\protos\cubby_methods.proto" GrpcServices="Client" />
+    </ItemGroup>
+
+</Project>
