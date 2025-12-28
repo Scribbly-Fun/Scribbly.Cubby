@@ -29,7 +29,7 @@ public static class EndpointRouteBuilderExtensions
             
             group.MapDelete("/{key}", CubbyHttpEndpoints.Evict);
             
-            group.MapPut("/refresh/{key}", CubbyHttpEndpoints.Refresh);
+            group.MapPut("/{key}/refresh", CubbyHttpEndpoints.Refresh);
 
             return group;
         }
