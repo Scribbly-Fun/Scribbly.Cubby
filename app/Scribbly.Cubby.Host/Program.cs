@@ -37,6 +37,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapCubbyGrpc();
+// app.MapCubbyGrpc();
+
+app.MapGet("/", TypedResults.Ok);
+app.MapGet("/write", TypedResults.Ok);
+app.MapGet("/read", TypedResults.Ok);
 
 app.Run();

@@ -13,7 +13,7 @@ WORKDIR /repo
 
 COPY . .
 
-RUN dotnet publish source/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj \
+RUN dotnet publish app/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj \
     -c Release \
     -r linux-x64 \
     --self-contained true \
@@ -25,15 +25,20 @@ RUN dotnet publish source/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj \
 ## --------------------------------
 ## Run Application
 ## --------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:10.0
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0
 
 WORKDIR /app
 COPY --from=build /app ./
+
+RUN rm -f appsettings.Development.json \
+       *.dbg \
+       *.pdb \
+       *.xml
 
 EXPOSE 8080
 EXPOSE 8081
 
 RUN ls -l /app
-RUN chmod +x /app/Scribbly.Cubby.Host.dll
+RUN chmod +x /app/Scribbly.Cubby.Host
 
-ENTRYPOINT ["dotnet", "/app/Scribbly.Cubby.Host.dll"]
+ENTRYPOINT ["/app/Scribbly.Cubby.Host"]

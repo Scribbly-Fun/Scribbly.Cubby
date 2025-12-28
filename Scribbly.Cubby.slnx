@@ -11,8 +11,8 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/app/">
+    <Project Path="app/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj" />
     <Project Path="source/Scribbly.Cubby.Aspire/Scribbly.Cubby.Aspire.csproj" />
-    <Project Path="source/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj" />
   </Folder>
   <Folder Name="/example/">
     <File Path="example/Directory.Build.props" />
