@@ -9,6 +9,10 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>true</PublishAot>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+
+    <Company>Scribble LLC</Company>
+    <WarningsAsErrors>True</WarningsAsErrors>
+    <RepositoryUrl>https://github.com/Scribbly-Fun/Scribbly.Cubby</RepositoryUrl>
 </PropertyGroup>
 
 <ItemGroup>

@@ -35,8 +35,9 @@ RUN rm -f appsettings.Development.json \
        *.pdb \
        *.xml
 
-EXPOSE 8080
-EXPOSE 8081
+ENV ASPNETCORE_URLS="http://+:5000;"
+
+EXPOSE 5000
 
 RUN ls -l /app
 RUN chmod +x /app/Scribbly.Cubby.Host
