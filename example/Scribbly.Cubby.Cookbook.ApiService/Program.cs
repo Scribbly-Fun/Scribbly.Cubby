@@ -24,11 +24,6 @@ builder
         ops.Host = new Uri(host?? throw new InvalidOperationException());
         
         ops.Lifetime = ServiceLifetime.Singleton;
-        
-        ops.AddMessagePackSerializer(ops =>
-        {
-            ops.SequencePool.Clear();
-        });
     })
     .WithCubbyGrpcClient();
 

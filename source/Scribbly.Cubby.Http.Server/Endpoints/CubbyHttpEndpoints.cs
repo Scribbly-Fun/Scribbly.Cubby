@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Buffers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Scribbly.Cubby.Stores;
 
@@ -15,13 +16,21 @@ internal static class CubbyHttpEndpoints
             : Results.NoContent();
     }
     
-    internal static IResult Put(
+    internal static async Task<IResult> Put(
         [FromRoute] string key, 
         [AsParameters] CacheParameters parameters,
-        [FromBody] byte[] bytes,
-        ICubbyStore store)
+        HttpContext context,
+        ICubbyStore store,
+        CancellationToken token)
     {
-        var results = store.Put(key, bytes, parameters.ToEntryOptions());
+        using var ms = new MemoryStream(
+            context.Request.ContentLength is { } len ? (int)len : 0);
+
+        await context.Request.Body.CopyToAsync(ms, token);
+
+        var buffer = ms.GetBuffer().AsSpan(0, (int)ms.Length).ToArray();
+        
+        var results = store.Put(key, buffer, parameters.ToEntryOptions());
 
         return results switch
         {

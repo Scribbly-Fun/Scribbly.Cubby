@@ -1,11 +1,17 @@
 @Scribbly.Cubby.Host_HostAddress = http://localhost:5018
 
-GET {{Scribbly.Cubby.Host_HostAddress}}/todos/
+
+###
+
+GET {{host}}/cubby/my_key
 Accept: application/json
 
 ###
 
-GET {{Scribbly.Cubby.Host_HostAddress}}/todos/1
-Accept: application/json
+PUT {{host}}/cubby/my_key
+Content-Type: application/json
 
-###
+{
+  "key": "my_key",
+  "value": "my value"
+}
