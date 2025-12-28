@@ -8,12 +8,16 @@
     <PackageReference Include="Bogus" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\app\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.Grpc.Client\Scribbly.Cubby.Grpc.Client.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.Http.Client\Scribbly.Cubby.Http.Client.csproj" />
     <ProjectReference Include="..\..\source\Scribbly.Cubby\Scribbly.Cubby.csproj" />
   </ItemGroup>
 

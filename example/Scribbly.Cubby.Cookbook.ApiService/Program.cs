@@ -6,7 +6,6 @@ using Microsoft.Extensions.Caching.Distributed;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Cookbook.ServiceDefaults;
-using Scribbly.Cubby.MessagePack;
 using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +16,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddOpenApi();
 
-builder
+builder.Services
     .AddCubbyClient(ops =>
     {
         var host = Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTPS") ?? Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTP");
@@ -26,8 +25,7 @@ builder
         ops.Lifetime = ServiceLifetime.Singleton;
     })
     .WithCubbyHttpClient()
-    // .WithCubbyGrpcClient()
-    ;
+    .WithCubbyGrpcClient();
 
 var app = builder.Build();
 
@@ -70,7 +68,7 @@ app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, [FromBo
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.Put(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
     
     watch.Stop();
 
@@ -84,7 +82,7 @@ app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, [FromBo
 app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
-    var item = await cache.Get<Item>(key, token);
+    var item = await cache.GetObject<Item>(key, token);
     
     watch.Stop();
     

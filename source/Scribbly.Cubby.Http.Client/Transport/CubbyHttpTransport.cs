@@ -1,11 +1,8 @@
 ﻿using System.Net;
-using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Stores;
 using PutResult = Scribbly.Cubby.Stores.PutResult;
 
-namespace Scribbly.Cubby.Cache;
-
-internal interface IHttpCubbyStoreTransport : ICubbyStoreTransport;
+namespace Scribbly.Cubby;
 
 internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreTransport
 {
@@ -46,7 +43,7 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     }
 
     /// <inheritdoc />
-    public async ValueTask<byte[]> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         

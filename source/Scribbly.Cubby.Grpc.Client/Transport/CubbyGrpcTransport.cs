@@ -1,12 +1,9 @@
 ﻿using Google.Protobuf;
-using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
 using PutResult = Scribbly.Cubby.Stores.PutResult;
 
-namespace Scribbly.Cubby.Cache;
-
-internal interface IGrpcCubbyStoreTransport : ICubbyStoreTransport;
+namespace Scribbly.Cubby;
 
 internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrpcCubbyStoreTransport
 {
@@ -43,7 +40,7 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
     }
 
     /// <inheritdoc />
-    public async ValueTask<byte[]> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
         var entry = await client.GetAsync(new GetRequest
         {

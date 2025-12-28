@@ -5,6 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Scribbly.Cubby.IntegrationTests" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <ProjectReference Include="..\Scribbly.Cubby.Http\Scribbly.Cubby.Http.csproj" />
         <ProjectReference Include="..\Scribbly.Cubby.Client\Scribbly.Cubby.Client.csproj" />
     </ItemGroup>

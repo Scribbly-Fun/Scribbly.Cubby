@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.DependencyInjection;
-using Scribbly.Cubby.Cache;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Scribbly.Cubby.Client;
 
 namespace Scribbly.Cubby.Builder;
@@ -23,21 +21,23 @@ public static class CubbyClientBuilderExtensions
         /// <returns>The configured cubby client host.</returns>
         public ICubbyClientBuilder WithCubbyHttpClient(Action<IHttpClientBuilder>? clientBuilderCallback = null)
         {
-            var clientBuilder = builder.HostBuilder.Services.AddHttpClient(nameof(CubbyHttpTransport), (sp, httpOptions) =>
+            var clientBuilder = builder.Services.AddHttpClient(nameof(CubbyHttpTransport), (sp, httpOptions) =>
             {
                 var clientOptions = sp.GetRequiredService<CubbyClientOptions>();
                 httpOptions.BaseAddress = clientOptions.Host;
             });
             
-            builder.HostBuilder.Services.AddSingleton<CubbyHttpTransport>();
+            builder.Services.AddSingleton<CubbyHttpTransport>();
             
-            builder.HostBuilder.Services.AddSingleton<ICubbyStoreTransport, CubbyHttpTransport>(
+            builder.Services.AddSingleton<ICubbyStoreTransport, CubbyHttpTransport>(
                 sp => sp.GetRequiredService<CubbyHttpTransport>());
             
-            builder.HostBuilder.Services.AddSingleton<IHttpCubbyStoreTransport, CubbyHttpTransport>(
+            builder.Services.AddSingleton<IHttpCubbyStoreTransport, CubbyHttpTransport>(
                 sp => sp.GetRequiredService<CubbyHttpTransport>());
             
             clientBuilderCallback?.Invoke(clientBuilder);
+            
+            builder.Services.AddScoped<IHttpCubbyClient, HttpCubbyClient>();
             
             return builder;
         }

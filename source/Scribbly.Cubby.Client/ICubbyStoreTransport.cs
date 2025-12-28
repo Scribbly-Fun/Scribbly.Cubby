@@ -15,5 +15,5 @@ internal interface ICubbyStoreTransport
     
     ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default);
     
-    ValueTask<byte[]> Get(BytesKey key, CancellationToken token = default);
+    ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default);
 }

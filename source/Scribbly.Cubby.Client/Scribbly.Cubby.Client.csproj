@@ -9,6 +9,7 @@
         <InternalsVisibleTo Include="Scribbly.Cubby.Http.Client" />
         <InternalsVisibleTo Include="Scribbly.Cubby.MessagePack" />
         <InternalsVisibleTo Include="Scribbly.Cubby.UnitTests" />
+        <InternalsVisibleTo Include="Scribbly.Cubby.IntegrationTests" />
     </ItemGroup>
 
     <ItemGroup>

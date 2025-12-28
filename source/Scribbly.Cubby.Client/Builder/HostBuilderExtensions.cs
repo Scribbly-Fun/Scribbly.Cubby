@@ -13,8 +13,8 @@ public static class HostApplicationBuilderExtensions
     /// <summary>
     /// Extends the host builder
     /// </summary>
-    /// <param name="hostBuilder">The Host Builder</param>
-    extension(IHostApplicationBuilder hostBuilder)
+    /// <param name="services">The Host Builder</param>
+    extension(IServiceCollection services)
     {
         /// <summary>
         /// Adds cubby services and configures the store.
@@ -27,16 +27,16 @@ public static class HostApplicationBuilderExtensions
         
             optionsCallback?.Invoke(options);
 
-            hostBuilder.Services.AddSingleton(options);
+            services.AddSingleton(options);
 
-            var cubbyBuilder = new CubbyClientBuilder(options, hostBuilder);
+            var cubbyBuilder = new CubbyClientBuilder(options, services);
 
-            hostBuilder.Services.AddSingleton<ICubbyCompressor>(options.Compressor);
-            hostBuilder.Services.AddSingleton<ICubbySerializer>(options.Serializer);
+            services.AddSingleton<ICubbyCompressor>(options.Compressor);
+            services.AddSingleton<ICubbySerializer>(options.Serializer);
             
-            hostBuilder.Services.AddScoped<ICubbyClient, CubbyClient>();
+            services.AddScoped<ICubbyClient, CubbyClient>();
             
-            hostBuilder.Services.AddSingleton<IDistributedCache, CubbyDistributedCache>();
+            services.AddSingleton<IDistributedCache, CubbyDistributedCache>();
             
             return cubbyBuilder;
         }
