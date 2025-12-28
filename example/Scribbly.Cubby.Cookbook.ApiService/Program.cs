@@ -25,7 +25,9 @@ builder
         
         ops.Lifetime = ServiceLifetime.Singleton;
     })
-    .WithCubbyGrpcClient();
+    .WithCubbyHttpClient()
+    // .WithCubbyGrpcClient()
+    ;
 
 var app = builder.Build();
 
@@ -64,7 +66,7 @@ app.MapGet("/entry/{key}", (IDistributedCache cache, string key) =>
     };
 });
 
-app.MapPost("cubby/entry/{key}", async (ICubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
 
@@ -79,7 +81,7 @@ app.MapPost("cubby/entry/{key}", async (ICubbyClient cache, string key, [FromBod
     };
 });
 
-app.MapGet("cubby/entry/{key}", async (ICubbyClient cache, string key, CancellationToken token) =>
+app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
     var item = await cache.Get<Item>(key, token);
@@ -93,7 +95,16 @@ app.MapGet("cubby/entry/{key}", async (ICubbyClient cache, string key, Cancellat
     };
 });
 
-app.Run();
+try
+{
+
+    app.Run();
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+    throw;
+}
 
 [JsonSerializable(typeof(Item))]
 partial class ItemJsonContext : JsonSerializerContext;

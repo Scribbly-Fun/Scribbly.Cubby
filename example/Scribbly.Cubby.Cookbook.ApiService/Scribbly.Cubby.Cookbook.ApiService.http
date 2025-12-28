@@ -14,7 +14,7 @@ GET {{host}}/entry/my_key
 
 ###
 
-POST {{host}}/cubby/entry/my_key
+POST {{host}}/cubby/client/my_key
 Content-Type: application/json
 
 {
@@ -24,22 +24,6 @@ Content-Type: application/json
 
 ###
 
-GET {{host}}/cubby/entry/my_key
-
-###
-
-###
-
-POST {{host}}/cubby/entry/my_key/raw
-Content-Type: application/json
-
-{
-    "key": "my_key",
-    "value": "my value"
-}
-
-###
-
-GET {{host}}/cubby/entry/my_key/raw
+GET {{host}}/cubby/client/my_key
 
 ###

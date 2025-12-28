@@ -13,7 +13,7 @@ internal interface ICubbyStoreTransport
 {
     ValueTask<bool> Exists(BytesKey key, CancellationToken token = default);
     
-    ValueTask<PutResult> Put(BytesKey key, byte[] value, CacheEntryOptions options, CancellationToken token = default);
+    ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default);
     
     ValueTask<byte[]> Get(BytesKey key, CancellationToken token = default);
 }

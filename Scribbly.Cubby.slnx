@@ -33,7 +33,9 @@
     <Project Path="source/Scribbly.Cubby.Grpc/Scribbly.Cubby.Grpc.csproj" />
   </Folder>
   <Folder Name="/lib/http/">
+    <Project Path="source/Scribbly.Cubby.Http.Client/Scribbly.Cubby.Http.Client.csproj" />
     <Project Path="source/Scribbly.Cubby.Http.Server/Scribbly.Cubby.Http.Server.csproj" />
+    <Project Path="source/Scribbly.Cubby.Http/Scribbly.Cubby.Http.csproj" />
   </Folder>
   <Folder Name="/protos/">
     <File Path="protos/cubby_messages.proto" />

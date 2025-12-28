@@ -36,6 +36,8 @@ public static class HostApplicationBuilderExtensions
             
             hostBuilder.Services.AddScoped<ICubbyClient, CubbyClient>();
             
+            hostBuilder.Services.AddSingleton<IDistributedCache, CubbyDistributedCache>();
+            
             return cubbyBuilder;
         }
     }
