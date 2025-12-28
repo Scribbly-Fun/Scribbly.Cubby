@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
+using Scribbly.Cubby.Cookbook.ServiceDefaults;
 using Scribbly.Cubby.MessagePack;
 using Scribbly.Cubby.Stores;
 
@@ -22,6 +24,11 @@ builder
         ops.Host = new Uri(host?? throw new InvalidOperationException());
         
         ops.Lifetime = ServiceLifetime.Singleton;
+        
+        ops.AddMessagePackSerializer(ops =>
+        {
+            ops.SequencePool.Clear();
+        });
     })
     .WithCubbyGrpcClient();
 
@@ -93,4 +100,6 @@ app.MapGet("cubby/entry/{key}", async (ICubbyClient cache, string key, Cancellat
 
 app.Run();
 
+[JsonSerializable(typeof(Item))]
+partial class ItemJsonContext : JsonSerializerContext;
 record Item(string Key, string Value);

@@ -26,6 +26,7 @@
 
 <ItemGroup>
     <ProjectReference Include="..\..\source\Scribbly.Cubby.Grpc.Server\Scribbly.Cubby.Grpc.Server.csproj" />
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.Http.Server\Scribbly.Cubby.Http.Server.csproj" />
 </ItemGroup>
 
 </Project>

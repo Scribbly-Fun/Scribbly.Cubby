@@ -42,7 +42,7 @@ public class CubbyClientOptions
     /// Configures the Cubby JSON serializer implementation.
     /// </summary>
     internal void AddSerializer<TSerializer>(
-        Action<JsonSerializerOptions> optionsCallback,
+        Action<JsonSerializerOptions>? optionsCallback = null,
         ICubbyCompressor? compressor = null) where TSerializer : ICubbySerializer
     {
         Compressor = compressor ?? new BrotliCubbyCompressor();
@@ -60,7 +60,7 @@ public class CubbyClientOptions
             TypeInfoResolver = JsonTypeInfoResolver.Combine()
         };
         
-        optionsCallback.Invoke(options);
+        optionsCallback?.Invoke(options);
 
         Serializer = new SystemTextCubbySerializer(options, Compressor);
     }
