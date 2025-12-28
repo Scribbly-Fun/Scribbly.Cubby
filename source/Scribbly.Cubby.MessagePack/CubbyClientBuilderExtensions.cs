@@ -1,4 +1,6 @@
-﻿using Scribbly.Cubby.Client;
+﻿using MessagePack;
+using MessagePack.Resolvers;
+using Scribbly.Cubby.Client;
 
 namespace Scribbly.Cubby.MessagePack;
 
@@ -16,9 +18,13 @@ public static class CubbyClientBuilderExtensions
         /// <summary>
         /// Adds and configures the message pack serializer.
         /// </summary>
-        public void AddMessagePackSerializer()
+        public void AddMessagePackSerializer(Action<MessagePackSerializerOptions>? optionsCallback = null)
         {
-            options.AddSerializer<MessagePackCubbySerializer>(new MessagePackCubbySerializer());
+            var messagePackOptions = MessagePackSerializerOptions.Standard.WithResolver(ContractlessStandardResolver.Instance);
+
+            optionsCallback?.Invoke(messagePackOptions);
+            
+            options.AddSerializer<MessagePackCubbySerializer>(new MessagePackCubbySerializer(messagePackOptions));
         }
     }
 }

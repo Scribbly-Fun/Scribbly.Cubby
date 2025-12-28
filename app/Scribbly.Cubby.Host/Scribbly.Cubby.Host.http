@@ -1,0 +1,17 @@
+@Scribbly.Cubby.Host_HostAddress = http://localhost:5018
+
+
+###
+
+GET {{host}}/cubby/my_key
+Accept: application/json
+
+###
+
+PUT {{host}}/cubby/my_key
+Content-Type: application/json
+
+{
+  "key": "my_key",
+  "value": "my value"
+}

@@ -28,7 +28,8 @@ builder
         ops.Capacity = int.MinValue;
         ops.Cores = Environment.ProcessorCount;
     })
-    .WithCubbyGrpcServer();
+    .WithCubbyGrpcServer()
+    .WithCubbyHttpServer();
 
 var app = builder.Build();
 
@@ -38,5 +39,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapCubbyGrpc();
+app.MapCubbyHttp();
 
 app.Run();

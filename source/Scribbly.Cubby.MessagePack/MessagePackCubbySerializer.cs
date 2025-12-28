@@ -6,17 +6,17 @@ namespace Scribbly.Cubby.MessagePack;
 /// <summary>
 /// Serializes data using the Message Pack Protocol
 /// </summary>
-public class MessagePackCubbySerializer : ICubbySerializer
+public class MessagePackCubbySerializer(MessagePackSerializerOptions messagePackOptions) : ICubbySerializer
 {
     /// <inheritdoc />
     public ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull
     {
         if (options.Compression != SerializerCompression.Compress)
         {
-            return MessagePackSerializer.Serialize<T>(value);
+            return MessagePackSerializer.Serialize<T>(value, messagePackOptions);
         }
         
-        var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+        var lz4Options = messagePackOptions.WithCompression(MessagePackCompression.Lz4BlockArray);
         return MessagePackSerializer.Serialize<T>(value, lz4Options);
     }
 
@@ -25,10 +25,10 @@ public class MessagePackCubbySerializer : ICubbySerializer
     {
         if (options.Compression != SerializerCompression.Compress)
         {
-            return MessagePackSerializer.Deserialize<T>(data.ToArray());
+            return MessagePackSerializer.Deserialize<T>(data.ToArray(), messagePackOptions);
         }
         
-        var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+        var lz4Options = messagePackOptions.WithCompression(MessagePackCompression.Lz4BlockArray);
         return MessagePackSerializer.Deserialize<T>(data.ToArray(), lz4Options);
     }
 }

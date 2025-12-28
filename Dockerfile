@@ -1,44 +1,45 @@
-﻿# --------------------------------
-# Build + Publish stage
-# --------------------------------
+﻿## --------------------------------
+## Build Application
+## --------------------------------
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG BUILD_CONFIGURATION=Release
 
+# NativeAOT prerequisites
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        clang \
-        zlib1g-dev \
+       clang zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /src
+WORKDIR /repo
 
-# Copy everything
 COPY . .
 
-# Publish AOT into /app
-WORKDIR /src/source/Scribbly.Cubby.Host
-RUN dotnet publish \
-    -c $BUILD_CONFIGURATION \
+RUN dotnet publish app/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj \
+    -c Release \
     -r linux-x64 \
+    --self-contained true \
     -p:PublishAot=true \
-    -p:SelfContained=true \
     -p:StripSymbols=true \
+    -p:InvariantGlobalization=true \
     -o /app
 
-# --------------------------------
-# Final runtime stage
-# --------------------------------
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0 AS final
+## --------------------------------
+## Run Application
+## --------------------------------
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0
 
 WORKDIR /app
+COPY --from=build /app ./
 
-COPY --from=build /app .
+RUN rm -f appsettings.Development.json \
+       *.dbg \
+       *.pdb \
+       *.xml
 
-ENV SCRB_CUBBY_HTTPS=true \
-    ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS="http://+:5000;"
 
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 5000
 
-ENTRYPOINT ["Scribbly.Cubby.Host.dll"]
+RUN ls -l /app
+RUN chmod +x /app/Scribbly.Cubby.Host
 
+ENTRYPOINT ["/app/Scribbly.Cubby.Host"]
