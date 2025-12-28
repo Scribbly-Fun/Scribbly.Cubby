@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\source\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
+    <ProjectReference Include="..\..\app\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
     <ProjectReference Include="..\Scribbly.Cubby.Cookbook.ApiService\Scribbly.Cubby.Cookbook.ApiService.csproj" />
   </ItemGroup>
 

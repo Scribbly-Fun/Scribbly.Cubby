@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
+      <ProjectReference Include="..\..\app\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
     </ItemGroup>
 
     <ItemGroup>
