@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Scribbly.Cubby;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Cookbook.ServiceDefaults;
@@ -80,6 +81,64 @@ app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, [FromBo
 });
 
 app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+    var item = await cache.GetObject<Item>(key, token);
+    
+    watch.Stop();
+    
+    return new
+    {
+        time = watch.Elapsed,
+        item = item,
+    };
+});
+
+app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+
+    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    
+    watch.Stop();
+
+    return new
+    {
+        time = watch.Elapsed,
+        result = results
+    };
+});
+
+app.MapGet("cubby/http/{key}", async (IHttpCubbyClient cache, string key, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+    var item = await cache.GetObject<Item>(key, token);
+    
+    watch.Stop();
+    
+    return new
+    {
+        time = watch.Elapsed,
+        item = item,
+    };
+});
+
+app.MapPost("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+
+    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    
+    watch.Stop();
+
+    return new
+    {
+        time = watch.Elapsed,
+        result = results
+    };
+});
+
+app.MapGet("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
     var item = await cache.GetObject<Item>(key, token);

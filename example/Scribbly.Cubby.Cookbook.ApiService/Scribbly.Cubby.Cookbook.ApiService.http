@@ -27,3 +27,31 @@ Content-Type: application/json
 GET {{host}}/cubby/client/my_key
 
 ###
+
+POST {{host}}/cubby/http/my_key
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
+###
+
+GET {{host}}/cubby/http/my_key
+
+###
+
+POST {{host}}/cubby/grpc/my_key
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
+###
+
+GET {{host}}/cubby/grpc/my_key
+
+###
