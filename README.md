@@ -249,7 +249,46 @@ builder.Services
 
 ## Compression
 
+The cubby client can optionally compress data befire transmitting the cache across the transport. 
 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as Application
+    participant Client as CubbyClient
+    participant Transport as CubbyTransport
+    participant Server as CubbyServer
+    participant Store as Cache Storage
+
+    %% PUT FLOW
+    App->>Client: Put(key, value)
+    alt Compression Enabled
+        Client->>Client: Serialize value
+        Client->>Client: Compress payload
+        Client->>Transport: Send(payload, encoding=Compressed)
+    else Compression Disabled
+        Client->>Client: Serialize value
+        Client->>Transport: Send(payload, encoding=None)
+    end
+
+    Transport->>Server: Forward payload + encoding flag
+    Server->>Store: Store payload (compressed if flagged)
+
+    %% GET FLOW
+    App->>Client: Get(key)
+    Client->>Transport: Request(key)
+    Transport->>Server: Forward request
+    Server->>Store: Lookup value
+    Store-->>Server: Return payload (compressed)
+    Server-->>Transport: Respond(payload, encoding=Compressed)
+
+    Transport-->>Client: Payload + encoding flag
+    alt Encoding = Compressed
+        Client->>Client: Decompress payload
+    end
+    Client->>Client: Deserialize value
+    Client-->>App: Return value
+```
 # Benchmarks
 
 ### 2025.12.20 Store Comparisons
