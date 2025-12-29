@@ -163,7 +163,7 @@ By default cubby will use System.Text.Json to serialize all object as byte[] dat
 *cubby implicitly uses System.Text.Json*
 
 ```csharp
-builder
+builder.Services
     .AddCubbyClient()
     .WithCubbyGrpcClient();
 ```
@@ -171,7 +171,7 @@ builder
 *override and configure the serializer*
 
 ```csharp
-builder
+builder.Services
     .AddCubbyClient(ops =>
     {
         ops.AddSystemTextSerializer();
@@ -182,7 +182,7 @@ builder
 *extend and override our defaults*
 
 ```csharp
-builder
+builder.Services
     .AddCubbyClient(ops =>
     {
         ops.AddSystemTextSerializer(ops =>
@@ -198,7 +198,7 @@ builder
 
 ```csharp
 
-builder
+builder.Services
     .AddCubbyClient(ops =>
     {
         ops.AddSystemTextSerializer(
@@ -221,7 +221,7 @@ https://github.com/MessagePack-CSharp/MessagePack-CSharp
 *call the ``AddMessagePackSerializer()`` method to use message pack*
 
 ```csharp
-builder
+builder.Services
     .AddCubbyClient(ops =>
     {
         ops.AddMessagePackSerializer();
@@ -233,7 +233,7 @@ builder
 
 ```csharp
 
-builder
+builder.Services
     .AddCubbyClient(ops =>
     {
         ops.AddMessagePackSerializer(ops =>
