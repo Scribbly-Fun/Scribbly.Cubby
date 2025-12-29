@@ -14,9 +14,7 @@
 
 # Scribbly Cubby
 
-A distributed caching service built on dotnet.  You know take stuff out and put stuff away `Cubby`.  
-Cubby is a "chose your own adventure" caching service.  Cubby can be used as a library hosted by your application 
-or standalone Native AOT running on Linux, Windows, or containerized.
+Cubby is a 'choose your own adventure' cross platform native AOT .net distributed cache application. 
 
 > [!Note]
 > Still in initial development, there may be several incorrect statements in the readme
