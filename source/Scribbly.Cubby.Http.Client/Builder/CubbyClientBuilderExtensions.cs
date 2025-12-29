@@ -27,6 +27,8 @@ public static class CubbyClientBuilderExtensions
                 httpOptions.BaseAddress = clientOptions.Host;
             });
             
+            clientBuilderCallback?.Invoke(clientBuilder);
+            
             builder.Services.AddSingleton<CubbyHttpTransport>();
             
             builder.Services.AddSingleton<ICubbyStoreTransport, CubbyHttpTransport>(
@@ -35,7 +37,6 @@ public static class CubbyClientBuilderExtensions
             builder.Services.AddSingleton<IHttpCubbyStoreTransport, CubbyHttpTransport>(
                 sp => sp.GetRequiredService<CubbyHttpTransport>());
             
-            clientBuilderCallback?.Invoke(clientBuilder);
             
             builder.Services.AddScoped<IHttpCubbyClient, HttpCubbyClient>();
             

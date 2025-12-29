@@ -19,14 +19,17 @@ public static class CubbyClientBuilderExtensions
         /// <summary>
         /// Adds cubby services and configures the store.
         /// </summary>
+        /// <param name="clientBuilderCallback">Optional callback to modify the http client.</param>
         /// <returns>The configured cubby client host.</returns>
-        public ICubbyClientBuilder WithCubbyGrpcClient()
+        public ICubbyClientBuilder WithCubbyGrpcClient(Action<IHttpClientBuilder>? clientBuilderCallback = null)
         {
-            builder.Services.AddGrpcClient<CacheService.CacheServiceClient>((sp, grpcClientOptions) =>
+            var clientBuilder = builder.Services.AddGrpcClient<CacheService.CacheServiceClient>((sp, grpcClientOptions) =>
             {
                 var clientOptions = sp.GetRequiredService<CubbyClientOptions>();
                 grpcClientOptions.Address = clientOptions.Host;
             });
+            
+            clientBuilderCallback?.Invoke(clientBuilder);
             
             builder.Services.AddSingleton<CubbyGrpcTransport>();
             
@@ -37,6 +40,7 @@ public static class CubbyClientBuilderExtensions
                 sp => sp.GetRequiredService<CubbyGrpcTransport>());
             
             builder.Services.AddScoped<IGrpcCubbyClient, GrpcCubbyClient>();
+            
             
             return builder;
         }
