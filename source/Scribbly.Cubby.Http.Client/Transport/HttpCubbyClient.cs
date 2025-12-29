@@ -5,6 +5,6 @@ namespace Scribbly.Cubby;
 
 /// <remarks>This is used when multiple transports are configured in a single application.</remarks>
 internal sealed class HttpCubbyClient(
-    ICubbyStoreTransport store, 
+    IHttpCubbyStoreTransport store, 
     ICubbySerializer serializer) 
     : CubbyClient(store, serializer), IHttpCubbyClient;
