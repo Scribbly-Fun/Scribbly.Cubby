@@ -9,5 +9,5 @@ internal static class CubbyContainerImageTags
     public const string Image = "scribbly/cubby";
 
     /// <remarks>latest</remarks>
-    public const string Tag = "0.1.0-7-docker-file.2";
+    public const string Tag = "0.1.0-24-http-client.1";
 }
