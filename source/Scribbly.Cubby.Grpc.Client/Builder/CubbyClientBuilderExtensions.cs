@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
-using Scribbly.Cubby.Cache;
 using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Proto;
 
@@ -23,14 +22,21 @@ public static class CubbyClientBuilderExtensions
         /// <returns>The configured cubby client host.</returns>
         public ICubbyClientBuilder WithCubbyGrpcClient()
         {
-            builder.HostBuilder.Services.AddGrpcClient<CacheService.CacheServiceClient>((sp, grpcClientOptions) =>
+            builder.Services.AddGrpcClient<CacheService.CacheServiceClient>((sp, grpcClientOptions) =>
             {
                 var clientOptions = sp.GetRequiredService<CubbyClientOptions>();
                 grpcClientOptions.Address = clientOptions.Host;
             });
             
-            builder.HostBuilder.Services.AddSingleton<IDistributedCache, CubbyDistributedCache>();
-            builder.HostBuilder.Services.AddSingleton<ICubbyStoreTransport, CubbyGrpcCache>();
+            builder.Services.AddSingleton<CubbyGrpcTransport>();
+            
+            builder.Services.AddSingleton<ICubbyStoreTransport, CubbyGrpcTransport>(
+                sp => sp.GetRequiredService<CubbyGrpcTransport>());
+            
+            builder.Services.AddSingleton<IGrpcCubbyStoreTransport, CubbyGrpcTransport>(
+                sp => sp.GetRequiredService<CubbyGrpcTransport>());
+            
+            builder.Services.AddScoped<IGrpcCubbyClient, GrpcCubbyClient>();
             
             return builder;
         }

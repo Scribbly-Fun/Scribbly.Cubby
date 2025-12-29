@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Scribbly.Cubby.Client;
 
@@ -13,7 +13,7 @@ public interface ICubbyClientBuilder
     CubbyClientOptions Options { get; }
     
     /// <summary>
-    /// The Application Host Builder.
+    /// The Application Service Collection.
     /// </summary>
-    IHostApplicationBuilder HostBuilder { get; }
+    IServiceCollection Services { get; }
 }

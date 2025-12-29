@@ -56,7 +56,10 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     {
         return !(left == right);
     }
-
+    
+    /// <inheritdoc />
+    public override string ToString() => Encoding.UTF8.GetString(_data);
+    
     /// <inheritdoc />
     public override int GetHashCode() => _hash;
 

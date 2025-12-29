@@ -4,7 +4,7 @@ using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Client;
 
-internal sealed class CubbyClient(ICubbyStoreTransport store, ICubbySerializer serializer) : ICubbyClient
+internal class CubbyClient(ICubbyStoreTransport store, ICubbySerializer serializer) : ICubbyClient
 {
     /// <inheritdoc />
     public ValueTask<bool> Exists(BytesKey key, CancellationToken token = default)
@@ -13,13 +13,13 @@ internal sealed class CubbyClient(ICubbyStoreTransport store, ICubbySerializer s
     }
 
     /// <inheritdoc />
-    public ValueTask<PutResult> Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options, CancellationToken token = default)
+    public ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default)
     {
-        return store.Put(key, value.ToArray(), options, token);
+        return store.Put(key, value, options, token);
     }
 
     /// <inheritdoc />
-    public async ValueTask<PutResult> Put<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default)
+    public async ValueTask<PutResult> PutObject<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default)
         where T : notnull
     {
         var encodedValue = serializer.Serialize<T>(value);
@@ -28,18 +28,18 @@ internal sealed class CubbyClient(ICubbyStoreTransport store, ICubbySerializer s
     }
 
     /// <inheritdoc />
-    public ValueTask<byte[]> Get(BytesKey key, CancellationToken token = default)
+    public ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
         return store.Get(key, token);
     }
 
     /// <inheritdoc />
-    public async ValueTask<T> Get<T>(BytesKey key, CancellationToken token = default)
+    public async ValueTask<T> GetObject<T>(BytesKey key, CancellationToken token = default)
         where T : notnull
     {
         var data = await store.Get(key, token);
 
-        var value = serializer.Deserialize<T>(data);
+        var value = serializer.Deserialize<T>(data.Span);
         
         return value ?? throw new SerializationException("Failed to convert the stored bytes to the requested object");
     }

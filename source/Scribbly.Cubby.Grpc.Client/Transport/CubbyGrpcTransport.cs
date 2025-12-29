@@ -1,12 +1,11 @@
 ﻿using Google.Protobuf;
-using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
 using PutResult = Scribbly.Cubby.Stores.PutResult;
 
-namespace Scribbly.Cubby.Cache;
+namespace Scribbly.Cubby;
 
-internal class CubbyGrpcCache(CacheService.CacheServiceClient client) : ICubbyStoreTransport
+internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrpcCubbyStoreTransport
 {
     /// <inheritdoc />
     public async ValueTask<bool> Exists(BytesKey key, CancellationToken token = default)
@@ -21,12 +20,12 @@ internal class CubbyGrpcCache(CacheService.CacheServiceClient client) : ICubbySt
     }
 
     /// <inheritdoc />
-    public async ValueTask<PutResult> Put(BytesKey key, byte[] value, CacheEntryOptions options, CancellationToken token = default)
+    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default)
     {
         var result = await client.PutAsync(new PutRequest
         {
             Key = ByteString.CopyFrom(key),
-            Value = ByteString.CopyFrom(value),
+            Value = ByteString.CopyFrom(value.Span),
             
         }, cancellationToken: token);
 
@@ -41,7 +40,7 @@ internal class CubbyGrpcCache(CacheService.CacheServiceClient client) : ICubbySt
     }
 
     /// <inheritdoc />
-    public async ValueTask<byte[]> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
         var entry = await client.GetAsync(new GetRequest
         {
