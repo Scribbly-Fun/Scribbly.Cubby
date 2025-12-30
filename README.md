@@ -45,6 +45,7 @@ Cubby is a 'choose your own adventure' cross platform native AOT .net distribute
   * [Compression](#compression)
 * [Benchmarks](#benchmarks)
     * [2025.12.20 Store Comparisons](#20251220-store-comparisons)
+    * [K6 Load Tests](#k6-load-tests-)
 <!-- TOC -->
 
 ## Example
@@ -313,3 +314,12 @@ The initial benchmarks to help select a default starting point for a in-memory c
 | ShardedConcurrentDictionary_Get | 16      | 100000     |  1.302 ms | 0.0242 ms | 0.0526 ms |  1.290 ms |  0.87 |    0.05 |               7.9316 |                - |   3.72 KB |        0.97 |
 | LockFreeHashTable_Get           | 16      | 100000     |  1.678 ms | 0.0327 ms | 0.0350 ms |  1.679 ms |  1.12 |    0.05 |               7.8438 |                - |   3.62 KB |        0.95 |
 
+### K6 Load Tests 
+
+>[!Warning]
+> Disclaimer, some of the benchmarks comparing HTTP in docker vs Native AOT HTTP may not be accurate as the request doesn't have the same network topology.
+> Take these with a grain of salt.  As you can see the Native execution is way faster.  I'll need to stand up a real server to get some real numbers.
+
+![docker](./docs/benchmarks/2025.12.29/docker-http-10vus-1m.PNG)
+
+![native](./docs/benchmarks/2025.12.29/native-http-10vus-1m.PNG)

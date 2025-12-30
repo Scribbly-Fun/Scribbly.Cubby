@@ -31,6 +31,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
     <!-- APPLICATION TOOLING -->
+    <PackageVersion Include="Scribbly.Aspire.Hosting.LoadTesting" Version="0.1.5" />
     <PackageVersion Include="Scribbly.Stencil" Version="0.3.6" />
     <PackageVersion Include="System.Text.Json" Version="9.0.5" />
     <!-- TESTING FRAMEWORKS -->

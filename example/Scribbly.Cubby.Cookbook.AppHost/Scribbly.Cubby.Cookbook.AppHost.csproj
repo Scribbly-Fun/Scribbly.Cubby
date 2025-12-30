@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Scribbly.Aspire.Hosting.LoadTesting" />
   </ItemGroup>
 
 </Project>

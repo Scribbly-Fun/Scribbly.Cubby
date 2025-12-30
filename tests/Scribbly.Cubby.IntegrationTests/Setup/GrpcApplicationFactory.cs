@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Scribbly.Cubby.Builder;
@@ -20,13 +21,27 @@ public class GrpcApplicationFactory : WebApplicationFactory<Program>, IAsyncLife
         {
             builder.ConfigureTestServices(services =>
             {
+                services.AddSingleton(this);
+                
                 services.RemoveAll<IHostedService>();
 
                 services.AddCubbyClient(ops =>
                     {
                         ops.Host = new Uri("http://localhost");
                     })
-                    .WithCubbyGrpcClient();
+                    .WithCubbyGrpcClient(grpcOptions =>
+                    {
+                        grpcOptions
+                            .ConfigurePrimaryHttpMessageHandler(sp => 
+                            { 
+                                var factory = sp.GetRequiredService<GrpcApplicationFactory>();
+                                return factory.Server.CreateHandler();
+                            })
+                            .ConfigureHttpClient(client => 
+                            { 
+                                client.BaseAddress = new Uri("http://localhost"); 
+                            });   
+                    });
 
             });
         }
