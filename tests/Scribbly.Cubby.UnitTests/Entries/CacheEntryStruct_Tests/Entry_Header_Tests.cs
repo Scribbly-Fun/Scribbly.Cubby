@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Buffers;
+using FluentAssertions;
 using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.UnitTests.Entries.CacheEntryStruct_Tests;
@@ -29,5 +30,7 @@ public class Entry_Header_Tests
         var slice = span[..lastIndexOf];
         
         slice.ToArray().Length.Should().Be(str.ValueLength + 24);
+        
+        ArrayPool<byte>.Shared.Return(entry);
     }
 }
