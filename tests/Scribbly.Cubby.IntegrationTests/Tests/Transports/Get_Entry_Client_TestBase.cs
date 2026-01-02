@@ -37,7 +37,7 @@ public abstract class Get_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         var store = scope.ServiceProvider.GetRequiredService<ICubbyStore>();
         var client = scope.ServiceProvider.GetRequiredService<ICubbyClient>();
 
-        store.Put(key, array, new CacheEntryOptions());
+        store.Put(key, array, CacheEntryOptions.None);
         
         var result = await client.Get(key, CancellationToken.None);
 

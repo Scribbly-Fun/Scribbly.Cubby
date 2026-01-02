@@ -54,4 +54,19 @@ public readonly ref struct CacheEntryStruct : ICacheEntry
         var expiresAt = BinaryPrimitives.ReadInt64LittleEndian(_buffer);
         return expiresAt != 0 && expiresAt <= nowUtcTicks;
     }
+    
+    /// <summary>
+    /// Updates the sliding time stored in the internal buffer
+    /// </summary>
+    /// <param name="time">Timespan in Ticks</param>
+    public void UpdateSlidingTime(long time)
+    {
+        var span = _buffer.AsSpan();
+        BinaryPrimitives.WriteInt64LittleEndian(span, time);
+    }
+    
+    /// <summary>
+    /// Returns a span for the backing buffer
+    /// </summary>
+    public Span<byte> AsSpan => _buffer.AsSpan();
 }

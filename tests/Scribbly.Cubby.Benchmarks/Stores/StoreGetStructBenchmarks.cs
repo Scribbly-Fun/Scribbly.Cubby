@@ -36,8 +36,8 @@ public class StoreGetStructBenchmarks
         
         for (int i = 0; i < EntryCount; i++)
         {
-            _classPooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
-            _refStructEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
+            _classPooledEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
+            _refStructEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
         }
     }
     
@@ -46,7 +46,7 @@ public class StoreGetStructBenchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _classPooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
+            _classPooledEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
         });
     }
 
@@ -55,7 +55,7 @@ public class StoreGetStructBenchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _refStructEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
+            _refStructEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
         });
     }
 }

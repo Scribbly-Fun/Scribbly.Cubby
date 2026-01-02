@@ -23,11 +23,8 @@ public class Entry_Encoding_Tests
         byte[] array = new byte[length];
         
         Random.Shared.NextBytes(array);
-        
-        var entry = array.LayoutEntry(new CacheEntryOptions
-        {
-            Encoding = encoding
-        });
+
+        var entry = array.LayoutEntry(CacheEntryOptions.Never(encoding: encoding));
         
         var str = new CacheEntryStruct(entry);
 

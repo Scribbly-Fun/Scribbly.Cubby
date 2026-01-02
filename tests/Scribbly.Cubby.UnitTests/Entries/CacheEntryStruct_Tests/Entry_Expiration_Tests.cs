@@ -18,13 +18,10 @@ public class Entry_Expiration_Tests
         
         Random.Shared.NextBytes(array);
 
-        var now = DateTimeOffset.UtcNow.UtcTicks;
-        var expected = now + ticks;
-        
-        var entry = array.LayoutEntry(new CacheEntryOptions
-        {
-            TimeToLive = TimeSpan.FromTicks(ticks).Ticks + now
-        });
+        var now = DateTimeOffset.UtcNow;
+        var expected = now.Ticks + ticks;
+
+        var entry = array.LayoutEntry(CacheEntryOptions.Sliding(now, TimeSpan.FromTicks(ticks)));
         
         var str = new CacheEntryStruct(entry);
         

@@ -42,7 +42,7 @@ internal sealed class ConcurrentStore : ICubbyStore
     /// <inheritdoc />
     public PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
-        var newEntry = PooledCacheEntry.Create(value, options.TimeToLive);
+        var newEntry = PooledCacheEntry.Create(value, options.SlidingDuration);
         
         if (!_store.TryGetValue(key, out var existing))
         {
@@ -60,6 +60,12 @@ internal sealed class ConcurrentStore : ICubbyStore
         }
 
         return PutResult.Undefined;
+    }
+
+    /// <inheritdoc />
+    public RefreshResult Refresh(BytesKey key)
+    {
+        throw new NotImplementedException();
     }
 
     /// <inheritdoc />

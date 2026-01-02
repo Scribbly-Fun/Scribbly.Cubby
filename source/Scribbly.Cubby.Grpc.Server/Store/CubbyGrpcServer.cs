@@ -37,7 +37,7 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
     {
         var key = new BytesKey(request.Key.ToByteArray());
 
-        var result = store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.Never);
+        var result = store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.None);
 
         return Task.FromResult(new PutResponse
         {

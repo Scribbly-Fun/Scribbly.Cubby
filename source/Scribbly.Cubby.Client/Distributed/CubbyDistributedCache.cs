@@ -39,6 +39,7 @@ internal class CubbyDistributedCache(ICubbyStoreTransport transport) : IDistribu
     /// <inheritdoc />
     public Task RemoveAsync(string key, CancellationToken token = default)
     {
+        // TODO: Update transport APIs to support all required APIs
         throw new NotImplementedException();
     }
 
@@ -51,6 +52,6 @@ internal class CubbyDistributedCache(ICubbyStoreTransport transport) : IDistribu
     /// <inheritdoc />
     public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
     {
-        await transport.Put(key, value, new CacheEntryOptions(), token);
+        await transport.Put(key, value, options.CubbyOptions, token);
     }
 }

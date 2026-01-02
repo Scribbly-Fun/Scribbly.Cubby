@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Scribbly.Cubby.Stores;
+﻿namespace Scribbly.Cubby.Stores;
 
 /// <summary>
 /// A common abstraction used by all cubby stores.
@@ -40,6 +38,12 @@ public interface ICubbyStore : IDisposable
     PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options);
 
     /// <summary>
+    /// Refreshed a cache entry when
+    /// </summary>
+    /// <param name="key">The key used from the cache</param>
+    RefreshResult Refresh(BytesKey key);
+
+    /// <summary>
     /// removes the cached value
     /// </summary>
     /// <param name="key">The key</param>
@@ -54,39 +58,58 @@ public interface ICubbyStore : IDisposable
 }
 
 /// <summary>
-/// 
+/// Result returned to the caller when a new or existing cache entry is added or updated
 /// </summary>
 public enum PutResult : byte
 {
     /// <summary>
-    /// 
+    /// Unknown result
     /// </summary>
     Undefined = 0,
     /// <summary>
-    /// 
+    /// A new entry was created
     /// </summary>
     Created = 1,
     /// <summary>
-    /// 
+    /// An existing entry was updated
     /// </summary>
     Updated = 2
 }
 
 /// <summary>
-/// 
+/// Result returned to the caller when cache was evicted
 /// </summary>
 public enum EvictResult : byte
 {
     /// <summary>
-    /// 
+    /// Entry was not found.
     /// </summary>
     Undefined = 0,
     /// <summary>
-    /// 
+    /// Cache entry was removed
     /// </summary>
     Removed = 1,
     /// <summary>
-    /// 
+    /// Unknown results.
     /// </summary>
     Unknown = 2
+}
+
+/// <summary>
+/// Result returned to the caller when cache entry was refreshed
+/// </summary>
+public enum RefreshResult : byte
+{
+    /// <summary>
+    /// Entry was not found.
+    /// </summary>
+    Undefined = 0,
+    /// <summary>
+    /// Cache entry was updated and sliding expiration was updated.
+    /// </summary>
+    Updated = 1,
+    /// <summary>
+    /// When the entry in the cache is not in fact a sliding entry and can't be refreshed.
+    /// </summary>
+    NotSlidingEntry = 2
 }

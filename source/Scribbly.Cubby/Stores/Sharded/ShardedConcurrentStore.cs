@@ -59,7 +59,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
     public PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
         var shard = GetShard(key);
-        var newEntry = PooledCacheEntry.Create(value, options.TimeToLive);
+        var newEntry = PooledCacheEntry.Create(value, options.SlidingDuration);
         
         if (!shard.TryGetValue(key, out var existing))
         {
@@ -77,6 +77,12 @@ internal sealed class ShardedConcurrentStore : ICubbyStore
         }
 
         return PutResult.Undefined;
+    }
+
+    /// <inheritdoc />
+    public RefreshResult Refresh(BytesKey key)
+    {
+        throw new NotImplementedException();
     }
 
     /// <inheritdoc />

@@ -6,14 +6,14 @@ internal static class CacheEntryExtensions
 {
     extension(CacheParameters parameters)
     {
-        public CacheEntryOptions ToEntryOptions()
+        public CacheEntryOptions ToEntryOptions(TimeProvider provider)
         {
-            return new CacheEntryOptions
-            {
-                Flags = parameters.Flags,
-                TimeToLive = parameters.Expiration,
-                Encoding = CacheEntryEncoding.None
-            };
+            return CacheEntryOptions.From(
+                provider: provider,
+                flags: parameters.Flags,
+                expiration: parameters.Expiration,
+                encoding: CacheEntryEncoding.None
+            );
         }
     }
 }

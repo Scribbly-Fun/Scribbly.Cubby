@@ -20,7 +20,7 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
     }
 
     /// <inheritdoc />
-    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default)
+    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options, CancellationToken token = default)
     {
         var result = await client.PutAsync(new PutRequest
         {

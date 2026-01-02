@@ -18,7 +18,7 @@ public class Entry_Value_Tests
         
         Random.Shared.NextBytes(array);
         
-        var entry = array.LayoutEntry(new CacheEntryOptions());
+        var entry = array.LayoutEntry(CacheEntryOptions.None);
         
         var str = new CacheEntryStruct(entry);
 
@@ -38,7 +38,7 @@ public class Entry_Value_Tests
         
         Random.Shared.NextBytes(array);
         
-        var entry = array.LayoutEntry(new CacheEntryOptions());
+        var entry = array.LayoutEntry(CacheEntryOptions.None);
         
         var str = new CacheEntryStruct(entry);
 

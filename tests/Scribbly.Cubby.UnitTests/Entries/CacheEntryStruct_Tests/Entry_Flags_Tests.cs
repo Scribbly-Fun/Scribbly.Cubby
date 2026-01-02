@@ -23,11 +23,8 @@ public class Entry_Flags_Tests
         byte[] array = new byte[length];
         
         Random.Shared.NextBytes(array);
-        
-        var entry = array.LayoutEntry(new CacheEntryOptions
-        {
-            Flags = flag
-        });
+
+        var entry = array.LayoutEntry(CacheEntryOptions.Never(flag));
         
         var str = new CacheEntryStruct(entry);
 
@@ -35,17 +32,14 @@ public class Entry_Flags_Tests
     }
 
     [Theory]
-    [InlineData(0, CacheEntryFlags.None & CacheEntryFlags.Sliding & CacheEntryFlags.Tombstone)]
+    [InlineData(0, CacheEntryFlags.None | CacheEntryFlags.Sliding | CacheEntryFlags.Tombstone)]
     public void Given_Combined_FlagBytes_Should_Be_FlagValue(int length, CacheEntryFlags flags)
     {
         byte[] array = new byte[length];
         
         Random.Shared.NextBytes(array);
         
-        var entry = array.LayoutEntry(new CacheEntryOptions
-        {
-            Flags = flags
-        });
+        var entry = array.LayoutEntry(CacheEntryOptions.Never(flags));
         
         var str = new CacheEntryStruct(entry);
 

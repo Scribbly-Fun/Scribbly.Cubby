@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Scribbly.Cubby.Stores;
 
@@ -36,6 +37,8 @@ public static class HostApplicationBuilderExtensions
                 var factory = new CubbyStoreFactory();
                 return factory.CreateStore(ops);
             });
+            
+            hostBuilder.Services.TryAddSingleton(TimeProvider.System);
             
             return cubbyBuilder;
         }

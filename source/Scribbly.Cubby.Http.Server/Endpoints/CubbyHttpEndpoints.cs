@@ -20,6 +20,7 @@ internal static class CubbyHttpEndpoints
         [FromRoute] string key, 
         [AsParameters] CacheParameters parameters,
         HttpContext context,
+        TimeProvider provider,
         ICubbyStore store,
         CancellationToken token)
     {
@@ -30,7 +31,7 @@ internal static class CubbyHttpEndpoints
 
         var buffer = ms.GetBuffer().AsSpan(0, (int)ms.Length).ToArray();
         
-        var results = store.Put(key, buffer, parameters.ToEntryOptions());
+        var results = store.Put(key, buffer, parameters.ToEntryOptions(provider));
 
         return results switch
         {

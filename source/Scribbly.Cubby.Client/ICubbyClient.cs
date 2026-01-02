@@ -15,7 +15,7 @@ public interface ICubbyClient
     /// <summary>
     /// Inserts or creates a new cached record.
     /// </summary>
-    ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default);
+    ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options = null, CancellationToken token = default);
     
     /// <summary>
     /// Inserts or creates a serialized object
@@ -23,7 +23,7 @@ public interface ICubbyClient
     /// <remarks>
     ///     Data will be serialized using the select serializer.
     /// </remarks>
-    ValueTask<PutResult> PutObject<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default) where T : notnull;
+    ValueTask<PutResult> PutObject<T>(BytesKey key, T value, CacheEntryOptions? options = null, CancellationToken token = default) where T : notnull;
     
     /// <summary>
     /// Gets data from the cache for a specific key

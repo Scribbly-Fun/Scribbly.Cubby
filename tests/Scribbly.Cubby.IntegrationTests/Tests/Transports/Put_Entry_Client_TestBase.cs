@@ -22,7 +22,7 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         using var scope = application.Services.CreateScope();
         var client = scope.ServiceProvider.GetRequiredService<ICubbyClient>();
         
-        var result = await client.Put(key, array, new CacheEntryOptions(), CancellationToken.None);
+        var result = await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
 
         result.Should().Be(PutResult.Created);
     }
@@ -42,7 +42,7 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         var client = scope.ServiceProvider.GetRequiredService<ICubbyClient>();
         var store = scope.ServiceProvider.GetRequiredService<ICubbyStore>();
 
-        await client.Put(key, array, new CacheEntryOptions(), CancellationToken.None);
+        await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
         
         store.Get(key).ToArray().Should().BeEquivalentTo(array);
     }
@@ -61,9 +61,9 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         using var scope = application.Services.CreateScope();
         var client = scope.ServiceProvider.GetRequiredService<ICubbyClient>();
         
-        await client.Put(key, array, new CacheEntryOptions(), CancellationToken.None);
+        await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
         
-        var result = await client.Put(key, array, new CacheEntryOptions(), CancellationToken.None);
+        var result = await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
 
         result.Should().Be(PutResult.Updated);
     }
@@ -83,7 +83,7 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         var client = scope.ServiceProvider.GetRequiredService<ICubbyClient>();
         var store = scope.ServiceProvider.GetRequiredService<ICubbyStore>();
         
-        await client.Put(key, array, new CacheEntryOptions(), CancellationToken.None);
+        await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
 
         store.Get(key).ToArray().Should().BeEquivalentTo(array);
     }

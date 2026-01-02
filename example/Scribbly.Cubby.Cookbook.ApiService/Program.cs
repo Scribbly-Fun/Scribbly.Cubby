@@ -69,7 +69,7 @@ app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, [FromBo
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(key, item, CacheEntryOptions.None, token);
     
     watch.Stop();
 
@@ -98,7 +98,7 @@ app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [From
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(key, item, CacheEntryOptions.None, token);
     
     watch.Stop();
 
@@ -127,7 +127,7 @@ app.MapPost("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, [From
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(key, item, CacheEntryOptions.None, token);
     
     watch.Stop();
 

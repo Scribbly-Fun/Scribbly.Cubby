@@ -20,15 +20,17 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     }
 
     /// <inheritdoc />
-    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default)
+    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options, CancellationToken token = default)
     {
+        options ??= CacheEntryOptions.None;
+        
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
         using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}");
         request.Content = new ByteArrayContent(value.ToArray());
         request.Headers.Add(Headers.CubbyHeaderFlags, options.Flags.ToString());
         request.Headers.Add(Headers.CubbyHeaderEncoding, options.Encoding.ToString());
-        request.Headers.Add(Headers.CubbyHeaderExpiration, options.TimeToLive.ToString());
+        request.Headers.Add(Headers.CubbyHeaderExpiration, options.SlidingDuration.ToString());
 
         using var response = await client.SendAsync(request, token);
 

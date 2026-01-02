@@ -5,16 +5,29 @@ namespace Scribbly.Cubby.UnitTests.Entries.CacheEntryStruct_Tests;
 
 public class Entry_Header_Tests
 {
-    [Fact]
-    public void Header_Should_Be_16_Bytes()
+    [Theory]
+    [InlineData(20)]
+    [InlineData(123_661)]
+    [InlineData(99_987)]
+    [InlineData(1)]
+    public void Header_Should_Be_24_Bytes(int length)
     {
-        byte[] array = [1, 2, 3];
+        byte[] array = new byte[length + 1];
         
-        var entry = array.LayoutEntry(new CacheEntryOptions());
+        Random.Shared.NextBytes(array);
+
+        array[length] = 0xFF;
+        
+        var entry = array.LayoutEntry(CacheEntryOptions.None);
         
         var str = new CacheEntryStruct(entry);
 
-        str.Value.Length.Should().Be(3);
-        str.ValueMemory.Length.Should().Be(3);
+        var span = entry.AsSpan();
+        
+        var lastIndexOf = span.LastIndexOf((byte)0xFF) + 1;
+
+        var slice = span[..lastIndexOf];
+        
+        slice.ToArray().Length.Should().Be(str.ValueLength + 24);
     }
 }

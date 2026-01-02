@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace Scribbly.Cubby.Stores.Sharded;
 
@@ -79,6 +80,25 @@ internal sealed class RefStructConcurrentStore : ICubbyStore
     }
 
     /// <inheritdoc />
+    public RefreshResult Refresh(BytesKey key)
+    {
+        var shard = GetShard(key);
+        if (!shard.TryGetValue(key, out var entry))
+        {
+            return RefreshResult.Undefined;
+        }
+
+        var slice = new CacheEntryStruct(entry);
+
+        if (slice.Flags.HasFlag(CacheEntryFlags.Sliding))
+        {
+            slice.UpdateSlidingTime(TimeSpan.FromSeconds(1).Ticks);
+        }
+
+        return RefreshResult.NotSlidingEntry;
+    }
+
+    /// <inheritdoc />
     public EvictResult Evict(BytesKey key)
     {
         var shard = GetShard(key);
@@ -106,6 +126,7 @@ internal sealed class RefStructConcurrentStore : ICubbyStore
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ConcurrentDictionary<BytesKey, byte[]> GetShard(BytesKey key)
         => _shards[(key[0] & int.MaxValue) % _shards.Length];
 
