@@ -3,12 +3,12 @@
 
 ###
 
-GET {{container}}/cubby/my_key
+GET {{debug}}/cubby/my_key2
 Accept: application/json
 
 ###
 
-PUT {{container}}/cubby/my_key
+PUT {{debug}}/cubby/my_key3
 Content-Type: application/json
 
 {

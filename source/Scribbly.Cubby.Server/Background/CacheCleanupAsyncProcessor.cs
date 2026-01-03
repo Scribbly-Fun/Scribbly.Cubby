@@ -28,10 +28,15 @@ internal class CacheCleanupAsyncProcessor(
 {
     private TimeSpan _delay;
     
+    private CancellationTokenSource? _delayCts;
+    private readonly Lock _lock = new();
+    
     /// <inheritdoc />
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         _delay = CalculateDelay(optionsMonitor.CurrentValue.Cleanup);
+        
+        _delayCts = new CancellationTokenSource();
         
         optionsMonitor.OnChange(OptionsUpdated);
         return base.StartAsync(cancellationToken);
@@ -39,9 +44,16 @@ internal class CacheCleanupAsyncProcessor(
 
     private void OptionsUpdated(CubbyOptions options)
     {
-        _delay = CalculateDelay(options.Cleanup);
-        
-        logger.LogOptionsUpdated(_delay);
+        lock (_lock)
+        {
+            _delay = CalculateDelay(options.Cleanup);
+            
+            _delayCts?.Cancel();
+            _delayCts?.Dispose();
+            _delayCts = new CancellationTokenSource();
+
+            logger.LogOptionsUpdated(_delay);
+        }
     }
 
     /// <inheritdoc />
@@ -51,9 +63,26 @@ internal class CacheCleanupAsyncProcessor(
         
         while (!stoppingToken.IsCancellationRequested)
         {
+            CancellationToken delayToken;
+            
+            lock (_lock)
+            {
+                if (_delayCts is null)
+                    return;
+
+                delayToken = CancellationTokenSource
+                    .CreateLinkedTokenSource(stoppingToken, _delayCts.Token)
+                    .Token;
+            }
+            
             try
             {
-                await Task.Delay(_delay, stoppingToken);
+                await Task.Delay(_delay, delayToken);
+                
+                if (delayToken.IsCancellationRequested)
+                {
+                    continue;
+                }
 
                 if (logger.IsEnabled(LogLevel.Trace))
                 {
@@ -62,6 +91,10 @@ internal class CacheCleanupAsyncProcessor(
                 }
 
                 ClearExpiredCache();
+            }
+            catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
+            {
+                logger.LogWarning("Delay was updated, Resetting Loop");
             }
             catch (Exception e)
             {

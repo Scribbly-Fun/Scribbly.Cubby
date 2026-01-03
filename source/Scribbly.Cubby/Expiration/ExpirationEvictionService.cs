@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Scribbly.Cubby.Expiration;
 
@@ -6,7 +7,7 @@ namespace Scribbly.Cubby.Expiration;
 /// Queries a cache store for records marked for removal.
 /// </summary>
 /// <param name="store">The cubby store to query</param>
-internal class ExpirationEvictionService(ICubbyStoreEvictionInteraction store) : IExpirationEvictionService
+internal class ExpirationEvictionService(ILogger<IExpirationEvictionService> logger, ICubbyStoreEvictionInteraction store) : IExpirationEvictionService
 {
     private const long MaxTicks = TimeSpan.TicksPerMillisecond * 2;
     
@@ -24,6 +25,7 @@ internal class ExpirationEvictionService(ICubbyStoreEvictionInteraction store) :
     {
         if (store.ActiveWriters > 0 && Random.Shared.Next(4) != 0)
         {
+            logger.LogCleanupSkipped();
             return;
         }
         
@@ -37,12 +39,14 @@ internal class ExpirationEvictionService(ICubbyStoreEvictionInteraction store) :
             if ((++iterations & 0x3F) == 0 &&
                 Stopwatch.GetTimestamp() > deadline)
             {
+                logger.LogCleanupDeadline(iterations, deadline);
                 return;
             }
             
             if (dict.Value.IsTombstoneOrExpired(nowUtcTicks))
             {
                 store.TryEvict(dict.Key, out _);
+                logger.LogEntryCleared(dict.Key);
             }
         }
     }

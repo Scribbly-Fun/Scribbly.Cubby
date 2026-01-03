@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Expiration;
 using Scribbly.Cubby.Server.Background;
@@ -42,11 +43,12 @@ public static class HostApplicationBuilderExtensions
             {
                 cubbyBuilder.HostBuilder.Services.AddSingleton<IExpirationEvictionService>(sp =>
                 {
+                    var logger = sp.GetRequiredService<ILogger<IExpirationEvictionService>>();
                     var store = sp.GetRequiredService<ICubbyStore>();
 
                     return store is not ICubbyStoreEvictionInteraction interaction 
                         ? throw new InvalidOperationException("The supported store does not support Eviction interaction") 
-                        : new ExpirationEvictionService(interaction);
+                        : new ExpirationEvictionService(logger, interaction);
                 });
             }
             

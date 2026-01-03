@@ -10,9 +10,9 @@ internal static class CacheEntryExtensions
         {
             return CacheEntryOptions.From(
                 provider: provider,
-                flags: parameters.Flags,
+                flags: parameters.Flags ?? CacheEntryFlags.None,
                 expiration: parameters.Expiration,
-                encoding: CacheEntryEncoding.None
+                encoding: parameters.Encoding ?? CacheEntryEncoding.None
             );
         }
     }
