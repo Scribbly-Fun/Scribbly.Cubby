@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Expiration;
 using Scribbly.Cubby.Stores;
+using static System.TimeSpan;
 
 namespace Scribbly.Cubby.Server.Background;
 
@@ -13,48 +14,49 @@ internal class CacheCleanupAsyncProcessor(ILogger<CacheCleanupAsyncProcessor> lo
     {
         var delay = CalculateDelay(options.CurrentValue.CacheCleanupOptions);
 
+        logger.LogStartupMessage(delay, options.CurrentValue.Store);
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = provider.GetUtcNow();
-            if (delay == 0)
+            if (delay == MinValue)
             {
                 evictionService.CleanCacheStorage(now.UtcTicks);
+                continue;
             }
-            else
-            {
-                    
-            } 
+            await Task.Delay(delay, stoppingToken);
+            
+            logger.LogStartupMessage(delay, options.CurrentValue.Store);
+
+            evictionService.CleanCacheStorage(now.UtcTicks);
+            
+            delay = CalculateDelay(options.CurrentValue.CacheCleanupOptions);
         }
     }
 
-    private long CalculateDelay(CacheCleanupOptions cleanupOptions) =>
+    private static TimeSpan CalculateDelay(CacheCleanupOptions cleanupOptions) =>
         cleanupOptions switch
         {
             { Strategy: CacheCleanupOptions.AsyncStrategy.Hourly }
-                => CacheCleanupOptions.Hour,
+                => FromTicks(CacheCleanupOptions.Hour),
             { Strategy: CacheCleanupOptions.AsyncStrategy.Random }
-                => Random.Shared.NextInt64(CacheCleanupOptions.MinRandom, CacheCleanupOptions.MaxRandom),
+                => FromTicks(Random.Shared.NextInt64(CacheCleanupOptions.MinRandom, CacheCleanupOptions.MaxRandom)),
             { Strategy: CacheCleanupOptions.AsyncStrategy.Aggressive }
-                => 0,
+                => MinValue,
             _ => throw new InvalidOperationException("Background Service is Running with Strategy Disabled"),
         };
 }
 
 internal static partial class CacheCleanupAsyncLogger
 {
-    [LoggerMessage(EventId = 2000, Level = LogLevel.Information,Message = "Executing Heartbeat Processor Delay: {Interval} Quantity: {Agents}")]
-    public static partial void LogHeartbeatRun(
+    [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Starting Cache Cleanup Background Processor: {IntervalDelay} Store: {Store}")]
+    public static partial void LogStartupMessage(
         this ILogger logger,
-        TimeSpan interval,
-        int agents);
+        TimeSpan intervalDelay,
+        CubbyOptions.StoreType store);
 
-    [LoggerMessage(EventId = 2001, Level = LogLevel.Debug,Message = "Executing Heartbeat Processor {Heartbeat}")]
-    public static partial void LogHeartbeatQuery(
+    [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Executing Cache Cleanup Background Processor: {IntervalDelay}")]
+    public static partial void LogIterationMessage(
         this ILogger logger,
-        HeartbeatState heartbeat);
-
-    [LoggerMessage(EventId = 2002, Level = LogLevel.Debug, Message = "Calculated Heartbeat Processor {Reason}")]
-    public static partial void LogHeartbeatOutcome(
-        this ILogger logger,
-        HeartbeatState.Reason reason);
+        TimeSpan intervalDelay);
 }

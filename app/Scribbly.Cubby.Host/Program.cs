@@ -27,6 +27,8 @@ builder
         ops.Store = CubbyOptions.StoreType.RefStruct;
         ops.Capacity = int.MinValue;
         ops.Cores = Environment.ProcessorCount;
+
+        ops.CacheCleanupOptions.Strategy = CacheCleanupOptions.AsyncStrategy.Random;
     })
     .WithCubbyGrpcServer()
     .WithCubbyHttpServer();
