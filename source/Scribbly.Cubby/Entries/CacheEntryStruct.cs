@@ -46,7 +46,7 @@ public readonly ref struct CacheEntryStruct : ICacheEntry
     {
         _buffer = buffer;
     }
-
+    
     /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsExpired(long nowUtcTicks)

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Scribbly.Cubby.Expiration;
+using Scribbly.Cubby.Server.Background;
 using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Server;
@@ -39,6 +41,23 @@ public static class HostApplicationBuilderExtensions
             });
             
             hostBuilder.Services.TryAddSingleton(TimeProvider.System);
+
+            if (options.CacheCleanupOptions.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled)
+            {
+                hostBuilder.Services.AddSingleton<IExpirationEvictionService>(sp =>
+                {
+                    var store = sp.GetRequiredService<ICubbyStore>();
+
+                    return store is not ICubbyStoreEvictionInteraction interaction 
+                        ? throw new InvalidOperationException("The supported store does not support Eviction interaction") 
+                        : new ExpirationEvictionService(interaction);
+                });
+            }
+            
+            if (options.CacheCleanupOptions.Strategy is CacheCleanupOptions.AsyncStrategy.Disabled or CacheCleanupOptions.AsyncStrategy.Manual)
+            {
+                hostBuilder.Services.AddHostedService<CacheCleanupAsyncProcessor>();
+            }
             
             return cubbyBuilder;
         }

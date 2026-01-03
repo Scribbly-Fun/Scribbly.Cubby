@@ -4,7 +4,7 @@
 /// A common abstraction used by all cubby stores.
 /// Stores hold the cached values matched against keys.
 /// </summary>
-public interface ICubbyStore : IDisposable
+public interface ICubbyStore : ICubbyStoreEviction, IDisposable
 {
     /// <summary>
     /// True when the value exists.
@@ -42,13 +42,19 @@ public interface ICubbyStore : IDisposable
     /// </summary>
     /// <param name="key">The key used from the cache</param>
     RefreshResult Refresh(BytesKey key);
+}
 
+/// <summary>
+/// Evicts cache entries
+/// </summary>
+public interface ICubbyStoreEviction
+{
     /// <summary>
     /// removes the cached value
     /// </summary>
     /// <param name="key">The key</param>
     EvictResult Evict(BytesKey key);
-
+    
     /// <summary>
     /// removes the cached value
     /// </summary>

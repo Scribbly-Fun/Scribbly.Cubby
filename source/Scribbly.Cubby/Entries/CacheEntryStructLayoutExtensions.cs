@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby;
@@ -25,6 +26,33 @@ internal static class CacheEntryStructLayoutExtensions
             value.CopyTo(span[EntryLayout.HeaderSize..]);
 
             return buffer;
+        }
+    }
+
+    extension(byte[] cacheData)
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool IsTombstoneOrExpired(long nowUtcTicks)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(cacheData.Length, EntryLayout.HeaderSize);
+            
+            var span = cacheData.AsSpan(0, EntryLayout.HeaderSize);
+
+            var flags = (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(span[EntryLayout.FlagsPosition..]);
+
+            if ((flags & CacheEntryFlags.Tombstone) != 0)
+                return true;
+
+            var expiresAt = BinaryPrimitives.ReadInt64LittleEndian(span);
+
+            return expiresAt != 0 && expiresAt <= nowUtcTicks;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsExpired(long nowUtcTicks, ReadOnlySpan<byte> span)
+        {
+            var expiresAt = BinaryPrimitives.ReadInt64LittleEndian(span);
+            return expiresAt != 0 && expiresAt <= nowUtcTicks;
         }
     }
 }

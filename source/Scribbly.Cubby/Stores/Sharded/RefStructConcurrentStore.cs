@@ -1,18 +1,21 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using Scribbly.Cubby.Expiration;
 
 namespace Scribbly.Cubby.Stores.Sharded;
 
 /// <summary>
 /// A cache storage that uses arrays of concurrent dictionaries to improve multithreaded locking contention.
 /// </summary>
-internal sealed class RefStructConcurrentStore : ICubbyStore
+internal sealed class RefStructConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteraction
 {
     /// <summary>
     /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
     /// </summary>
     internal static RefStructConcurrentStore FromOptions(CubbyOptions options) => new(options);
+    
+    private int _activeWriters;
     
     private readonly ConcurrentDictionary<BytesKey, byte[]>[] _shards;
 
@@ -31,6 +34,25 @@ internal sealed class RefStructConcurrentStore : ICubbyStore
                 _shards[i] = new ConcurrentDictionary<BytesKey, byte[]>(
                     concurrencyLevel: Environment.ProcessorCount,
                     capacity: options.Capacity);
+            }
+        }
+    }
+    
+    /// <inheritdoc />
+    int ICubbyStoreEvictionInteraction.ActiveWriters
+        => Volatile.Read(ref _activeWriters);
+
+    /// <inheritdoc />
+    IEnumerable<KeyValuePair<BytesKey, byte[]>> ICubbyStoreIterator.Entries
+    {
+        get
+        {
+            foreach (var shard in _shards)
+            {
+                foreach (var kvp in shard)
+                {
+                    yield return kvp;
+                }
             }
         }
     }
@@ -62,40 +84,58 @@ internal sealed class RefStructConcurrentStore : ICubbyStore
     /// <inheritdoc />
     public PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
-        var shard = GetShard(key);
-        var buffer = value.LayoutEntry(options);
+        Interlocked.Increment(ref _activeWriters);
 
-        if (!shard.TryGetValue(key, out var existing))
+        try
         {
-            return shard.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
-        }
-        
-        if(shard.TryUpdate(key, buffer, existing))
-        {
-            ArrayPool<byte>.Shared.Return(existing, clearArray: false);
-            return PutResult.Updated;
-        }
+            var shard = GetShard(key);
+            var buffer = value.LayoutEntry(options);
 
-        return PutResult.Undefined;
+            if (!shard.TryGetValue(key, out var existing))
+            {
+                return shard.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
+            }
+            
+            if(shard.TryUpdate(key, buffer, existing))
+            {
+                ArrayPool<byte>.Shared.Return(existing, clearArray: false);
+                return PutResult.Updated;
+            }
+
+            return PutResult.Undefined;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
     }
 
     /// <inheritdoc />
     public RefreshResult Refresh(BytesKey key)
     {
-        var shard = GetShard(key);
-        if (!shard.TryGetValue(key, out var entry))
+        Interlocked.Increment(ref _activeWriters);
+
+        try
         {
-            return RefreshResult.Undefined;
+            var shard = GetShard(key);
+            if (!shard.TryGetValue(key, out var entry))
+            {
+                return RefreshResult.Undefined;
+            }
+
+            var slice = new CacheEntryStruct(entry);
+
+            if (slice.Flags.HasFlag(CacheEntryFlags.Sliding))
+            {
+                slice.UpdateSlidingTime(TimeSpan.FromSeconds(1).Ticks);
+            }
+
+            return RefreshResult.NotSlidingEntry;
         }
-
-        var slice = new CacheEntryStruct(entry);
-
-        if (slice.Flags.HasFlag(CacheEntryFlags.Sliding))
+        finally
         {
-            slice.UpdateSlidingTime(TimeSpan.FromSeconds(1).Ticks);
+            Interlocked.Decrement(ref _activeWriters);
         }
-
-        return RefreshResult.NotSlidingEntry;
     }
 
     /// <inheritdoc />

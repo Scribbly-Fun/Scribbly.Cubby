@@ -3,6 +3,7 @@
 [assembly: InternalsVisibleTo("Scribbly.Cubby.UnitTests")]
 [assembly: InternalsVisibleTo("Scribbly.Cubby.IntegrationTests")]
 [assembly: InternalsVisibleTo("Scribbly.Cubby.Cookbook.Tests")]
+[assembly: InternalsVisibleTo("Scribbly.Cubby.Server")]
 [assembly: InternalsVisibleTo("Scribbly.Cubby.Hosted")]
 [assembly: InternalsVisibleTo("Scribbly.Cubby.Benchmarks")]
 [assembly: InternalsVisibleTo("Scribbly.Cubby.MicrosoftHosting")]

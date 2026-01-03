@@ -122,7 +122,7 @@ public sealed record CacheEntryOptions
     /// <exception cref="ArgumentOutOfRangeException">The time is in the past</exception>
     public static CacheEntryOptions Absolute(TimeProvider provider, DateTimeOffset expirationTime, CacheEntryFlags flags = CacheEntryFlags.None, CacheEntryEncoding encoding = CacheEntryEncoding.None) 
         => Absolute(provider.GetUtcNow(), expirationTime, flags, encoding);
-
+    
     /// <summary>
     /// Creates an Absolute cache entry
     /// </summary>
@@ -143,7 +143,7 @@ public sealed record CacheEntryOptions
     /// <param name="encoding">Optional encoding information</param>
     /// <returns>A cache entry configuration</returns>
     /// <exception cref="ArgumentOutOfRangeException">The time is in the past</exception>
-    private static CacheEntryOptions Absolute(DateTimeOffset now, DateTimeOffset expirationTime, CacheEntryFlags flags = CacheEntryFlags.None, CacheEntryEncoding encoding = CacheEntryEncoding.None)
+    public static CacheEntryOptions Absolute(DateTimeOffset now, DateTimeOffset expirationTime, CacheEntryFlags flags = CacheEntryFlags.None, CacheEntryEncoding encoding = CacheEntryEncoding.None)
     {
         if (flags.HasFlag(CacheEntryFlags.Sliding))
         {
