@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace Scribbly.Cubby.Stores.LockFree;
 
+[Experimental("SCRB001", Message = "Not yet implemented")]
 [StructLayout(LayoutKind.Sequential)]
 internal struct Entry
 {

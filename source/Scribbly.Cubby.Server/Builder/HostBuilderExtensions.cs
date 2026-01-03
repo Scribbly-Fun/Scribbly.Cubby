@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Expiration;
 using Scribbly.Cubby.Server.Background;
 using Scribbly.Cubby.Stores;
@@ -25,26 +27,20 @@ public static class HostApplicationBuilderExtensions
         /// <returns>The configured host.</returns>
         public ICubbyServerBuilder AddCubbyServer(Action<CubbyOptions>? optionsCallback = null)
         {
-            var options = new CubbyOptions();
-        
-            optionsCallback?.Invoke(options);
-
-            hostBuilder.Services.AddSingleton(options);
-
-            var cubbyBuilder = new CubbyServerBuilder(options, hostBuilder);
+            var cubbyBuilder = hostBuilder.AddCubbyConfiguration(optionsCallback);
             
-            hostBuilder.Services.AddSingleton<ICubbyStore>(sp =>
+            cubbyBuilder.HostBuilder.Services.AddSingleton<ICubbyStore>(sp =>
             {
-                var ops = sp.GetRequiredService<CubbyOptions>();
+                var ops = sp.GetRequiredService<IOptions<CubbyOptions>>();
                 var factory = new CubbyStoreFactory();
-                return factory.CreateStore(ops);
+                return factory.CreateStore(ops.Value);
             });
             
-            hostBuilder.Services.TryAddSingleton(TimeProvider.System);
+            cubbyBuilder.HostBuilder.Services.TryAddSingleton(TimeProvider.System);
 
-            if (options.CacheCleanupOptions.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled)
+            if (cubbyBuilder.Options.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled)
             {
-                hostBuilder.Services.AddSingleton<IExpirationEvictionService>(sp =>
+                cubbyBuilder.HostBuilder.Services.AddSingleton<IExpirationEvictionService>(sp =>
                 {
                     var store = sp.GetRequiredService<ICubbyStore>();
 
@@ -54,12 +50,29 @@ public static class HostApplicationBuilderExtensions
                 });
             }
             
-            if (options.CacheCleanupOptions.Strategy is CacheCleanupOptions.AsyncStrategy.Disabled or CacheCleanupOptions.AsyncStrategy.Manual)
+            if (cubbyBuilder.Options.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled and not CacheCleanupOptions.AsyncStrategy.Manual)
             {
-                hostBuilder.Services.AddHostedService<CacheCleanupAsyncProcessor>();
+                cubbyBuilder.HostBuilder.Services.AddHostedService<CacheCleanupAsyncProcessor>();
             }
             
             return cubbyBuilder;
+        }
+
+        private CubbyServerBuilder AddCubbyConfiguration(Action<CubbyOptions>? optionsCallback = null)
+        {
+            var options = new CubbyOptions();
+
+            optionsCallback?.Invoke(options);
+
+            hostBuilder.Configuration
+                .GetSection(nameof(CubbyOptions))
+                .Bind(options);
+            
+            hostBuilder.Services
+                .AddOptions<CubbyOptions>()
+                .Bind(hostBuilder.Configuration.GetSection(nameof(CubbyOptions)));
+
+            return new CubbyServerBuilder(options, hostBuilder);
         }
     }
 }

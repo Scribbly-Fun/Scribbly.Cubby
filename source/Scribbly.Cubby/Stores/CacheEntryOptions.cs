@@ -9,24 +9,24 @@ public sealed record CacheEntryOptions
     /// The amount of time in ticks before the cache will expire.
     /// </summary>
     /// <remarks>This will remain as a zero value when the entry is absolute</remarks>
-    public long SlidingDuration { get; init; } = 0;
+    public long SlidingDuration { get; private init; }
     
     /// <summary>
     /// A specified expiration time.
     /// </summary>
     /// <remarks>The absolute time will be used to calculate and determine expiration.</remarks>
-    public long AbsoluteExpiration { get; init; } = 0;
+    public long AbsoluteExpiration { get; private init; }
 
     /// <summary>
     /// Stores an encoding value in the cache store.
     /// When stored this will allow the admin portal to display and parse the cached values.
     /// </summary>
-    public CacheEntryEncoding Encoding { get; init; } = CacheEntryEncoding.None;
+    public CacheEntryEncoding Encoding { get; private init; } = CacheEntryEncoding.None;
     
     /// <summary>
     /// 
     /// </summary>
-    public CacheEntryFlags Flags { get; init; } = CacheEntryFlags.None;
+    public CacheEntryFlags Flags { get; private init; } = CacheEntryFlags.None;
     
     private CacheEntryOptions()
     {
@@ -61,7 +61,7 @@ public sealed record CacheEntryOptions
     /// </summary>
     /// <param name="flags">Optional flags</param>
     /// <param name="encoding">Optional encoding</param>
-    /// <returns>When the flags includes sliding</returns>
+    /// <returns>When the flags include sliding</returns>
     /// <exception cref="InvalidOperationException"></exception>
     public static CacheEntryOptions Never(CacheEntryFlags flags = CacheEntryFlags.None, CacheEntryEncoding encoding = CacheEntryEncoding.None)
     {
@@ -175,9 +175,9 @@ public sealed record CacheEntryOptions
     public static implicit operator CacheEntryOptions(DateTimeOffset expiration) => Absolute(expiration);
 
     /// <summary>
-    /// Converts the flags to a never expiration entry
+    /// Converts the flags to a never expiring entry
     /// </summary>
     /// <param name="flags">The flags</param>
-    /// <returns>The never expiration entry</returns>
+    /// <returns>The never expiring entry</returns>
     public static implicit operator CacheEntryOptions(CacheEntryFlags flags) => Never(flags);
 }

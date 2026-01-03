@@ -16,7 +16,7 @@ if (useHttps)
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
-  // TODO: add all JSON context for admin APIs
+  // TODO: add all JSON context for admin APIs;
 });
 
 builder.Services.AddOpenApi();
@@ -24,11 +24,11 @@ builder.Services.AddOpenApi();
 builder
     .AddCubbyServer(ops =>
     {
-        ops.Store = CubbyOptions.StoreType.RefStruct;
-        ops.Capacity = int.MinValue;
+        ops.Store = CubbyOptions.StoreType.Sharded;
+        ops.Capacity = 2000;
         ops.Cores = Environment.ProcessorCount;
 
-        ops.CacheCleanupOptions.Strategy = CacheCleanupOptions.AsyncStrategy.Random;
+        ops.Cleanup.Strategy = CacheCleanupOptions.AsyncStrategy.Random;
     })
     .WithCubbyGrpcServer()
     .WithCubbyHttpServer();

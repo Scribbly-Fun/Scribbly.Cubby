@@ -27,8 +27,7 @@ public sealed class CubbyStoreFactory
     {
         return options switch
         {
-            { Store: CubbyOptions.StoreType.RefStruct } => RefStructConcurrentStore.FromOptions(options),
-            { Store: CubbyOptions.StoreType.Sharded } => ShardedConcurrentStore.FromOptions(options),
+            { Store: CubbyOptions.StoreType.Sharded } => SharedConcurrentStore.FromOptions(options),
             { Store: CubbyOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(options),
             
             _ => throw new ArgumentOutOfRangeException(nameof(options), options, null)

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Scribbly.Cubby.Stores;
 
@@ -19,11 +20,6 @@ public class CubbyOptions
     public enum StoreType
     {
         /// <summary>
-        /// A store that handles everything as stack allocated structs
-        /// </summary>
-        RefStruct,
-
-        /// <summary>
         /// The sharded store
         /// </summary>
         Sharded,
@@ -36,6 +32,7 @@ public class CubbyOptions
         /// <summary>
         /// The lock free store
         /// </summary>
+        [Experimental("SCRB003", Message = "Not yet implemented")]
         LockFree,
     }
     
@@ -46,13 +43,13 @@ public class CubbyOptions
     ///     For the time being this is being used to help benchmark and do regression testing.
     ///     Long term it may be beneficial
     /// </remarks>
-    public StoreType Store { get; set; } = StoreType.RefStruct;
+    public StoreType Store { get; set; } = StoreType.Sharded;
 
     /// <summary>
     ///     The total capacity of the cache store.
     ///     A micro optimization useful when the caller knows roughly how much stuff them plan to cache.
     /// </summary>
-    public int Capacity { get; set; } = int.MinValue;
+    public int Capacity { get; set; } = 0;
 
     /// <summary>
     ///     The number of CPUs to use.
@@ -63,7 +60,7 @@ public class CubbyOptions
     /// <summary>
     ///     Options to define how and when the cache is cleaned up.
     /// </summary>
-    public CacheCleanupOptions CacheCleanupOptions { get; set; } = new();
+    public CacheCleanupOptions Cleanup { get; set; } = new();
 }
 
 /// <summary>
@@ -72,6 +69,7 @@ public class CubbyOptions
 public sealed class CacheCleanupOptions
 {
     internal const long Hour = TimeSpan.TicksPerMinute * 60;
+    internal const long Aggressive = TimeSpan.TicksPerMillisecond * 250;
     internal const long MinRandom = TimeSpan.TicksPerMinute * 20;
     internal const long MaxRandom = TimeSpan.TicksPerHour * 3;
     
@@ -100,6 +98,10 @@ public sealed class CacheCleanupOptions
         /// </summary>
         Aggressive,
         /// <summary>
+        ///     Runs at the specified duration
+        /// </summary>
+        Duration,
+        /// <summary>
         ///     Only runs when manually triggered.
         /// </summary>
         Manual
@@ -112,4 +114,12 @@ public sealed class CacheCleanupOptions
     ///     Defaults to a randomness strategy
     /// </remarks>
     public AsyncStrategy Strategy { get; set; } = AsyncStrategy.Random;
+
+    /// <summary>
+    ///     A static duration used with the <see cref="AsyncStrategy"/> Duration option
+    /// </summary>
+    /// <remarks>
+    ///     This duration value will onl be honored when the strategy is set to Duration
+    /// </remarks>
+    public TimeSpan Delay { get; set; }
 }

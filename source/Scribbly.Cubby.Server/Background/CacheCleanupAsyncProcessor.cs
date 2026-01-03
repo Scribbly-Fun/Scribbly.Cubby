@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Expiration;
@@ -7,56 +8,101 @@ using static System.TimeSpan;
 
 namespace Scribbly.Cubby.Server.Background;
 
-internal class CacheCleanupAsyncProcessor(ILogger<CacheCleanupAsyncProcessor> logger, TimeProvider provider, IExpirationEvictionService evictionService, IOptionsMonitor<CubbyOptions> options) : BackgroundService
+/// <summary>
+/// An async background worker used to poll and revoke cache entries.
+/// </summary>
+/// <param name="logger">A logger used to log the status of the processor</param>
+/// <param name="provider">A time provider used to generate time queries.</param>
+/// <param name="evictionService">A class responsible for clearing and querying the cache</param>
+/// <param name="optionsMonitor">Options that can be updated at runtime.</param>
+/// <remarks>
+///     The cubby options are utilized to create several different strategies for cache revoking and memory cleanup.
+///     Each configuration should be tested for your specific use case.
+///     Exessive cleanup could cause locking contentions, while infrequent clean up could impact GC pressure.
+/// </remarks>
+internal class CacheCleanupAsyncProcessor(
+    ILogger<CacheCleanupAsyncProcessor> logger, 
+    TimeProvider provider, 
+    IExpirationEvictionService evictionService, 
+    IOptionsMonitor<CubbyOptions> optionsMonitor) : BackgroundService
 {
+    private TimeSpan _delay;
+    
+    /// <inheritdoc />
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        _delay = CalculateDelay(optionsMonitor.CurrentValue.Cleanup);
+        
+        optionsMonitor.OnChange(OptionsUpdated);
+        return base.StartAsync(cancellationToken);
+    }
+
+    private void OptionsUpdated(CubbyOptions options)
+    {
+        _delay = CalculateDelay(options.Cleanup);
+        
+        logger.LogOptionsUpdated(_delay);
+    }
+
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var delay = CalculateDelay(options.CurrentValue.CacheCleanupOptions);
-
-        logger.LogStartupMessage(delay, options.CurrentValue.Store);
+        logger.LogStartupMessage(optionsMonitor.CurrentValue.Store, _delay);
         
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = provider.GetUtcNow();
-            if (delay == MinValue)
+            try
             {
-                evictionService.CleanCacheStorage(now.UtcTicks);
-                continue;
-            }
-            await Task.Delay(delay, stoppingToken);
-            
-            logger.LogStartupMessage(delay, options.CurrentValue.Store);
+                await Task.Delay(_delay, stoppingToken);
 
-            evictionService.CleanCacheStorage(now.UtcTicks);
-            
-            delay = CalculateDelay(options.CurrentValue.CacheCleanupOptions);
+                if (logger.IsEnabled(LogLevel.Trace))
+                {
+                    ClearExpiredCacheAndTrace();
+                    continue;
+                }
+
+                ClearExpiredCache();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Cache Background Processor Encountered an Unhandled Error");
+            }
         }
     }
 
+    private void ClearExpiredCacheAndTrace()
+    {
+        var watch = Stopwatch.StartNew();
+        var now = provider.GetUtcNow();
+                
+        evictionService.CleanCacheStorage(now.UtcTicks);
+        
+        watch.Stop();
+        
+        logger.LogIterationMessage(_delay, watch.Elapsed);
+    }
+    
+    private void ClearExpiredCache()
+    {
+        var now = provider.GetUtcNow();
+        evictionService.CleanCacheStorage(now.UtcTicks);
+    }
+    
     private static TimeSpan CalculateDelay(CacheCleanupOptions cleanupOptions) =>
         cleanupOptions switch
         {
             { Strategy: CacheCleanupOptions.AsyncStrategy.Hourly }
                 => FromTicks(CacheCleanupOptions.Hour),
+            
             { Strategy: CacheCleanupOptions.AsyncStrategy.Random }
                 => FromTicks(Random.Shared.NextInt64(CacheCleanupOptions.MinRandom, CacheCleanupOptions.MaxRandom)),
+            
             { Strategy: CacheCleanupOptions.AsyncStrategy.Aggressive }
-                => MinValue,
+                => FromTicks(CacheCleanupOptions.Aggressive),
+
+            { Strategy: CacheCleanupOptions.AsyncStrategy.Duration }
+                => cleanupOptions.Delay,
+            
             _ => throw new InvalidOperationException("Background Service is Running with Strategy Disabled"),
         };
-}
-
-internal static partial class CacheCleanupAsyncLogger
-{
-    [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Starting Cache Cleanup Background Processor: {IntervalDelay} Store: {Store}")]
-    public static partial void LogStartupMessage(
-        this ILogger logger,
-        TimeSpan intervalDelay,
-        CubbyOptions.StoreType store);
-
-    [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Executing Cache Cleanup Background Processor: {IntervalDelay}")]
-    public static partial void LogIterationMessage(
-        this ILogger logger,
-        TimeSpan intervalDelay);
 }
