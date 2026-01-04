@@ -13,6 +13,12 @@ public interface ICacheEntry
     long ExpirationUtcTicks { get; }
     
     /// <summary>
+    /// The sliding duration value.
+    /// Will be Zero when an absolute expiration has been set
+    /// </summary>
+    long DurationUtcTicks { get; }
+    
+    /// <summary>
     /// True when the cache will never expire
     /// </summary>
     bool NeverExpires => ExpirationUtcTicks == 0;

@@ -6,6 +6,7 @@ namespace Scribbly.Cubby.Expiration;
 /// <summary>
 /// Queries a cache store for records marked for removal.
 /// </summary>
+/// <param name="logger">A logger to log all evictions</param>
 /// <param name="store">The cubby store to query</param>
 internal class ExpirationEvictionService(ILogger<IExpirationEvictionService> logger, ICubbyStoreEvictionInteraction store) : IExpirationEvictionService
 {
@@ -45,8 +46,8 @@ internal class ExpirationEvictionService(ILogger<IExpirationEvictionService> log
             
             if (dict.Value.IsTombstoneOrExpired(nowUtcTicks))
             {
-                store.TryEvict(dict.Key, out _);
-                logger.LogEntryCleared(dict.Key);
+                var eviction = store.Evict(dict.Key);
+                logger.LogEntryCleared(dict.Key, eviction);
             }
         }
     }

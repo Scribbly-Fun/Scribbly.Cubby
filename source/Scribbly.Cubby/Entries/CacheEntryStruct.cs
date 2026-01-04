@@ -4,7 +4,8 @@ using System.Runtime.CompilerServices;
 namespace Scribbly.Cubby;
 
 /// <summary>
-/// A ref struct used to align the bytes in the buffer stored in a cache store
+/// A ref struct used to align the bytes in the buffer stored in a cache store.
+/// Essentially a parsing wrapper for the byte buffer stored in the cache.
 /// </summary>
 public readonly ref struct CacheEntryStruct : ICacheEntry
 {
@@ -13,6 +14,10 @@ public readonly ref struct CacheEntryStruct : ICacheEntry
     /// <inheritdoc />
     public long ExpirationUtcTicks
         => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
+
+    /// <inheritdoc />
+    public long DurationUtcTicks
+        => BinaryPrimitives.ReadInt64LittleEndian(_buffer.AsSpan(EntryLayout.DurationPosition));
 
     /// <inheritdoc />
     public bool NeverExpires
@@ -58,11 +63,11 @@ public readonly ref struct CacheEntryStruct : ICacheEntry
     /// <summary>
     /// Updates the sliding time stored in the internal buffer
     /// </summary>
-    /// <param name="time">Timespan in Ticks</param>
-    public void UpdateSlidingTime(long time)
+    public void UpdateSlidingTime()
     {
         var span = _buffer.AsSpan();
-        BinaryPrimitives.WriteInt64LittleEndian(span, time);
+        var duration = BinaryPrimitives.ReadInt64LittleEndian(span.Slice(EntryLayout.DurationPosition, 8));
+        BinaryPrimitives.WriteInt64LittleEndian(span, duration);
     }
     
     /// <summary>

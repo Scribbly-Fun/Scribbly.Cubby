@@ -54,13 +54,6 @@ public interface ICubbyStoreEviction
     /// </summary>
     /// <param name="key">The key</param>
     EvictResult Evict(BytesKey key);
-    
-    /// <summary>
-    /// removes the cached value
-    /// </summary>
-    /// <param name="key">The key</param>
-    /// <param name="result"></param>
-    bool TryEvict(BytesKey key, out EvictResult result);
 }
 
 /// <summary>

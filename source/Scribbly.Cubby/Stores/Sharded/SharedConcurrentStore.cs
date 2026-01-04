@@ -10,17 +10,21 @@ namespace Scribbly.Cubby.Stores.Sharded;
 /// </summary>
 internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteraction
 {
+    private readonly TimeProvider _provider;
+
     /// <summary>
     /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
     /// </summary>
-    internal static SharedConcurrentStore FromOptions(CubbyOptions options) => new(options);
+    internal static SharedConcurrentStore FromOptions(CubbyOptions options, TimeProvider provider)
+        => new(options, provider);
     
     private int _activeWriters;
     
     private readonly ConcurrentDictionary<BytesKey, byte[]>[] _shards;
 
-    private SharedConcurrentStore(CubbyOptions options)
+    private SharedConcurrentStore(CubbyOptions options, TimeProvider provider)
     {
+        _provider = provider;
         _shards = new ConcurrentDictionary<BytesKey, byte[]>[options.Cores];
         
         for (var i = 0; i < options.Cores; i++)
@@ -63,22 +67,94 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
     /// <inheritdoc />
     public ReadOnlyMemory<byte> Get(BytesKey key)
     {
-        var shared = GetShard(key)[key];
-        return new CacheEntryStruct(shared).ValueMemory;
+        Interlocked.Increment(ref _activeWriters);
+        
+        try
+        {
+            ConcurrentDictionary<BytesKey, byte[]> shard = GetShard(key);
+        
+            var entry = shard[key];
+
+            var header = entry.GetHeader();
+            var flags = header.GetFlags();
+
+            if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+            {
+                return null;
+            }
+        
+            if (header.IsNeverExpiringEntry(out var expirationTicks))
+            {
+                return entry;
+            }
+
+            var now = _provider.GetUtcNow().UtcTicks;
+            if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+            {
+                return null;
+            }
+
+            if (flags.IsSliding())
+            {
+                header.UpdateSlidingTime(now);
+            }
+        
+            return entry;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
     }
 
     /// <inheritdoc />
     public bool TryGet(BytesKey key, out ReadOnlySpan<byte> value)
     {
-        var shard = GetShard(key);
-        if (!shard.TryGetValue(key, out var entry))
+        Interlocked.Increment(ref _activeWriters);
+        
+        try
         {
-            value = null;
-            return false;
-        }
+            var shard = GetShard(key);
+            if (!shard.TryGetValue(key, out var entry))
+            {
+                value = null;
+                return false;
+            }
 
-        value = new CacheEntryStruct(entry).Value;
-        return true;
+            var header = entry.GetHeader();
+            var flags = header.GetFlags();
+
+            if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+            {
+                value = null;
+                return false;
+            }
+        
+            if (header.IsNeverExpiringEntry(out var expirationTicks))
+            {
+                value = entry;
+                return true;
+            }
+
+            var now = _provider.GetUtcNow().UtcTicks;
+            if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+            {
+                value = null;
+                return false;
+            }
+
+            if (flags.IsSliding())
+            {
+                header.UpdateSlidingTime(now);
+            }
+        
+            value = entry;
+            return true;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
     }
     
     /// <inheritdoc />
@@ -94,6 +170,13 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
             if (!shard.TryGetValue(key, out var existing))
             {
                 return shard.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
+            }
+            
+            var header = existing.GetHeader();
+            if (header.IsSlidingEntry())
+            {
+                var now = _provider.GetUtcNow().UtcTicks;
+                header.UpdateSlidingTime(now);
             }
             
             if(shard.TryUpdate(key, buffer, existing))
@@ -123,11 +206,13 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
                 return RefreshResult.Undefined;
             }
 
-            var slice = new CacheEntryStruct(entry);
+            var header = entry.GetHeader();
 
-            if (slice.Flags.HasFlag(CacheEntryFlags.Sliding))
+            if (header.IsSlidingEntry())
             {
-                slice.UpdateSlidingTime(TimeSpan.FromSeconds(1).Ticks);
+                var now = _provider.GetUtcNow().UtcTicks;
+                header.UpdateSlidingTime(now);
+                return RefreshResult.Updated;
             }
 
             return RefreshResult.NotSlidingEntry;
@@ -139,33 +224,8 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
     }
 
     /// <inheritdoc />
-    public EvictResult Evict(BytesKey key)
-    {
-        var shard = GetShard(key);
-        if (shard.TryRemove(key, out var entry))
-        {
-            ArrayPool<byte>.Shared.Return(entry, clearArray: false);
-            return EvictResult.Removed;
-        }
-
-        return EvictResult.Unknown;
-    }
+    public EvictResult Evict(BytesKey key) => GetShard(key).TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
     
-    /// <inheritdoc />
-    public bool TryEvict(BytesKey key, out EvictResult result)
-    {
-        var shard = GetShard(key);
-        if (!shard.TryRemove(key, out var entry))
-        {
-            result = EvictResult.Unknown;
-            return false;
-        }
-        
-        ArrayPool<byte>.Shared.Return(entry, clearArray: false);
-        result = EvictResult.Removed;
-        return true;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ConcurrentDictionary<BytesKey, byte[]> GetShard(BytesKey key)
         => _shards[(key[0] & int.MaxValue) % _shards.Length];
@@ -181,6 +241,24 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
             }
 
             shard.Clear();
+        }
+    }
+}
+
+internal static class DictionaryExtensions
+{
+    extension(ConcurrentDictionary<BytesKey, byte[]> dictionary)
+    {
+        internal bool TryRemoveRentedArray(BytesKey key)
+        {
+            if (!dictionary.TryRemove(key, out var entry))
+            {
+                return false;
+            }
+            
+            ArrayPool<byte>.Shared.Return(entry, clearArray: false);
+            return true;
+
         }
     }
 }

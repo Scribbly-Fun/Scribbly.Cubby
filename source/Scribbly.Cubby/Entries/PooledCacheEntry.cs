@@ -19,6 +19,10 @@ public sealed class PooledCacheEntry : ICacheEntry, IDisposable
         => BinaryPrimitives.ReadInt64LittleEndian(_buffer);
 
     /// <inheritdoc />
+    public long DurationUtcTicks 
+        => BinaryPrimitives.ReadInt64LittleEndian(_buffer.AsSpan(EntryLayout.DurationPosition));
+
+    /// <inheritdoc />
     public int ValueLength 
         => BinaryPrimitives.ReadInt32LittleEndian(_buffer.AsSpan(EntryLayout.ValueLengthPosition));
 

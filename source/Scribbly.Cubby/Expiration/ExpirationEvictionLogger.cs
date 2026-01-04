@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using Scribbly.Cubby.Stores;
 
-namespace Scribbly.Cubby.Expiration;
+// ReSharper disable once CheckNamespace
+namespace Scribbly.Cubby;
 
 internal static partial class ExpirationEvictionLogger
 {
@@ -23,8 +25,9 @@ internal static partial class ExpirationEvictionLogger
     [LoggerMessage(
         EventId = 10_103, 
         Level = LogLevel.Trace, 
-        Message = "Detected Expired Cache {Key}, Removing")]
+        Message = "Detected Expired Cache {Key}, Result: {EvictionResult}")]
     internal static partial void LogEntryCleared(
         this ILogger logger,
-        BytesKey key);
+        BytesKey key,
+        EvictResult evictionResult);
 }
