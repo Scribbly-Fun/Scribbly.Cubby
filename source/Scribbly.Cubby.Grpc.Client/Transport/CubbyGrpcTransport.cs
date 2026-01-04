@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Proto;
 using Scribbly.Cubby.Stores;
 using PutResult = Scribbly.Cubby.Stores.PutResult;
@@ -40,14 +41,20 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
     }
 
     /// <inheritdoc />
-    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default)
     {
         var entry = await client.GetAsync(new GetRequest
         {
             Key = ByteString.CopyFromUtf8(key)
             
         }, cancellationToken: token);
-        
-        return entry?.Value.ToByteArray() ?? [];
+
+        return new EntryResponse
+        {
+            Flags = (CacheEntryFlags)entry.Flags,
+            Encoding = (CacheEntryEncoding)entry.Encoding,
+            Expiration = entry.Expiration,
+            Value = entry.Value.ToByteArray() ?? []
+        };
     }
 }

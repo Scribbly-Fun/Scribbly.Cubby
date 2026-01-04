@@ -4,7 +4,16 @@
 /// Options used when serializing.
 /// </summary>
 /// <param name="Compression">Compression options.</param>
-public readonly record struct SerializerOptions(SerializerCompression Compression = SerializerCompression.None);
+public readonly record struct SerializerOptions(SerializerCompression Compression = SerializerCompression.None)
+{
+    /// <summary>
+    /// Creates a new instance with the compression specification.
+    /// </summary>
+    /// <param name="compress">Compressed or not compressed</param>
+    /// <returns>The options</returns>
+    public static implicit operator SerializerOptions(SerializerCompression compress) 
+        => new SerializerOptions(compress);
+}
 
 /// <summary>
 /// Tells the serializer to compress the data before sending it to the cache

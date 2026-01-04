@@ -5,7 +5,11 @@ using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Client;
 
-internal class CubbyClient(ICubbyStoreTransport store, ICubbySerializer serializer) : ICubbyClient
+internal class CubbyClient(
+    ICubbyStoreTransport store, 
+    ICubbySerializer serializer, 
+    ICubbyCompressor compressor) 
+    : ICubbyClient
 {
     /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -33,9 +37,16 @@ internal class CubbyClient(ICubbyStoreTransport store, ICubbySerializer serializ
 
     /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
-        return store.Get(key, token);
+        var entry = await store.Get(key, token);
+        
+        if ((entry.Flags & CacheEntryFlags.Compressed) != 0)
+        {
+            return compressor.Decompress(entry.Value.Span).ToArray();
+        }
+        
+        return entry.Value;
     }
 
     /// <inheritdoc />
@@ -43,10 +54,15 @@ internal class CubbyClient(ICubbyStoreTransport store, ICubbySerializer serializ
     public async ValueTask<T> GetObject<T>(BytesKey key, CancellationToken token = default)
         where T : notnull
     {
-        var data = await store.Get(key, token);
+        var entry = await store.Get(key, token);
 
-        var value = serializer.Deserialize<T>(data.Span);
+        if ((entry.Flags & CacheEntryFlags.Compressed) != 0)
+        {
+            return serializer.Deserialize<T>(entry.Value.Span, SerializerCompression.Compress) 
+                   ?? throw new SerializationException("Failed to convert the stored bytes to the requested object");
+        }
         
-        return value ?? throw new SerializationException("Failed to convert the stored bytes to the requested object");
+        return serializer.Deserialize<T>(entry.Value.Span) 
+               ?? throw new SerializationException("Failed to convert the stored bytes to the requested object");
     }
 }

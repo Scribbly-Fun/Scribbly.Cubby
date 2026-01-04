@@ -23,6 +23,18 @@ message GetResponse {
   * The value returned from the cache
   */
   bytes value = 2;
+  /**
+  * The flags for the located cache entry
+  */
+  optional int32 flags = 3;
+  /**
+  * The encoding for the current entry
+  */
+  optional int32 encoding = 4;
+  /**
+  * The expiration for the current entry
+  */
+  optional int64 expiration = 5;
 }
 
 /**

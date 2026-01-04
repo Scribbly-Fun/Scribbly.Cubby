@@ -20,10 +20,14 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
 
         if (store.TryGet(key, out var value))
         {
+            var header = value.GetHeader();
             return Task.FromResult(new GetResponse
             {
                 Found = true,
-                Value = ByteString.CopyFrom(value)
+                Value = ByteString.CopyFrom(value),
+                Flags = (short)header.GetFlags(),
+                Encoding = (short)header.GetEncoding(),
+                Expiration = header.GetExpiration()
             });
         }
 

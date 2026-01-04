@@ -1,19 +1,41 @@
-﻿using System.Buffers;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Endpoints;
 
+internal static class HttpResponseHeaderExtensions
+{
+    extension(HttpResponse response)
+    {
+        internal void ApplyCubbyResponseHeaders(ReadOnlySpan<byte> buffer)
+        {
+            var header = buffer.GetHeader();
+
+            response.Headers[Headers.CubbyHeaderFlags] = header.GetFlags().ToFlagsString();
+            response.Headers[Headers.CubbyHeaderEncoding] = header.GetEncoding().ToEncodingString();
+            response.Headers[Headers.CubbyHeaderExpiration] = header.GetExpiration().ToString();
+        }
+    }
+}
+
 internal static class CubbyHttpEndpoints
 {
     internal static IResult Get(
         [FromRoute] string key, 
+        HttpContext context,
         ICubbyStore store)
     {
-        return store.TryGet(key, out var value) 
-            ? Results.Bytes(value.ToArray()) 
-            : Results.NoContent();
+        if (!store.TryGet(key, out var entry))
+        {
+            return Results.NoContent();
+        }
+        
+        var header = entry.GetHeader();
+        var value = entry.GetValue();
+        context.Response.ApplyCubbyResponseHeaders(header);
+            
+        return Results.Bytes(value.ToArray());
     }
     
     internal static async Task<IResult> Put(
