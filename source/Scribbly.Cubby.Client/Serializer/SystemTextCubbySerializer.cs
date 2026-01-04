@@ -5,29 +5,21 @@ namespace Scribbly.Cubby.Client.Serializer;
 /// <summary>
 /// A System.Text.Json serializer for the Cubby cache client.
 /// </summary>
-internal sealed class SystemTextCubbySerializer(JsonSerializerOptions jsonOptions, ICubbyCompressor compressor) : ICubbySerializer
+internal sealed class SystemTextCubbySerializer(JsonSerializerOptions jsonOptions) : ICubbySerializer
 {
     /// <inheritdoc />
+#pragma warning disable SCRB011
     public ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull
+#pragma warning restore SCRB011
     {
-        if (options.Compression != SerializerCompression.Compress)
-        {
-            return JsonSerializer.SerializeToUtf8Bytes<T>(value, jsonOptions);
-        }
-        
-        var source = JsonSerializer.SerializeToUtf8Bytes<T>(value, jsonOptions);
-        return compressor.Compress(source);
+        return JsonSerializer.SerializeToUtf8Bytes<T>(value, jsonOptions);
     }
 
     /// <inheritdoc />
+#pragma warning disable SCRB011
     public T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull
+#pragma warning restore SCRB011
     {
-        if (options.Compression != SerializerCompression.Compress)
-        {
-            return JsonSerializer.Deserialize<T>(data, jsonOptions);
-        }
-
-        var decompressed = compressor.Decompress(data);
-        return JsonSerializer.Deserialize<T>(decompressed, jsonOptions);
+        return JsonSerializer.Deserialize<T>(data, jsonOptions);
     }
 }

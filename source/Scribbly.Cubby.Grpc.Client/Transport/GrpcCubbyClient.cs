@@ -5,7 +5,7 @@ namespace Scribbly.Cubby;
 
 /// <remarks>This is used when multiple transports are configured in a single application.</remarks>
 internal sealed class GrpcCubbyClient(
-    IGrpcCubbyStoreTransport store, 
+    IGrpcCubbyStoreTransport transport, 
     ICubbySerializer serializer,
     ICubbyCompressor compressor) 
-    : CubbyClient(store, serializer, compressor), IGrpcCubbyClient;
+    : CubbyClient(transport, serializer, compressor), IGrpcCubbyClient;

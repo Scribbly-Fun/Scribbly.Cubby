@@ -2,7 +2,7 @@ using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Endpoints;
 
-internal static class CacheEntryExtensions
+internal static class HttpCacheParametersExtensions
 {
     extension(CacheParameters parameters)
     {
