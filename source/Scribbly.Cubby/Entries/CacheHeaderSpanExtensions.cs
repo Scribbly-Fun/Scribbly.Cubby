@@ -29,17 +29,10 @@ public static class CacheHeaderSpanExtensions
             return cacheSpan[..EntryLayout.HeaderSize];
         }
 
-        /// <summary>
-        /// Gets the value stored in the buffer.
-        /// </summary>
-        /// <returns>The header as a span</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Span<byte> GetValue()
-        {
-            var length = BinaryPrimitives.ReadInt32LittleEndian(cacheSpan[EntryLayout.ValueLengthPosition..]);
-            return cacheSpan.Slice(EntryLayout.HeaderSize, length);
-        }
-        
+        internal int GetValueLength() 
+            => BinaryPrimitives.ReadInt32LittleEndian(cacheSpan[EntryLayout.ValueLengthPosition..]);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal CacheEntryFlags GetFlags() => 
             (CacheEntryFlags)BinaryPrimitives.ReadInt16LittleEndian(cacheSpan[EntryLayout.FlagsPosition..]);
