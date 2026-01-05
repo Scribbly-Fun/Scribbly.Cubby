@@ -23,8 +23,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Entries\FlagExtension_Tests\" />
-  </ItemGroup>
-
 </Project>
