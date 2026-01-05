@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Scribbly.Cubby.Client.Serializer;
 using Scribbly.Cubby.Stores;
@@ -31,6 +32,8 @@ internal class CubbyClient(
     }
 
     /// <inheritdoc />
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Serialize<T>(T, SerializerOptions)")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Serialize<T>(T, SerializerOptions)")]
     public async ValueTask<PutResult> PutObject<T>(BytesKey key, T value, CacheEntryOptions? options, CancellationToken token = default)
         where T : notnull
     {
@@ -84,6 +87,9 @@ internal class CubbyClient(
     }
 
     /// <inheritdoc />
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
     public async ValueTask<EntryResponse<T>> GetObject<T>(BytesKey key, CancellationToken token = default)
         where T : notnull
     {

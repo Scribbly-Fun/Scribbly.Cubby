@@ -1,4 +1,7 @@
-﻿namespace Scribbly.Cubby.Client.Serializer;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Scribbly.Cubby.Client.Serializer;
+#pragma warning disable SCRB011
 
 /// <summary>
 /// Abstract used to serialize data in and out of the cache.
@@ -12,9 +15,9 @@ public interface ICubbySerializer
     /// <param name="options">Options to configure how the data will be encoded.</param>
     /// <typeparam name="T">The type to encode</typeparam>
     /// <returns>A readonly byte array of data representing the object serialized.</returns>
-#pragma warning disable SCRB011
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.SerializeToUtf8Bytes<TValue>(TValue, JsonSerializerOptions)")]
+    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.SerializeToUtf8Bytes<TValue>(TValue, JsonSerializerOptions)")]
     ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull;
-#pragma warning restore SCRB011
 
     /// <summary>
     /// Deserializes data with optional configuration from the stored value in the cubby cache store.
@@ -23,7 +26,8 @@ public interface ICubbySerializer
     /// <param name="options">Options to configure how the data will be encoded.</param>
     /// <typeparam name="T">The type to decode</typeparam>
     /// <returns>A materialized type from the stored bytes</returns>
-#pragma warning disable SCRB011
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.SerializeToUtf8Bytes<TValue>(TValue, JsonSerializerOptions)")]
+    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.SerializeToUtf8Bytes<TValue>(TValue, JsonSerializerOptions)")]
     T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull;
-#pragma warning restore SCRB011
 }
+#pragma warning restore SCRB011

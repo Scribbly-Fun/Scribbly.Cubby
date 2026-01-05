@@ -1,8 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using MessagePack;
 using Scribbly.Cubby.Client.Serializer;
 
 namespace Scribbly.Cubby.MessagePack;
+#pragma warning disable SCRB011
 
 /// <summary>
 /// Serializes data using the Message Pack Protocol
@@ -10,20 +12,19 @@ namespace Scribbly.Cubby.MessagePack;
 public class MessagePackCubbySerializer(MessagePackSerializerOptions messagePackOptions) : ICubbySerializer
 {
     /// <inheritdoc />
-#pragma warning disable SCRB011
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [RequiresUnreferencedCode("May invoke serialize with unregistered type.  Ensure cubby configuration supports AOT")]
     public ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull
-#pragma warning restore SCRB011
     {
         return MessagePackSerializer.Serialize<T>(value, messagePackOptions);
     }
 
     /// <inheritdoc />
-#pragma warning disable SCRB011
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [RequiresUnreferencedCode("May invoke serialize with unregistered type.  Ensure cubby configuration supports AOT")]
     public T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull
-#pragma warning restore SCRB011
     {
         return MessagePackSerializer.Deserialize<T>(data.ToArray(), messagePackOptions);
     }
 }
+#pragma warning restore SCRB011

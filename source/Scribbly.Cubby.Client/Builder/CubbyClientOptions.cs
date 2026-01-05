@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Scribbly.Cubby.Client.Serializer;
@@ -8,6 +9,8 @@ namespace Scribbly.Cubby.Client;
 /// <summary>
 /// Options used to setup the client.
 /// </summary>
+[RequiresUnreferencedCode("May invoke serialize with unregistered type.  Ensure cubby configuration supports AOT")]
+[RequiresDynamicCode("May invoke serialize with unregistered type.  Ensure cubby configuration supports AOT")]
 public class CubbyClientOptions
 {
     internal ICubbySerializer Serializer { get; private set; } 
