@@ -98,7 +98,8 @@ internal class CacheCleanupAsyncProcessor(
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Cache Background Processor Encountered an Unhandled Error");
+                logger.LogCritical(e, "Cache Background Processor Encountered an Unhandled Error");
+                throw;
             }
         }
     }
