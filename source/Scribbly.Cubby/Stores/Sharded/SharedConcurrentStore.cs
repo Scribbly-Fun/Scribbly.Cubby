@@ -29,16 +29,11 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
         
         for (var i = 0; i < options.Cores; i++)
         {
-            if (options.Capacity == int.MinValue)
-            {
-                _shards[i] = new ConcurrentDictionary<BytesKey, byte[]>();
-            }
-            else
-            {
-                _shards[i] = new ConcurrentDictionary<BytesKey, byte[]>(
+            _shards[i] = options.Capacity == int.MinValue
+                ? new ConcurrentDictionary<BytesKey, byte[]>()
+                : new ConcurrentDictionary<BytesKey, byte[]>(
                     concurrencyLevel: Environment.ProcessorCount,
                     capacity: options.Capacity);
-            }
         }
     }
     
