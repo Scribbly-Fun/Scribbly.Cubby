@@ -19,7 +19,7 @@ public abstract class Get_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
 
         var result = await client.Get(key, CancellationToken.None);
 
-        result.ToArray().Should().BeEmpty();
+        result.Value.ToArray().Should().BeEmpty();
     }
 
     [Theory]
@@ -37,10 +37,10 @@ public abstract class Get_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         var store = scope.ServiceProvider.GetRequiredService<ICubbyStore>();
         var client = scope.ServiceProvider.GetRequiredService<ICubbyClient>();
 
-        store.Put(key, array, new CacheEntryOptions());
+        store.Put(key, array, CacheEntryOptions.None);
         
-        var result = await client.Get(key, CancellationToken.None);
-
-        result.ToArray().Should().BeEquivalentTo(array);
+        var entry = await client.Get(key, CancellationToken.None);
+        
+        entry.Value.ToArray().Should().BeEquivalentTo(array);
     }
 }

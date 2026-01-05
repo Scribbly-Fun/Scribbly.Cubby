@@ -1,34 +1,39 @@
-﻿using MessagePack;
+﻿using System.Runtime.CompilerServices;
+using Nerdbank.MessagePack;
+using PolyType;
 using Scribbly.Cubby.Client.Serializer;
 
 namespace Scribbly.Cubby.MessagePack;
+#pragma warning disable SCRB011
 
 /// <summary>
 /// Serializes data using the Message Pack Protocol
 /// </summary>
-public class MessagePackCubbySerializer(MessagePackSerializerOptions messagePackOptions) : ICubbySerializer
+public class MessagePackCubbySerializer(MessagePackSerializer serializer, ITypeShapeProvider shapeProvider) : ICubbySerializer
 {
+    
     /// <inheritdoc />
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull
     {
-        if (options.Compression != SerializerCompression.Compress)
+        var shape = shapeProvider.GetTypeShape<T>();
+        if (shape is null)
         {
-            return MessagePackSerializer.Serialize<T>(value, messagePackOptions);
+            throw new CubbySerializerException<T>();
         }
-        
-        var lz4Options = messagePackOptions.WithCompression(MessagePackCompression.Lz4BlockArray);
-        return MessagePackSerializer.Serialize<T>(value, lz4Options);
+        return serializer.Serialize(value, shape);
     }
 
     /// <inheritdoc />
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull
     {
-        if (options.Compression != SerializerCompression.Compress)
+        var shape = shapeProvider.GetTypeShape<T>();
+        if (shape is null)
         {
-            return MessagePackSerializer.Deserialize<T>(data.ToArray(), messagePackOptions);
+            throw new CubbySerializerException<T>();
         }
-        
-        var lz4Options = messagePackOptions.WithCompression(MessagePackCompression.Lz4BlockArray);
-        return MessagePackSerializer.Deserialize<T>(data.ToArray(), lz4Options);
+        return serializer.Deserialize(data.ToArray(), shape);
     }
 }
+#pragma warning restore SCRB011

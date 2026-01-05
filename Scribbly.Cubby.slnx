@@ -10,6 +10,10 @@
     <File Path="Dockerfile" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/analyzers/">
+    <File Path="analyzers/Directory.Build.props" />
+    <Project Path="analyzers/Scribbly.Cubby.Aspire.Analyzer/Scribbly.Cubby.Aspire.Analyzer.csproj" />
+  </Folder>
   <Folder Name="/app/">
     <Project Path="app/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj" />
   </Folder>

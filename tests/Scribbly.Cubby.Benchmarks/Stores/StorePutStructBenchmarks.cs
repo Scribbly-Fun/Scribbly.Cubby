@@ -14,13 +14,12 @@ public class StorePutStructBenchmarks
     private BytesKey[] _keys = null!;
     private byte[][] _values = null!;
 
-    private ShardedConcurrentStore _classPooledEntries = null!;
-    private RefStructConcurrentStore _refStructEntries = null!;
+    private SharedConcurrentStore _sharedEntries = null!;
     
     [GlobalSetup]
     public void Setup()
     {
-        var options = new CubbyOptions();
+        var options = new CubbyServerOptions();
 
         _keys = new BytesKey[EntryCount];
         _values = new byte[EntryCount][];
@@ -31,25 +30,15 @@ public class StorePutStructBenchmarks
             _values[i] = new byte[64];
         }
 
-        _classPooledEntries = ShardedConcurrentStore.FromOptions(options);
-        _refStructEntries = RefStructConcurrentStore.FromOptions(options);
+        _sharedEntries = SharedConcurrentStore.FromOptions(options, TimeProvider.System);
     }
     
-    [Benchmark(Baseline = true)]
-    public void Class_PooledArrayStore_Put()
-    {
-        Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
-        {
-            _classPooledEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
-        });
-    }
-
     [Benchmark]
     public void Struct_PooledArrayStore_Put()
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _refStructEntries.Put(_keys[i], _values[i], new CacheEntryOptions());
+            _sharedEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
         });
     }
 }

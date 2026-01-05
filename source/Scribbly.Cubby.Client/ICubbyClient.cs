@@ -1,4 +1,5 @@
-﻿using Scribbly.Cubby.Stores;
+﻿using System.Diagnostics.CodeAnalysis;
+using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Client;
 
@@ -15,7 +16,7 @@ public interface ICubbyClient
     /// <summary>
     /// Inserts or creates a new cached record.
     /// </summary>
-    ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default);
+    ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options = null, CancellationToken token = default);
     
     /// <summary>
     /// Inserts or creates a serialized object
@@ -23,15 +24,20 @@ public interface ICubbyClient
     /// <remarks>
     ///     Data will be serialized using the select serializer.
     /// </remarks>
-    ValueTask<PutResult> PutObject<T>(BytesKey key, T value, CacheEntryOptions options, CancellationToken token = default) where T : notnull;
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Serialize<T>(T, SerializerOptions)")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Serialize<T>(T, SerializerOptions)")]
+    ValueTask<PutResult> PutObject<T>(BytesKey key, T value, CacheEntryOptions? options = null, CancellationToken token = default) where T : notnull;
     
     /// <summary>
     /// Gets data from the cache for a specific key
     /// </summary>
-    ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default);
+    ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default);
     
     /// <summary>
     /// Gets decoded data from the cache.
     /// </summary>
-   ValueTask<T> GetObject<T>(BytesKey key, CancellationToken token = default) where T : notnull;
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    ValueTask<EntryResponse<T>> GetObject<T>(BytesKey key, CancellationToken token = default) where T : notnull;
 }

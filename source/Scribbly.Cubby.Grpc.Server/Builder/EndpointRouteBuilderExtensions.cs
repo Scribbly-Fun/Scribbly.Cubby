@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-using Scribbly.Cubby.Store;
+using Scribbly.Cubby.Endpoints;
 
 namespace Scribbly.Cubby.Builder;
 

@@ -3,10 +3,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using PolyType;
 using Scribbly.Cubby;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Cookbook.ServiceDefaults;
+using Scribbly.Cubby.MessagePack;
 using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,11 @@ builder.Services
         ops.Host = new Uri(host?? throw new InvalidOperationException());
         
         ops.Lifetime = ServiceLifetime.Singleton;
+        
+        ops.AddSystemTextSerializer(ops =>
+        {
+            ops.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
+        });
     })
     .WithCubbyHttpClient()
     .WithCubbyGrpcClient();
@@ -69,7 +76,7 @@ app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, [FromBo
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(key, item, CacheEntryOptions.None, token);
     
     watch.Stop();
 
@@ -94,11 +101,16 @@ app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, Cancella
     };
 });
 
-app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [FromQuery] bool? compress, [FromBody] Item item, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(
+        key, item, 
+        compress is true 
+            ? CacheEntryOptions.Never(CacheEntryFlags.Compressed) 
+            : CacheEntryOptions.None, 
+        token);
     
     watch.Stop();
 
@@ -127,7 +139,7 @@ app.MapPost("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, [From
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, new CacheEntryOptions(), token);
+    var results = await cache.PutObject(key, item, CacheEntryOptions.None, token);
     
     watch.Stop();
 
@@ -166,3 +178,6 @@ catch (Exception e)
 [JsonSerializable(typeof(Item))]
 partial class ItemJsonContext : JsonSerializerContext;
 record Item(string Key, string Value);
+
+[GenerateShapeFor<Item>]
+public partial class Witness;

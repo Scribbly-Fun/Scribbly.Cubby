@@ -1,4 +1,8 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
+using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Stores;
 using PutResult = Scribbly.Cubby.Stores.PutResult;
 
@@ -20,15 +24,17 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     }
 
     /// <inheritdoc />
-    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions options, CancellationToken token = default)
+    public async ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options, CancellationToken token = default)
     {
+        options ??= CacheEntryOptions.None;
+        
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
         using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}");
         request.Content = new ByteArrayContent(value.ToArray());
-        request.Headers.Add(Headers.CubbyHeaderFlags, options.Flags.ToString());
-        request.Headers.Add(Headers.CubbyHeaderEncoding, options.Encoding.ToString());
-        request.Headers.Add(Headers.CubbyHeaderExpiration, options.TimeToLive.ToString());
+        request.Headers.Add(Headers.CubbyHeaderFlags, options.Flags.ToFlagsString());
+        request.Headers.Add(Headers.CubbyHeaderEncoding, options.Encoding.ToEncodingString());
+        request.Headers.Add(Headers.CubbyHeaderExpiration, options.SlidingDuration.ToString());
 
         using var response = await client.SendAsync(request, token);
 
@@ -51,4 +57,17 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
 
         return await response.Content.ReadAsByteArrayAsync(token);
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string? GetSingleHeader(
+        HttpResponseHeaders headers,
+        string name)
+    {
+        if (!headers.TryGetValues(name, out var values))
+            return null;
+
+        using var e = values.GetEnumerator();
+        return e.MoveNext() ? e.Current : null;
+    }
 }
+

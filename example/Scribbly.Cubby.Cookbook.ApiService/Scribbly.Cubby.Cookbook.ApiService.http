@@ -36,6 +36,16 @@ Content-Type: application/json
     "value": "my value"
 }
 
+### With Compression
+
+POST {{host}}/cubby/http/my_key?compress=true
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
 ###
 
 GET {{host}}/cubby/http/my_key

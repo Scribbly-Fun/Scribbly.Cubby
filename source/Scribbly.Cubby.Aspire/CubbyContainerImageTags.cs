@@ -9,5 +9,5 @@ internal static class CubbyContainerImageTags
     public const string Image = "scribbly/cubby";
 
     /// <remarks>latest</remarks>
-    public const string Tag = "0.1.0-24-http-client.1";
+    public const string Tag = BuildConstants.ContainerImageTag;
 }

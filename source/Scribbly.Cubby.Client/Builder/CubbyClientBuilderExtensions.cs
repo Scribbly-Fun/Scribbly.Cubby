@@ -21,7 +21,7 @@ public static class CubbyClientBuilderExtensions
             Action<JsonSerializerOptions>? optionsCallback = null,
             ICubbyCompressor? compressor = null)
         {
-            options.AddSerializer<SystemTextCubbySerializer>(optionsCallback, compressor);
+            options.AddSerializer<JsonCubbySerializer>(optionsCallback, compressor);
         }
     }
 }

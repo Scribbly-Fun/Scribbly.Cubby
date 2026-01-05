@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scribbly.Cubby.Client.Serializer;
@@ -21,6 +22,8 @@ public static class HostApplicationBuilderExtensions
         /// </summary>
         /// <param name="optionsCallback">Options to configure cubby</param>
         /// <returns>The configured host.</returns>
+        [RequiresUnreferencedCode("To support AOT ensure all JSON types have been provided")]
+        [RequiresDynamicCode("To support AOT ensure all JSON types have been provided")]
         public ICubbyClientBuilder AddCubbyClient(Action<CubbyClientOptions>? optionsCallback = null)
         {
             var options = new CubbyClientOptions();

@@ -11,7 +11,7 @@ public interface ICubbyServerBuilder
     /// <summary>
     /// The options used during setup.
     /// </summary>
-    CubbyOptions Options { get; }
+    CubbyServerOptions ServerOptions { get; }
     
     /// <summary>
     /// The hosted builder.

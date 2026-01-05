@@ -1,4 +1,7 @@
-﻿namespace Scribbly.Cubby.Client.Serializer;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Scribbly.Cubby.Client.Serializer;
+#pragma warning disable SCRB011
 
 /// <summary>
 /// Abstract used to serialize data in and out of the cache.
@@ -23,3 +26,4 @@ public interface ICubbySerializer
     /// <returns>A materialized type from the stored bytes</returns>
     T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull;
 }
+#pragma warning restore SCRB011

@@ -3,5 +3,23 @@
   <PropertyGroup>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Scribbly.Cubby.Server" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Client" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Hosted" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Grpc.Client" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Grpc.Server" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Http.Client" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Http.Server" />
+    
+    <InternalsVisibleTo Include="Scribbly.Cubby.UnitTests" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.IntegrationTests" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Benchmarks" />
+  </ItemGroup>
 
 </Project>

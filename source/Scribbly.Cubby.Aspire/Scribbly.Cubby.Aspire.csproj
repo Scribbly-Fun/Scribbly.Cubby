@@ -1,7 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
+    <PropertyGroup>
+        <CubbyContainerImageTag>0.1.0-24-http-client.1</CubbyContainerImageTag>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="CubbyContainerImageTag" />
+    </ItemGroup>
+    
     <ItemGroup>
       <PackageReference Include="Aspire.Hosting" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\..\analyzers\Scribbly.Cubby.Aspire.Analyzer\Scribbly.Cubby.Aspire.Analyzer.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all" />
     </ItemGroup>
 
 </Project>

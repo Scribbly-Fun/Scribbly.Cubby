@@ -3,15 +3,29 @@
 
 ###
 
-GET {{container}}/cubby/my_key
+GET {{debug}}/cubby/my_key3
 Accept: application/json
 
-###
+### PUT with Expiration
 
-PUT {{container}}/cubby/my_key
+PUT {{debug}}/cubby/my_key3
 Content-Type: application/json
+x-cubby-expiry: 00:00:10
 
 {
   "key": "my_key",
   "value": "my value"
 }
+
+
+### PUT with Compression (we would need to compress the value here since it's assumed the client does the compression before crossing the wire)
+
+PUT {{debug}}/cubby/my_key3
+Content-Type: application/json
+x-cubby-flags: Compressed
+
+{
+  "key": "my_key",
+  "value": "my value"
+}
+

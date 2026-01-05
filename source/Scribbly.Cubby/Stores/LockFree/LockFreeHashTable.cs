@@ -1,7 +1,9 @@
 ﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Scribbly.Cubby.Stores.LockFree;
 
+[Experimental("SCRB001", Message = "Not yet implemented")]
 sealed class LockFreeHashTable
 {
     internal readonly Entry[] Entries;
@@ -76,7 +78,7 @@ sealed class LockFreeHashTable
     }
 }
 
-
+[Experimental("SCRB001", Message = "Not yet implemented")]
 sealed class CacheEngine
 {
     private readonly CacheShard[] _shards;
@@ -103,6 +105,7 @@ sealed class CacheEngine
     }
 }
 
+[Experimental("SCRB001", Message = "Not yet implemented")]
 sealed class CacheShard
 {
     private readonly LockFreeHashTable _table = new LockFreeHashTable(2);
