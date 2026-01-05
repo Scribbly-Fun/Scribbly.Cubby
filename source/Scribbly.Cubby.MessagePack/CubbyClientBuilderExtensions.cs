@@ -1,5 +1,5 @@
-﻿using MessagePack;
-using MessagePack.Resolvers;
+﻿using Nerdbank.MessagePack;
+using PolyType;
 using Scribbly.Cubby.Client;
 
 namespace Scribbly.Cubby.MessagePack;
@@ -18,13 +18,10 @@ public static class CubbyClientBuilderExtensions
         /// <summary>
         /// Adds and configures the message pack serializer.
         /// </summary>
-        public void AddMessagePackSerializer(Action<MessagePackSerializerOptions>? optionsCallback = null)
+        public void AddMessagePackSerializer(ITypeShapeProvider shapeProvider)
         {
-            var messagePackOptions = MessagePackSerializerOptions.Standard.WithResolver(ContractlessStandardResolver.Instance);
-
-            optionsCallback?.Invoke(messagePackOptions);
-            
-            options.AddSerializer<MessagePackCubbySerializer>(new MessagePackCubbySerializer(messagePackOptions));
+            var serializer = new MessagePackCubbySerializer(new MessagePackSerializer(), shapeProvider);
+            options.AddSerializer(serializer);
         }
     }
 }

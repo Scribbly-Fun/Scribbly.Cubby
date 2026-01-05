@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using MessagePack;
+﻿using System.Runtime.CompilerServices;
+using Nerdbank.MessagePack;
+using PolyType;
 using Scribbly.Cubby.Client.Serializer;
 
 namespace Scribbly.Cubby.MessagePack;
@@ -9,22 +9,31 @@ namespace Scribbly.Cubby.MessagePack;
 /// <summary>
 /// Serializes data using the Message Pack Protocol
 /// </summary>
-public class MessagePackCubbySerializer(MessagePackSerializerOptions messagePackOptions) : ICubbySerializer
+public class MessagePackCubbySerializer(MessagePackSerializer serializer, ITypeShapeProvider shapeProvider) : ICubbySerializer
 {
+    
     /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [RequiresUnreferencedCode("May invoke serialize with unregistered type.  Ensure cubby configuration supports AOT")]
     public ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull
     {
-        return MessagePackSerializer.Serialize<T>(value, messagePackOptions);
+        var shape = shapeProvider.GetTypeShape<T>();
+        if (shape is null)
+        {
+            throw new CubbySerializerException<T>();
+        }
+        return serializer.Serialize(value, shape);
     }
 
     /// <inheritdoc />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [RequiresUnreferencedCode("May invoke serialize with unregistered type.  Ensure cubby configuration supports AOT")]
     public T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull
     {
-        return MessagePackSerializer.Deserialize<T>(data.ToArray(), messagePackOptions);
+        var shape = shapeProvider.GetTypeShape<T>();
+        if (shape is null)
+        {
+            throw new CubbySerializerException<T>();
+        }
+        return serializer.Deserialize(data.ToArray(), shape);
     }
 }
 #pragma warning restore SCRB011
