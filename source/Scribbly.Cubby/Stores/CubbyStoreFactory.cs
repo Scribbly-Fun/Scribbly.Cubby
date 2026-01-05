@@ -34,7 +34,7 @@ public sealed class CubbyStoreFactory(IOptions<CubbyOptions> options, TimeProvid
         return cubbyOptions switch
         {
             { Store: CubbyOptions.StoreType.Sharded } => SharedConcurrentStore.FromOptions(cubbyOptions, provider),
-            { Store: CubbyOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(cubbyOptions),
+            { Store: CubbyOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(cubbyOptions, provider),
             
             _ => throw new ArgumentOutOfRangeException(nameof(options), options, null)
         };

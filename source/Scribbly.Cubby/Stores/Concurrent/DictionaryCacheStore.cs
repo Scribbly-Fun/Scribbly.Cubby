@@ -1,120 +1,220 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
+using Scribbly.Cubby.Expiration;
+using Scribbly.Cubby.Stores.Sharded;
 
 namespace Scribbly.Cubby.Stores.Concurrent;
 
 /// <summary>
 /// A cache storage that uses arrays of concurrent dictionaries to improve multithreaded locking contention.
 /// </summary>
-internal sealed class ConcurrentStore : ICubbyStore
+internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteraction
 {
-    private readonly ConcurrentDictionary<BytesKey, ICacheEntry> _store;
+    private readonly TimeProvider _provider;
 
-    internal static ConcurrentStore FromOptions(CubbyOptions options) => new(options);
+    /// <summary>
+    /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
+    /// </summary>
+    internal static ConcurrentStore FromOptions(CubbyOptions options, TimeProvider provider)
+        => new(options, provider);
     
-    private ConcurrentStore(CubbyOptions options)
+    private int _activeWriters;
+    
+    private readonly ConcurrentDictionary<BytesKey, byte[]> _store;
+
+    private ConcurrentStore(CubbyOptions options, TimeProvider provider)
     {
+        _provider = provider;
         _store = options.Capacity == int.MinValue 
-                ? new ConcurrentDictionary<BytesKey, ICacheEntry>()
-                : new ConcurrentDictionary<BytesKey, ICacheEntry>(
-                    concurrencyLevel: Environment.ProcessorCount,
-                    capacity: options.Capacity);
+            ? new ConcurrentDictionary<BytesKey, byte[]>()
+            : new ConcurrentDictionary<BytesKey, byte[]>(
+                concurrencyLevel: Environment.ProcessorCount,
+                capacity: options.Capacity);
+    }
+    
+    /// <inheritdoc />
+    int ICubbyStoreEvictionInteraction.ActiveWriters
+        => Volatile.Read(ref _activeWriters);
+
+    /// <inheritdoc />
+    IEnumerable<KeyValuePair<BytesKey, byte[]>> ICubbyStoreIterator.Entries
+    {
+        get
+        {
+            foreach (var kvp in _store)
+            {
+                yield return kvp;
+            }
+        }
     }
     
     /// <inheritdoc />
     public bool Exists(BytesKey key) => _store.ContainsKey(key);
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> Get(BytesKey key) => _store[key].ValueMemory;
+    public ReadOnlyMemory<byte> Get(BytesKey key)
+    {
+        Interlocked.Increment(ref _activeWriters);
+        
+        try
+        {
+            var entry = _store[key];
+
+            var header = entry.GetHeader();
+            var flags = header.GetFlags();
+
+            if (flags.IsTombstone() && _store.TryRemoveRentedArray(key))
+            {
+                return null;
+            }
+        
+            if (header.IsNeverExpiringEntry(out var expirationTicks))
+            {
+                return entry;
+            }
+
+            var now = _provider.GetUtcNow().UtcTicks;
+            if (expirationTicks.IsExpired(now) && _store.TryRemoveRentedArray(key))
+            {
+                return null;
+            }
+
+            if (flags.IsSliding())
+            {
+                header.UpdateSlidingTime(now);
+            }
+        
+            return entry;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
+    }
 
     /// <inheritdoc />
     public bool TryGet(BytesKey key, out ReadOnlySpan<byte> value)
     {
-        if (!_store.TryGetValue(key, out var entry))
+        Interlocked.Increment(ref _activeWriters);
+        
+        try
         {
-            value = null;
-            return false;
-        }
+            if (!_store.TryGetValue(key, out var entry))
+            {
+                value = null;
+                return false;
+            }
 
-        value = entry.Value;
-        return true;
+            var header = entry.GetHeader();
+            var flags = header.GetFlags();
+
+            if (flags.IsTombstone() && _store.TryRemoveRentedArray(key))
+            {
+                value = null;
+                return false;
+            }
+        
+            if (header.IsNeverExpiringEntry(out var expirationTicks))
+            {
+                value = entry;
+                return true;
+            }
+
+            var now = _provider.GetUtcNow().UtcTicks;
+            if (expirationTicks.IsExpired(now) && _store.TryRemoveRentedArray(key))
+            {
+                value = null;
+                return false;
+            }
+
+            if (flags.IsSliding())
+            {
+                header.UpdateSlidingTime(now);
+            }
+        
+            value = entry;
+            return true;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
     }
     
     /// <inheritdoc />
     public PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
-        var newEntry = PooledCacheEntry.Create(value, options.SlidingDuration);
-        
-        if (!_store.TryGetValue(key, out var existing))
+        Interlocked.Increment(ref _activeWriters);
+
+        try
         {
-            return _store.TryAdd(key, newEntry) ? PutResult.Created : PutResult.Undefined;
-        }
-        
-        if(_store.TryUpdate(key, newEntry, existing))
-        {
-            if (existing is IDisposable disposable)
+            var buffer = value.LayoutEntry(options);
+
+            if (!_store.TryGetValue(key, out var existing))
             {
-                disposable.Dispose();
+                return _store.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
             }
             
-            return PutResult.Updated;
-        }
+            var header = existing.GetHeader();
+            if (header.IsSlidingEntry())
+            {
+                var now = _provider.GetUtcNow().UtcTicks;
+                header.UpdateSlidingTime(now);
+            }
+            
+            if(_store.TryUpdate(key, buffer, existing))
+            {
+                ArrayPool<byte>.Shared.Return(existing, clearArray: false);
+                return PutResult.Updated;
+            }
 
-        return PutResult.Undefined;
+            return PutResult.Undefined;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
     }
 
     /// <inheritdoc />
     public RefreshResult Refresh(BytesKey key)
     {
-        throw new NotImplementedException();
-    }
+        Interlocked.Increment(ref _activeWriters);
 
-    /// <inheritdoc />
-    public EvictResult Evict(BytesKey key)
-    {
-        if (_store.TryRemove(key, out var entry))
+        try
         {
-            if (entry is IDisposable disposable)
+            if (!_store.TryGetValue(key, out var entry))
             {
-                disposable.Dispose();
+                return RefreshResult.Undefined;
             }
 
-            return EvictResult.Removed;
-        }
+            var header = entry.GetHeader();
 
-        return EvictResult.Unknown;
+            if (header.IsSlidingEntry())
+            {
+                var now = _provider.GetUtcNow().UtcTicks;
+                header.UpdateSlidingTime(now);
+                return RefreshResult.Updated;
+            }
+
+            return RefreshResult.NotSlidingEntry;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
     }
 
     /// <inheritdoc />
-    public bool TryEvict(BytesKey key, out EvictResult result)
-    {
-        if (!_store.TryRemove(key, out var entry))
-        {
-            result = EvictResult.Unknown;
-            return false;
-        }
-        
-        if (entry is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-        
-        result = EvictResult.Removed;
-        return true;
-    }
+    public EvictResult Evict(BytesKey key) => _store.TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
     
     /// <inheritdoc />
     public void Dispose()
     {
-        foreach (var entry in _store.Values)
+        foreach (var entry in _store)
         {
-            if (entry is not IDisposable disposable)
-            {
-                continue;
-            }
-            
-            disposable.Dispose();
+            ArrayPool<byte>.Shared.Return(entry.Value, clearArray: false);
         }
-        
         _store.Clear();
     }
 }
