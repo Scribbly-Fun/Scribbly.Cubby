@@ -3,10 +3,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using PolyType;
 using Scribbly.Cubby;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Client;
 using Scribbly.Cubby.Cookbook.ServiceDefaults;
+using Scribbly.Cubby.MessagePack;
 using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,11 @@ builder.Services
         ops.Host = new Uri(host?? throw new InvalidOperationException());
         
         ops.Lifetime = ServiceLifetime.Singleton;
+        
+        ops.AddSystemTextSerializer(ops =>
+        {
+            ops.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
+        });
     })
     .WithCubbyHttpClient()
     .WithCubbyGrpcClient();
@@ -171,3 +178,6 @@ catch (Exception e)
 [JsonSerializable(typeof(Item))]
 partial class ItemJsonContext : JsonSerializerContext;
 record Item(string Key, string Value);
+
+[GenerateShapeFor<Item>]
+public partial class Witness;

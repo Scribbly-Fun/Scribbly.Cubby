@@ -23,29 +23,17 @@ Cubby is a 'choose your own adventure' cross platform native AOT .net distribute
 
 ## Table of Contents
 <!-- TOC -->
-* [Scribbly Cubby](#scribbly-cubby)
-  * [Table of Contents](#table-of-contents)
-  * [Example](#example)
 * [Cubby Host](#cubby-host)
   * [AOT](#aot)
   * [Library](#library)
   * [Docker](#docker)
   * [Transports](#transports)
-    * [HTTP](#http)
-    * [GRPC](#grpc)
-    * [TCP](#tcp)
 * [Cubby Client](#cubby-client)
   * [Transports](#transports-1)
-    * [HTTP](#http-1)
-    * [GRPC](#grpc-1)
-    * [TCP](#tcp-1)
   * [Serializers](#serializers)
-    * [System.Text.Json](#systemtextjson)
-    * [MessagePack](#messagepack)
   * [Compression](#compression)
+* [Cache Store](#cache-store)
 * [Benchmarks](#benchmarks)
-    * [2025.12.20 Store Comparisons](#20251220-store-comparisons)
-    * [K6 Load Tests](#k6-load-tests-)
 <!-- TOC -->
 
 ## Example
@@ -214,9 +202,9 @@ builder.Services
 ### MessagePack
 
 By adding a reference to the ``Scribbly.Cubby.MessagePack`` cubby con be configured to use `MessagePack` 
-to serialize all objects.
+to serialize all objects.  Ensure you've generated a TypeShapeProvider for each time you plan to serialize.
 
-https://github.com/MessagePack-CSharp/MessagePack-CSharp
+https://aarnott.github.io/Nerdbank.MessagePack/index.html
 
 *call the ``AddMessagePackSerializer()`` method to use message pack*
 
@@ -224,33 +212,16 @@ https://github.com/MessagePack-CSharp/MessagePack-CSharp
 builder.Services
     .AddCubbyClient(ops =>
     {
-        ops.AddMessagePackSerializer();
+        ops.AddMessagePackSerializer(Witness.GeneratedTypeShapeProvider);
     })
     .WithCubbyGrpcClient();
 ```
 
 *override and configure the serializer*
 
-```csharp
-
-builder.Services
-    .AddCubbyClient(ops =>
-    {
-        ops.AddMessagePackSerializer(ops =>
-        {
-            // See message pack docs
-            ops.SequencePool.Clear();
-        });
-    })
-    .WithCubbyGrpcClient();
-```
-
-> [!Note]
-> When using MessagePack we will use their built-in compression as apposed to using the Cubby `ICubbyCompression` 
-
 ## Compression
 
-The cubby client can optionally compress data befire transmitting the cache across the transport. 
+The cubby client can optionally compress data before transmitting the cache across the transport. 
 
 ```mermaid
 sequenceDiagram
@@ -290,6 +261,18 @@ sequenceDiagram
     Client->>Client: Deserialize value
     Client-->>App: Return value
 ```
+
+# Cache Store
+
+### Eviction Strategies
+
+The below diagram describes Cubby's eviction logic.
+
+> [!Note]
+> The async background process can be configured and will exit each query when locking contention is detected.
+
+![Eviction Strategy](./docs/eviction.PNG)
+
 # Benchmarks
 
 ### 2025.12.20 Store Comparisons
