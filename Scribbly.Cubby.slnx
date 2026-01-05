@@ -21,6 +21,7 @@
   </Folder>
   <Folder Name="/lib/">
     <File Path="source/Directory.Build.props" />
+    <Project Path="source/Scribbly.Cubby.Aspire.Analyzer/Scribbly.Cubby.Aspire.Analyzer.csproj" />
     <Project Path="source/Scribbly.Cubby.Aspire/Scribbly.Cubby.Aspire.csproj" />
     <Project Path="source/Scribbly.Cubby.Client/Scribbly.Cubby.Client.csproj" />
     <Project Path="source/Scribbly.Cubby.MessagePack/Scribbly.Cubby.MessagePack.csproj" />
