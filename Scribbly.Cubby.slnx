@@ -10,6 +10,10 @@
     <File Path="Dockerfile" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/analyzers/">
+    <File Path="analyzers/Directory.Build.props" />
+    <Project Path="analyzers/Scribbly.Cubby.Aspire.Analyzer/Scribbly.Cubby.Aspire.Analyzer.csproj" />
+  </Folder>
   <Folder Name="/app/">
     <Project Path="app/Scribbly.Cubby.Host/Scribbly.Cubby.Host.csproj" />
   </Folder>
@@ -21,7 +25,6 @@
   </Folder>
   <Folder Name="/lib/">
     <File Path="source/Directory.Build.props" />
-    <Project Path="source/Scribbly.Cubby.Aspire.Analyzer/Scribbly.Cubby.Aspire.Analyzer.csproj" />
     <Project Path="source/Scribbly.Cubby.Aspire/Scribbly.Cubby.Aspire.csproj" />
     <Project Path="source/Scribbly.Cubby.Client/Scribbly.Cubby.Client.csproj" />
     <Project Path="source/Scribbly.Cubby.MessagePack/Scribbly.Cubby.MessagePack.csproj" />

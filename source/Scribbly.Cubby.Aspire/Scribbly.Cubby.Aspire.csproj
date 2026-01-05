@@ -11,22 +11,12 @@
     <ItemGroup>
       <PackageReference Include="Aspire.Hosting" />
     </ItemGroup>
-
     
     <ItemGroup>
-        <ProjectReference Include="..\Scribbly.Cubby.Aspire.Analyzer\Scribbly.Cubby.Aspire.Analyzer.csproj"
+        <ProjectReference Include="..\..\analyzers\Scribbly.Cubby.Aspire.Analyzer\Scribbly.Cubby.Aspire.Analyzer.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"
                           PrivateAssets="all" />
-    </ItemGroup>
-
-    <!--  Here we are conditionally packing the assembly only when running dotnet pack -P:IsPacking='true' 
-      This ensures our local project reference assembly isn't included twice.  See Cookbook.Api.csproj for direct project refernece.-->
-    <ItemGroup Condition="'$(IsPacking)' == 'true'">
-        <None Include="..\Scribbly.Cubby.Aspire.Analyzer\bin\$(Configuration)\netstandard2.0\Scribbly.Cubby.Aspire.Analyzer.dll"
-              Pack="true"
-              PackagePath="analyzers/dotnet/cs"
-              Visible="false" />
     </ItemGroup>
 
 </Project>
