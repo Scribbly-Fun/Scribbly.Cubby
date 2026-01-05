@@ -46,10 +46,10 @@ public sealed record CacheEntryOptions
     /// <param name="encoding">Optional encoding.</param>
     /// <param name="expiration">Optional expiration</param>
     /// <returns></returns>
-    public static CacheEntryOptions From(TimeProvider provider, CacheEntryFlags flags,TimeSpan? expiration, CacheEntryEncoding encoding = CacheEntryEncoding.None) =>
+    public static CacheEntryOptions From(TimeProvider provider, CacheEntryFlags flags, TimeSpan? expiration, CacheEntryEncoding encoding = CacheEntryEncoding.None) =>
         (flags, expiration) switch
         {
-            (_, expiration: { Ticks: > 0 }) when flags.HasFlag(CacheEntryFlags.Sliding)
+            (_, expiration: { Ticks: > 0 }) when (flags & CacheEntryFlags.Sliding) != 0 
                 => Sliding(provider, expiration.Value, flags, encoding),
             (_, expiration: { Ticks: > 0 })
                 => Absolute(provider.GetUtcNow().Add(expiration.Value), flags, encoding),

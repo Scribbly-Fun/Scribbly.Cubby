@@ -68,22 +68,10 @@ internal class CubbyClient(
         if ((flags & CacheEntryFlags.Compressed) != 0)
         {
             var decompressed = compressor.Decompress(value);
-            return new EntryResponse
-            {
-                Flags =  flags,
-                Encoding = encoding,
-                Expiration = expiration,
-                Value = decompressed.ToArray()
-            };
+            return EntryResponse.Create(flags, encoding, expiration, decompressed.ToArray());
         }
         
-        return new EntryResponse
-        {
-            Flags =  flags,
-            Encoding = encoding,
-            Expiration = expiration,
-            Value = value.ToArray()
-        };
+        return EntryResponse.Create(flags, encoding, expiration, value.ToArray());
     }
 
     /// <inheritdoc />
@@ -110,23 +98,14 @@ internal class CubbyClient(
         if ((flags & CacheEntryFlags.Compressed) != 0)
         {
             var decompressed = compressor.Decompress(value);
-            return new EntryResponse<T>
-            {
-                Flags =  flags,
-                Encoding = encoding,
-                Expiration = expiration,
-                Value = serializer.Deserialize<T>(decompressed) 
-                        ?? throw new SerializationException("Failed to convert the stored bytes to the requested object")
-            };
+            return EntryResponse<T>.Create(flags, encoding, expiration, 
+                serializer.Deserialize<T>(decompressed) 
+                ?? throw new SerializationException("Failed to convert the stored bytes to the requested object"));
         }
         
-        return new EntryResponse<T>
-        {
-            Flags =  flags,
-            Encoding = encoding,
-            Expiration = expiration,
-            Value = serializer.Deserialize<T>(value) 
-                    ?? throw new SerializationException("Failed to convert the stored bytes to the requested object")
-        };
+        return EntryResponse<T>.Create(flags, encoding, expiration,
+            serializer.Deserialize<T>(value) 
+            ?? throw new SerializationException("Failed to convert the stored bytes to the requested object")
+        );
     }
 }

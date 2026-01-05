@@ -35,6 +35,17 @@ public readonly struct EntryResponse
     public required ReadOnlyMemory<byte> Value { get; init; }
     
     /// <summary>
+    /// Creates a new entry response
+    /// </summary>
+    public static EntryResponse Create(CacheEntryFlags flags, CacheEntryEncoding encoding, long expiration, ReadOnlyMemory<byte> value) => new ()
+    {
+        Flags = flags,
+        Encoding = encoding,
+        Expiration = expiration,
+        Value = value
+    };
+
+    /// <summary>
     /// An empty response
     /// </summary>
     public static EntryResponse Empty { get; } = new()
@@ -79,6 +90,17 @@ public readonly struct EntryResponse<T> where T : notnull
     public required T? Value { get; init; }
     
     /// <summary>
+    /// Creates a new entry response
+    /// </summary>
+    public static EntryResponse<T> Create(CacheEntryFlags flags, CacheEntryEncoding encoding, long expiration, T value) => new ()
+    {
+        Flags = flags,
+        Encoding = encoding,
+        Expiration = expiration,
+        Value = value
+    };
+    
+    /// <summary>
     /// An empty response
     /// </summary>
     public static EntryResponse<T> Empty { get; } = new()
@@ -88,4 +110,5 @@ public readonly struct EntryResponse<T> where T : notnull
         Expiration = 0,
         Value = default(T)
     };
+    
 }
