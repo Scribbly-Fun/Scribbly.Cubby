@@ -16,7 +16,7 @@ namespace Scribbly.Cubby.Stores;
 /// <param name="provider">
 ///     A time provider used to generate and computer time related events
 /// </param>
-public sealed class CubbyStoreFactory(IOptions<CubbyOptions> options, TimeProvider provider)
+public sealed class CubbyStoreFactory(IOptions<CubbyServerOptions> options, TimeProvider provider)
 {
     /// <summary>
     ///     Creates  a new cubby store
@@ -33,8 +33,8 @@ public sealed class CubbyStoreFactory(IOptions<CubbyOptions> options, TimeProvid
         var cubbyOptions = options.Value;
         return cubbyOptions switch
         {
-            { Store: CubbyOptions.StoreType.Sharded } => SharedConcurrentStore.FromOptions(cubbyOptions, provider),
-            { Store: CubbyOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(cubbyOptions, provider),
+            { Store: CubbyServerOptions.StoreType.Sharded } => SharedConcurrentStore.FromOptions(cubbyOptions, provider),
+            { Store: CubbyServerOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(cubbyOptions, provider),
             
             _ => throw new ArgumentOutOfRangeException(nameof(options), options, null)
         };

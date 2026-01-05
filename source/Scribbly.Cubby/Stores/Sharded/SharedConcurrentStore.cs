@@ -15,25 +15,25 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
     /// <summary>
     /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
     /// </summary>
-    internal static SharedConcurrentStore FromOptions(CubbyOptions options, TimeProvider provider)
-        => new(options, provider);
+    internal static SharedConcurrentStore FromOptions(CubbyServerOptions serverOptions, TimeProvider provider)
+        => new(serverOptions, provider);
     
     private int _activeWriters;
     
     private readonly ConcurrentDictionary<BytesKey, byte[]>[] _shards;
 
-    private SharedConcurrentStore(CubbyOptions options, TimeProvider provider)
+    private SharedConcurrentStore(CubbyServerOptions serverOptions, TimeProvider provider)
     {
         _provider = provider;
-        _shards = new ConcurrentDictionary<BytesKey, byte[]>[options.Cores];
+        _shards = new ConcurrentDictionary<BytesKey, byte[]>[serverOptions.Cores];
         
-        for (var i = 0; i < options.Cores; i++)
+        for (var i = 0; i < serverOptions.Cores; i++)
         {
-            _shards[i] = options.Capacity == int.MinValue
+            _shards[i] = serverOptions.Capacity == int.MinValue
                 ? new ConcurrentDictionary<BytesKey, byte[]>()
                 : new ConcurrentDictionary<BytesKey, byte[]>(
                     concurrencyLevel: Environment.ProcessorCount,
-                    capacity: options.Capacity);
+                    capacity: serverOptions.Capacity);
         }
     }
     
@@ -160,7 +160,7 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
         try
         {
             var shard = GetShard(key);
-            var buffer = value.LayoutEntry(options);
+            var buffer = value.RentCacheEntryArray(options);
 
             if (!shard.TryGetValue(key, out var existing))
             {

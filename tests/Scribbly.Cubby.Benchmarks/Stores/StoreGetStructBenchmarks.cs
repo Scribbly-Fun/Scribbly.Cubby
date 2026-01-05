@@ -19,7 +19,7 @@ public class StoreGetStructBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var options = new CubbyOptions();
+        var options = new CubbyServerOptions();
         
         _keys = new BytesKey[EntryCount];
         _values = new byte[EntryCount][];

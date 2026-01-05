@@ -24,7 +24,7 @@ builder.Services.AddOpenApi();
 builder
     .AddCubbyServer(ops =>
     {
-        ops.Store = CubbyOptions.StoreType.Sharded;
+        ops.Store = CubbyServerOptions.StoreType.Sharded;
         ops.Capacity = 2000;
         ops.Cores = Environment.ProcessorCount;
 

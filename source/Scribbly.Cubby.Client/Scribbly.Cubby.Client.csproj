@@ -3,6 +3,7 @@
     <PropertyGroup>
         <RootNamespace>Scribbly.Cubby.Client</RootNamespace>
         <IsAotCompatible>true</IsAotCompatible>
+        <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     </PropertyGroup>
 
     <ItemGroup>

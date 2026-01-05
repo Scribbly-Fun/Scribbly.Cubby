@@ -24,7 +24,7 @@ internal class CacheCleanupAsyncProcessor(
     ILogger<CacheCleanupAsyncProcessor> logger, 
     TimeProvider provider, 
     IExpirationEvictionService evictionService, 
-    IOptionsMonitor<CubbyOptions> optionsMonitor) : BackgroundService
+    IOptionsMonitor<CubbyServerOptions> optionsMonitor) : BackgroundService
 {
     private TimeSpan _delay;
     
@@ -42,11 +42,11 @@ internal class CacheCleanupAsyncProcessor(
         return base.StartAsync(cancellationToken);
     }
 
-    private void OptionsUpdated(CubbyOptions options)
+    private void OptionsUpdated(CubbyServerOptions serverOptions)
     {
         lock (_lock)
         {
-            _delay = CalculateDelay(options.Cleanup);
+            _delay = CalculateDelay(serverOptions.Cleanup);
             
             _delayCts?.Cancel();
             _delayCts?.Dispose();

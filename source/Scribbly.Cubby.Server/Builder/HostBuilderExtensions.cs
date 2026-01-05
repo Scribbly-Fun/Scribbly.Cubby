@@ -25,7 +25,7 @@ public static class HostApplicationBuilderExtensions
         /// </summary>
         /// <param name="optionsCallback">Options to configure cubby</param>
         /// <returns>The configured host.</returns>
-        public ICubbyServerBuilder AddCubbyServer(Action<CubbyOptions>? optionsCallback = null)
+        public ICubbyServerBuilder AddCubbyServer(Action<CubbyServerOptions>? optionsCallback = null)
         {
             var cubbyBuilder = hostBuilder.AddCubbyConfiguration(optionsCallback);
 
@@ -38,7 +38,7 @@ public static class HostApplicationBuilderExtensions
             
             cubbyBuilder.HostBuilder.Services.TryAddSingleton(TimeProvider.System);
 
-            if (cubbyBuilder.Options.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled)
+            if (cubbyBuilder.ServerOptions.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled)
             {
                 cubbyBuilder.HostBuilder.Services.AddSingleton<IExpirationEvictionService>(sp =>
                 {
@@ -51,7 +51,7 @@ public static class HostApplicationBuilderExtensions
                 });
             }
             
-            if (cubbyBuilder.Options.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled and not CacheCleanupOptions.AsyncStrategy.Manual)
+            if (cubbyBuilder.ServerOptions.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled and not CacheCleanupOptions.AsyncStrategy.Manual)
             {
                 cubbyBuilder.HostBuilder.Services.AddHostedService<CacheCleanupAsyncProcessor>();
             }
@@ -59,19 +59,19 @@ public static class HostApplicationBuilderExtensions
             return cubbyBuilder;
         }
 
-        private CubbyServerBuilder AddCubbyConfiguration(Action<CubbyOptions>? optionsCallback = null)
+        private CubbyServerBuilder AddCubbyConfiguration(Action<CubbyServerOptions>? optionsCallback = null)
         {
-            var options = new CubbyOptions();
+            var options = new CubbyServerOptions();
 
             optionsCallback?.Invoke(options);
 
             hostBuilder.Configuration
-                .GetSection(nameof(CubbyOptions))
+                .GetSection(CubbyServerOptions.SectionName)
                 .Bind(options);
             
             hostBuilder.Services
-                .AddOptions<CubbyOptions>()
-                .Bind(hostBuilder.Configuration.GetSection(nameof(CubbyOptions)));
+                .AddOptions<CubbyServerOptions>()
+                .Bind(hostBuilder.Configuration.GetSection(CubbyServerOptions.SectionName));
 
             return new CubbyServerBuilder(options, hostBuilder);
         }

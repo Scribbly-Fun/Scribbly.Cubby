@@ -6,14 +6,14 @@ namespace Scribbly.Cubby.Server;
 internal class CubbyServerBuilder : ICubbyServerBuilder
 {
     /// <inheritdoc />
-    public CubbyOptions Options { get; }
+    public CubbyServerOptions ServerOptions { get; }
 
     /// <inheritdoc />
     public IHostApplicationBuilder HostBuilder { get; }
     
-    internal CubbyServerBuilder(CubbyOptions options, IHostApplicationBuilder hostBuilder)
+    internal CubbyServerBuilder(CubbyServerOptions serverOptions, IHostApplicationBuilder hostBuilder)
     {
-        Options = options;
+        ServerOptions = serverOptions;
         HostBuilder = hostBuilder;
     }
 }

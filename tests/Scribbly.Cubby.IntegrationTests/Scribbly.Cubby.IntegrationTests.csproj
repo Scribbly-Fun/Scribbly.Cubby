@@ -25,4 +25,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Tests\Builder\Server\" />
+  </ItemGroup>
+
 </Project>

@@ -12,7 +12,7 @@ internal static partial class CacheCleanupAsyncLogger
     [LoggerMessage(EventId = 10_001, Level = LogLevel.Information, Message = "Starting Cache Cleanup Background Processor, Store: {Store} Delay: {Delay}")]
     internal static partial void LogStartupMessage(
         this ILogger logger,
-        CubbyOptions.StoreType store,
+        CubbyServerOptions.StoreType store,
         TimeSpan delay);
 
     [LoggerMessage(EventId = 10_002, Level = LogLevel.Warning, Message = "Cubby Options Updated, New Delay: {Delay}")]
