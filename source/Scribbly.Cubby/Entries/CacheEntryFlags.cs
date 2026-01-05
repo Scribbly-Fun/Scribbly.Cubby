@@ -96,7 +96,7 @@ public static class CacheEntryFlagExtensions
                 FlagCompressedTombstone => CacheEntryFlags.Compressed | CacheEntryFlags.Tombstone,
                 FlagSlidingTombstone => CacheEntryFlags.Sliding | CacheEntryFlags.Tombstone,
                 FlagCompressedSlidingTombstone => CacheEntryFlags.Compressed | CacheEntryFlags.Sliding | CacheEntryFlags.Tombstone,
-                _ => throw new ArgumentOutOfRangeException(nameof(value), value, "Unknown CacheEntryFlags string.")
+                _ => CacheEntryFlags.None,
             };
         }
     }

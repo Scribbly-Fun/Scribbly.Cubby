@@ -41,7 +41,7 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
     }
 
     /// <inheritdoc />
-    public async ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
         var entry = await client.GetAsync(new GetRequest
         {
@@ -49,12 +49,6 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
             
         }, cancellationToken: token);
 
-        return new EntryResponse
-        {
-            Flags = (CacheEntryFlags)entry.Flags,
-            Encoding = (CacheEntryEncoding)entry.Encoding,
-            Expiration = entry.Expiration,
-            Value = entry.Value.ToByteArray() ?? []
-        };
+        return entry.Value.ToByteArray();
     }
 }

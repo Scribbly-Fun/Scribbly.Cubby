@@ -49,27 +49,13 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     }
 
     /// <inheritdoc />
-    public async ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default)
+    public async ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default)
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
         using var response = await client.GetAsync($"/cubby/{key}", token);
 
-        var value = await response.Content.ReadAsByteArrayAsync(token);
-        
-        var flagsHeader = GetSingleHeader(response.Headers, Headers.CubbyHeaderFlags);
-        var encodingHeader = GetSingleHeader(response.Headers, Headers.CubbyHeaderEncoding);
-        var expirationHeader = GetSingleHeader(response.Headers, Headers.CubbyHeaderExpiration);
-        
-        return new EntryResponse
-        {
-            Flags =  flagsHeader?.ToCacheEntryFlags() ?? CacheEntryFlags.None,
-            Encoding = encodingHeader?.ToCacheEncoding() ?? CacheEntryEncoding.None,
-            Expiration = expirationHeader is not null
-                ? long.Parse(expirationHeader, CultureInfo.InvariantCulture)
-                : 0,
-            Value = value
-        };
+        return await response.Content.ReadAsByteArrayAsync(token);
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

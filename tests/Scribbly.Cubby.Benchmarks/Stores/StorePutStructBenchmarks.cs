@@ -30,7 +30,7 @@ public class StorePutStructBenchmarks
             _values[i] = new byte[64];
         }
 
-        _sharedEntries = SharedConcurrentStore.FromOptions(options);
+        _sharedEntries = SharedConcurrentStore.FromOptions(options, TimeProvider.System);
     }
     
     [Benchmark]

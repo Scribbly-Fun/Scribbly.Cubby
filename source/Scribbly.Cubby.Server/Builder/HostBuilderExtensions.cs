@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Expiration;
 using Scribbly.Cubby.Server.Background;
 using Scribbly.Cubby.Stores;
@@ -29,12 +28,12 @@ public static class HostApplicationBuilderExtensions
         public ICubbyServerBuilder AddCubbyServer(Action<CubbyOptions>? optionsCallback = null)
         {
             var cubbyBuilder = hostBuilder.AddCubbyConfiguration(optionsCallback);
-            
+
+            cubbyBuilder.HostBuilder.Services.AddSingleton<CubbyStoreFactory>();
             cubbyBuilder.HostBuilder.Services.AddSingleton<ICubbyStore>(sp =>
             {
-                var ops = sp.GetRequiredService<IOptions<CubbyOptions>>();
-                var factory = new CubbyStoreFactory();
-                return factory.CreateStore(ops.Value);
+                var factory = sp.GetRequiredService<CubbyStoreFactory>();
+                return factory.CreateStore();
             });
             
             cubbyBuilder.HostBuilder.Services.TryAddSingleton(TimeProvider.System);

@@ -94,11 +94,16 @@ app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, Cancella
     };
 });
 
-app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [FromQuery] bool? compress, [FromBody] Item item, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
 
-    var results = await cache.PutObject(key, item, CacheEntryOptions.None, token);
+    var results = await cache.PutObject(
+        key, item, 
+        compress is true 
+            ? CacheEntryOptions.Never(CacheEntryFlags.Compressed) 
+            : CacheEntryOptions.None, 
+        token);
     
     watch.Stop();
 

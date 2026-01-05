@@ -15,7 +15,8 @@ internal class CubbyDistributedCache(ICubbyStoreTransport transport) : IDistribu
     public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
     {
         var entry = await transport.Get(key, token);
-        return entry.Value.ToArray();
+        var value = entry.Span.GetValue();
+        return value.ToArray();
     }
 
     /// <inheritdoc />

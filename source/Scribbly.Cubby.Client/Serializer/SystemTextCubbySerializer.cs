@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Scribbly.Cubby.Client.Serializer;
 
@@ -9,6 +10,7 @@ internal sealed class SystemTextCubbySerializer(JsonSerializerOptions jsonOption
 {
     /// <inheritdoc />
 #pragma warning disable SCRB011
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<byte> Serialize<T>(T value, SerializerOptions options = default) where T : notnull
 #pragma warning restore SCRB011
     {
@@ -17,6 +19,7 @@ internal sealed class SystemTextCubbySerializer(JsonSerializerOptions jsonOption
 
     /// <inheritdoc />
 #pragma warning disable SCRB011
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? Deserialize<T>(ReadOnlySpan<byte> data, SerializerOptions options = default) where T : notnull
 #pragma warning restore SCRB011
     {

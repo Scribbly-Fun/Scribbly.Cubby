@@ -4,21 +4,6 @@ using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Endpoints;
 
-internal static class HttpResponseHeaderExtensions
-{
-    extension(HttpResponse response)
-    {
-        internal void ApplyCubbyResponseHeaders(ReadOnlySpan<byte> buffer)
-        {
-            var header = buffer.GetHeader();
-
-            response.Headers[Headers.CubbyHeaderFlags] = header.GetFlags().ToFlagsString();
-            response.Headers[Headers.CubbyHeaderEncoding] = header.GetEncoding().ToEncodingString();
-            response.Headers[Headers.CubbyHeaderExpiration] = header.GetExpiration().ToString();
-        }
-    }
-}
-
 internal static class CubbyHttpEndpoints
 {
     internal static IResult Get(
@@ -31,11 +16,7 @@ internal static class CubbyHttpEndpoints
             return Results.NoContent();
         }
         
-        var header = entry.GetHeader();
-        var value = entry.GetValue();
-        context.Response.ApplyCubbyResponseHeaders(header);
-            
-        return Results.Bytes(value.ToArray());
+        return Results.Bytes(entry.ToArray());
     }
     
     internal static async Task<IResult> Put(

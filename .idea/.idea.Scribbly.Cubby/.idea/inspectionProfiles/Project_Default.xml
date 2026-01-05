@@ -6,6 +6,7 @@
         <set>
           <option value="x-cubby-expiry = 00" />
           <option value="x-cubby-expiry" />
+          <option value="x-cubby-flags" />
         </set>
       </option>
     </inspection_tool>

@@ -28,10 +28,10 @@ public interface ICubbyClient
     /// <summary>
     /// Gets data from the cache for a specific key
     /// </summary>
-    ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default);
+    ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default);
     
     /// <summary>
     /// Gets decoded data from the cache.
     /// </summary>
-   ValueTask<T> GetObject<T>(BytesKey key, CancellationToken token = default) where T : notnull;
+   ValueTask<EntryResponse<T>> GetObject<T>(BytesKey key, CancellationToken token = default) where T : notnull;
 }

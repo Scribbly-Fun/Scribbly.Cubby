@@ -7,9 +7,9 @@ using GrpcPutResult = Scribbly.Cubby.Proto.PutResult;
 using CSharpEvictResult = Scribbly.Cubby.Stores.EvictResult;
 using GrpcEvictResult = Scribbly.Cubby.Proto.EvictResult;
 
-namespace Scribbly.Cubby.Store;
+namespace Scribbly.Cubby.Endpoints;
 
-internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheServiceBase
+internal sealed class CubbyGrpcServer(ICubbyStore store, TimeProvider provider) : CacheService.CacheServiceBase
 {
     /// <inheritdoc />
     public override Task<GetResponse> Get(
@@ -18,16 +18,12 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
     {
         var key = new BytesKey(request.Key.ToByteArray());
 
-        if (store.TryGet(key, out var value))
+        if (store.TryGet(key, out var entry))
         {
-            var header = value.GetHeader();
             return Task.FromResult(new GetResponse
             {
                 Found = true,
-                Value = ByteString.CopyFrom(value),
-                Flags = (short)header.GetFlags(),
-                Encoding = (short)header.GetEncoding(),
-                Expiration = header.GetExpiration()
+                Value = ByteString.CopyFrom(entry)
             });
         }
 
@@ -41,7 +37,7 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
     {
         var key = new BytesKey(request.Key.ToByteArray());
 
-        var result = store.Put(key, request.Value.ToByteArray(), CacheEntryOptions.None);
+        var result = store.Put(key, request.Value.ToByteArray(), request.ToOptions(provider));
 
         return Task.FromResult(new PutResponse
         {
@@ -50,7 +46,7 @@ internal sealed class CubbyGrpcServer(ICubbyStore store) : CacheService.CacheSer
                 CSharpPutResult.Undefined => GrpcPutResult.Undefined,
                 CSharpPutResult.Created => GrpcPutResult.Created,
                 CSharpPutResult.Updated => GrpcPutResult.Updated,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException(nameof(result))
             }
         });
     }

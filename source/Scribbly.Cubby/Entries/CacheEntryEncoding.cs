@@ -87,7 +87,7 @@ public static class CacheEntryEncodingExtensions
                 EncodingUtf16String => CacheEntryEncoding.Utf16String,
                 EncodingJson => CacheEntryEncoding.Json,
                 EncodingMessagePack => CacheEntryEncoding.MessagePack,
-               _ => throw new ArgumentOutOfRangeException(nameof(value), value, "Unknown CacheEntryFlags string.")
+               _ => CacheEntryEncoding.None
             };
         }
     }

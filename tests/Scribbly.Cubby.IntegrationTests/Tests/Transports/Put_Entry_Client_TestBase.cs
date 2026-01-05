@@ -43,8 +43,10 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         var store = scope.ServiceProvider.GetRequiredService<ICubbyStore>();
 
         await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
+
+        var value = store.Get(key).Span.GetValue();
         
-        store.Get(key).ToArray().Should().BeEquivalentTo(array);
+        value.ToArray().Should().BeEquivalentTo(array);
     }
 
     [Theory]
@@ -84,7 +86,9 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         var store = scope.ServiceProvider.GetRequiredService<ICubbyStore>();
         
         await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
+        
+        var value = store.Get(key).Span.GetValue();
 
-        store.Get(key).ToArray().Should().BeEquivalentTo(array);
+        value.ToArray().Should().BeEquivalentTo(array);
     }
 }

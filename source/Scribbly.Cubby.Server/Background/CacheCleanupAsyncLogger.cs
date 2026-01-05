@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Scribbly.Cubby.Stores;
 
-namespace Scribbly.Cubby.Server.Background;
+// ReSharper disable once CheckNamespace
+namespace Scribbly.Cubby;
 
 /// <summary>
 /// Logging methods for the background processor.

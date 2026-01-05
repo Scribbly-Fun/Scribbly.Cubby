@@ -15,19 +15,5 @@ internal interface ICubbyStoreTransport
     
     ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options = null, CancellationToken token = default);
     
-    ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default);
-}
-
-/// <summary>
-/// The value from the transport response for a cache entry
-/// </summary>
-internal readonly struct EntryResponse
-{
-    internal required CacheEntryFlags Flags { get; init; }
-    
-    internal required CacheEntryEncoding Encoding { get; init; }
-    
-    internal required long Expiration { get; init; }
-    
-    internal required ReadOnlyMemory<byte> Value { get; init; }
+    ValueTask<ReadOnlyMemory<byte>> Get(BytesKey key, CancellationToken token = default);
 }

@@ -11,7 +11,7 @@ namespace Scribbly.Cubby.Client;
 public class CubbyClientOptions
 {
     internal ICubbySerializer Serializer { get; private set; } 
-        = new SystemTextCubbySerializer(JsonSerializerOptions.Default, new BrotliCubbyCompressor());
+        = new SystemTextCubbySerializer(JsonSerializerOptions.Default);
 
     internal ICubbyCompressor Compressor { get; private set; } 
         = new BrotliCubbyCompressor();
@@ -62,6 +62,6 @@ public class CubbyClientOptions
         
         optionsCallback?.Invoke(options);
 
-        Serializer = new SystemTextCubbySerializer(options, Compressor);
+        Serializer = new SystemTextCubbySerializer(options);
     }
 }
