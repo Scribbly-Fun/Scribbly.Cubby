@@ -25,8 +25,8 @@ Cubby is a 'choose your own adventure' cross platform native AOT .net distribute
 <!-- TOC -->
 * [Cubby Host](#cubby-host)
   * [AOT](#aot)
-  * [Library](#library)
   * [Docker](#docker)
+  * [Library](#library)
   * [Transports](#transports)
 * [Cubby Client](#cubby-client)
   * [Transports](#transports-1)
@@ -85,6 +85,7 @@ Simply pull our container using docker pull.  By default the container will run 
 | CUBBY__CLEANUP__STRATEGY | Sets the cache expiration cleanup strategy               | Disabled, Hourly, Random, Aggressive, Duration, Manual |
 | CUBBY__CLEANUP__DELAY    | The time between cleanups when using a Duration strategy | 00:00:00 - HH:MM:SS:MS                                 |
 | LOGGING__LOGLEVEL        | A log level used for all standard out messages           | Scribbly.Cubby : Trace, Information, etc               |
+| ASPNETCORE_URLS          | The applications HTTP Ports and Schemes                  | See MS Docs for Aspnet Core                            |
 
 **Default Container Configuration**
 
@@ -95,6 +96,14 @@ Simply pull our container using docker pull.  By default the container will run 
 | CUBBY__CLEANUP__STRATEGY | Random                       |
 | CUBBY__CLEANUP__DELAY    | 00:00:00 / NA                |
 | LOGGING__LOGLEVEL        | Scribbly.Cubby : Information |
+| ASPNETCORE_URLS          | "http://+:5000;"             |
+
+### Ports
+
+By default the Cubby container will expose port `5000` HTTP.
+
+> [Note]
+> We will probably be adding HTTPs support inside the container to better support gRPC transports
 
 ## Library
 
