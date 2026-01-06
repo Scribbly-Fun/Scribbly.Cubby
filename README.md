@@ -47,6 +47,55 @@ nuget package and executed from within an existing application.
 
 ## AOT
 
+To create a Native AOT build of cubby follow the build steps below.
+
+```shell
+cd ./app/Scribbly.Cubby.Host
+```
+
+```shell
+dotnet publish ./Scribbly.Cubby.Host.csproj -r win-x64 -c Release -o ../../artifacts/publish
+```
+```shell
+../../artifacts/publish/Scribbly.Cubby.Host.exe
+```
+
+>[!Note]
+> Compiled binaries for a few platforms (Window x64, Linux x64) will be provided eventually.
+> Expect to see these on the github releases soon.
+
+## Docker
+
+Simply pull our container using docker pull.  By default the container will run with the Cubby HTTP and gPRC transports.
+
+``docker pull scribbly/cubby:***``
+
+### Environment Variable
+
+> [!Note]
+> Long term you will be able to start the container with the transport(s) specified using an environment variable
+> something like: CUBBY__TRANSPORT:tcp http grpc
+> Currently the container will start with gRPC and HTTP transports.
+> gRPC will not include a SSL will need to be managed from outside the container
+
+| Name                     | Purpose                                                  | Values                                                 | 
+|--------------------------|----------------------------------------------------------|--------------------------------------------------------|
+| CUBBY__STORE             | Changes the cubby internal store                         | Sharded, Concurrent, LockFree                          |
+| CUBBY__CAPACITY          | Sets the storage capacity for the cache                  | 0 - None or 1 - XXXX                                   |
+| CUBBY__CLEANUP__STRATEGY | Sets the cache expiration cleanup strategy               | Disabled, Hourly, Random, Aggressive, Duration, Manual |
+| CUBBY__CLEANUP__DELAY    | The time between cleanups when using a Duration strategy | 00:00:00 - HH:MM:SS:MS                                 |
+| LOGGING__LOGLEVEL        | A log level used for all standard out messages           | Scribbly.Cubby : Trace, Information, etc               |
+
+**Default Container Configuration**
+
+| Name                     | Value                        | 
+|--------------------------|------------------------------|
+| CUBBY__STORE             | Sharded                      |
+| CUBBY__CAPACITY          | 0 - None                     |
+| CUBBY__CLEANUP__STRATEGY | Random                       |
+| CUBBY__CLEANUP__DELAY    | 00:00:00 / NA                |
+| LOGGING__LOGLEVEL        | Scribbly.Cubby : Information |
+
 ## Library
 
 Add a package reference to `Scribbly.Cubby.Server` as well as a Transport package such as 
@@ -55,6 +104,9 @@ Add a package reference to `Scribbly.Cubby.Server` as well as a Transport packag
 > [!Note]
 > You can simply look at the source code for the Scribbly.Cubby.Host application for examples in the 
 > /app/Scribbly.Cubby.Host/ directory
+> 
+> Take note of the use of CreateSlimBuilder to support AOT.  
+> You can use whatever you need however, it may maintain AOT compatability.
 
 To get started some services need to be configured and registered.
 
@@ -74,22 +126,35 @@ builder
     .AddCubbyServer(ops =>
     {
         // Cubby's default storage
-        ops.Store = CubbyOptions.StoreType.RefStruct; 
+        ops.Store = CubbyOptions.StoreType.Sharded; 
         
         // When greater than zero a max cache key value will be set.  This is a large optimization if the value is known.
-        ops.Capacity = int.MinValue;
+        ops.Capacity = 0;
         
         // Override the concurrency with a specific number of CORES
         ops.Cores = Environment.ProcessorCount;
+        
+        // Configure an async cleanup strategy
+        ops.Cleanup.Strategy = CacheCleanupOptions.AsyncStrategy.Random;
     });
 ```
 
-Once configured each transport may/will require some setup.
+Once configured at a minimum a transport must be configured. Each transport may/will require some setup.
+
+*grpc transport*
 
 ```csharp
 builder
     .AddCubbyServer()
     .WithCubbyGrpcServer();
+```
+
+*http transport*
+
+```csharp
+builder
+    .AddCubbyServer()
+    .WithCubbyHttpServer();
 ```
 
 Lastly the application may need to bind the transport
@@ -106,39 +171,198 @@ var app = builder.Build();
 app.MapCubbyGrpc();
 ```
 
-## Docker
+*Note that multiple transports can be used at once*
 
-Simply pull our container using docker pull.
+```csharp
+var builder = WebApplication.CreateSlimBuilder(args);
 
-``docker pull scribbly/cubby:0.1.0-7-docker-file.2``
+builder
+    .AddCubbyServer()
+    .WithCubbyHttpServer()
+    .WithCubbyGrpcServer();
 
-> [!Note]
-> The container is still not GA and will be changing.
-> Long term you will be able to start the container with the transport(s) specified using an environment variable
-> something like: SCRB_TRANSPORT:tcp http grpc 
-> Currently the container will start with gRPC and no https, this can create issues using a gRPC client.
+var app = builder.Build();
+
+app.MapCubbyGrpc();
+app.MapCubbyHttp();
+```
+
+### Cubby Options
+
+All builder configuration can be both hardcoded (as above) or added to your appsettings.json.
+Cubby will load the hard coded values then override them with values from your configuration.
+Below is an example appsettings.json
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Scribbly.Cubby": "Information"
+    }
+  },
+  "Cubby": {
+    "Store" : "Sharded",
+    "Capacity": 1000,
+    "Cleanup": {
+      "Strategy": "Duration",
+      "Delay" : "00:00:01"
+    }
+  }
+}
+```
+
+All asynchronous executions monitoring changes in the Cubby configuration.  
+As such your async strategy and durations can be updated while the application is running.
 
 ## Transports
 
-Cubby (will) support multiple transports configured in the hosted application or using environment variables.
+Cubby supports multiple transports configured in the hosted application or using environment variables.
 
 ### HTTP
 
 ### GRPC
 
 ### TCP
+
+`(TDB)`
 
 # Cubby Client
 
+Similar to the server Cubby has several client side library designed to seamlessly interface with the transports.
+You just need to be sure your server is running the transport designed to operate with your client.
+
+To start using the `Cubby Client` add a package reference to a Cubby Client transport
+
+1. Scribbly.Cubby.Grpc.Client
+2. Scribbly.Cubby.Http.Client
+
+In your applications program use the ``AddCubbyClient`` service extension to register all required services.
+
+```csharp
+builder.Services
+    .AddCubbyClient();
+```
+
+At a minimum at least one transport must be setup
+
+```csharp
+builder.Services
+    .AddCubbyClient()
+    .WithCubbyHttpClient();
+```
+
+Several client options and configuration may be required depending on your use case and environment
+
+```csharp
+builder.Services
+    .AddCubbyClient(ops =>
+    {
+        // Set the server's URL 
+        var host = Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTPS") ?? Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTP");
+        ops.Host = new Uri(host?? throw new InvalidOperationException());
+        
+        // Configure the client scope, defaults to a Singleton
+        ops.Lifetime = ServiceLifetime.Singleton;
+        
+        // Setup a custom serializer configuration
+        ops.AddSystemTextSerializer(ops =>
+        {
+            ops.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
+        });
+    })
+    .WithCubbyHttpClient()
+    .WithCubbyGrpcClient();
+```
+
+All transports support custom HTTP handlers using the HTTP Client Factory
+
+```csharp
+builder.Services
+    .AddCubbyClient(ops =>
+    {
+        // ...
+    })
+    .WithCubbyHttpClient(ops =>
+    {
+        ops.AddHttpMessageHandler<MyHandler>()
+    })
+    .WithCubbyGrpcClient(ops =>
+    {
+        ops.AddHttpMessageHandler<MyHandler>()
+    });
+```
+
+Once the cubby client is all configured for your application you can resolve the ``ICubbyClient`` service.
+
+```csharp
+app.MapPost("cubby/client/{key}", async (ICubbyClient cache, string key, Item item, CancellationToken token) =>
+{
+    return await cache.PutObject(key, item, CacheEntryOptions.None, token);
+});
+
+app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, CancellationToken token) =>
+{
+    return await cache.GetObject<Item>(key, token);
+});
+```
+
+Cubby also supports Microsoft's `IDistributedCache`
+
+```csharp
+app.MapPost("/entry/{key}", (IDistributedCache cache, string key, [FromBody] Item item) =>
+{
+    var value = JsonSerializer.SerializeToUtf8Bytes(item);
+    cache.Set(key, value);
+});
+```
 
 ## Transports
 
+When using multiple transports you may need to explicitly select the designed ``ICubbyClient``.  Note that the `ICubbyClient`
+will resolve to the first transport added to your application.
 
 ### HTTP
 
+To explicitly use the Http Transport resolve the ``IHttpCubbyClient``
+
+```csharp
+app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [FromQuery] bool? compress, [FromBody] Item item, CancellationToken token) =>
+{
+    return await cache.PutObject(
+        key, item, 
+        compress is true 
+            ? CacheEntryOptions.Never(CacheEntryFlags.Compressed) 
+            : CacheEntryOptions.None, 
+        token);
+});
+
+app.MapGet("cubby/http/{key}", async (IHttpCubbyClient cache, string key, CancellationToken token) =>
+{
+    return await cache.GetObject<Item>(key, token);
+});
+
+```
 ### GRPC
 
+To explicitly use the gRPC Transport resolve the ``IGrpcCubbyClient``
+
+```csharp
+```csharp
+app.MapPost("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    return await cache.PutObject(key, item, CacheEntryOptions.None, token);
+});
+
+app.MapGet("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, CancellationToken token) =>
+{
+    return await cache.GetObject<Item>(key, token);
+});
+
+```
+
 ### TCP
+
+``(TBD)``
 
 ## Serializers
 
@@ -201,7 +425,7 @@ builder.Services
 
 ### MessagePack
 
-By adding a reference to the ``Scribbly.Cubby.MessagePack`` cubby con be configured to use `MessagePack` 
+By adding a reference to the ``Scribbly.Cubby.MessagePack`` cubby can be configured to use `MessagePack` 
 to serialize all objects.  Ensure you've generated a TypeShapeProvider for each time you plan to serialize.
 
 https://aarnott.github.io/Nerdbank.MessagePack/index.html
