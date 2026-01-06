@@ -96,6 +96,10 @@ internal class CacheCleanupAsyncProcessor(
             {
                 logger.LogWarning("Delay was updated, Resetting Loop");
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                logger.LogWarning("Async Hosted Service was Shutdown");
+            }
             catch (Exception e)
             {
                 logger.LogCritical(e, "Cache Background Processor Encountered an Unhandled Error");
