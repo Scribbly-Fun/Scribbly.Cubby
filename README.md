@@ -317,6 +317,9 @@ app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, Cancella
 
 Cubby also supports Microsoft's `IDistributedCache`
 
+>[!Warning]
+> The implementation is not fully supported yet.
+
 ```csharp
 app.MapPost("/entry/{key}", (IDistributedCache cache, string key, [FromBody] Item item) =>
 {
