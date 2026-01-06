@@ -32,14 +32,8 @@ builder.Services
             ops.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
         });
     })
-    .WithCubbyHttpClient(ops =>
-    {
-        ops.AddHttpMessageHandler<MyHandler>()
-    })
-    .WithCubbyGrpcClient(ops =>
-    {
-        ops.AddHttpMessageHandler<MyHandler>()
-    });
+    .WithCubbyHttpClient()
+    .WithCubbyGrpcClient();
 
 var app = builder.Build();
 
