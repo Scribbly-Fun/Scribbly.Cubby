@@ -99,6 +99,7 @@ internal class CacheCleanupAsyncProcessor(
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 logger.LogWarning("Async Hosted Service was Shutdown");
+                break;
             }
             catch (Exception e)
             {
