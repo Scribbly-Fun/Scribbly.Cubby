@@ -27,9 +27,9 @@ builder.Services
         
         ops.Lifetime = ServiceLifetime.Singleton;
         
-        ops.AddSystemTextSerializer(ops =>
+        ops.AddSystemTextSerializer(jsonOptions =>
         {
-            ops.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
+            jsonOptions.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
         });
     })
     .WithCubbyHttpClient()

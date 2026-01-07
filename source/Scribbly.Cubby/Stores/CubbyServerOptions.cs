@@ -17,7 +17,7 @@ public class CubbyServerOptions
     /// <summary>
     /// The env and appsettings.json section name
     /// </summary>
-    public const string SectionName = "ScrbCubby";
+    public const string SectionName = "Cubby";
     
     /// <summary>
     /// The supported store types
