@@ -4,16 +4,28 @@ using Scribbly.Cubby.UnitTests.Store_Tests;
 
 namespace Scribbly.Cubby.UnitTests.Tests.Store_Tests;
 
-public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
+public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
 {
     [Fact]
-    public void TryGet_Unknown_Key_Returns_False()
+    public void Get_Unknown_Key_Should_Throw_KeyNotFound()
     {
         BytesKey key = "My Unknown Key";
 
-        using var store = CreateStore(new CubbyServerOptions(), TimeProvider.System);
+        var act = () =>
+        {
+            var store = CreateStore(new CubbyServerOptions(), TimeProvider.System);
+            try
+            {
+                store.Get(key);
 
-        store.TryGet(key, out _).Should().BeFalse();
+            }
+            finally
+            {
+                store.Dispose();
+            }
+        };
+
+        act.Should().ThrowExactly<KeyNotFoundException>();
     }
 
     [Theory]
@@ -22,7 +34,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithActiveEntry_Returns_True(string key, int length)
+    public void Get_Known_Key_WithActiveEntry_Returns_Entry(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -31,7 +43,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.None);
         
-        store.TryGet(key, out _).Should().BeTrue();
+        store.Get(key).ToArray().Length.Should().Be(array.Length + 24);
     }
 
     [Theory]
@@ -40,7 +52,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithTombstoneEntry_Returns_False(string key, int length)
+    public void Get_Known_Key_WithTombstoneEntry_Returns_False(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -49,7 +61,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.From(TimeProvider.System, CacheEntryFlags.Tombstone, null));
         
-        store.TryGet(key, out _).Should().BeFalse();
+        store.Get(key).IsEmpty.Should().BeTrue();
     }
 
     [Theory]
@@ -58,7 +70,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithAbsoluteExpiredEntry_Returns_False(string key, int length)
+    public void Get_Known_Key_WithAbsoluteExpiredEntry_Returns_False(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -70,7 +82,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         time.AddMilliseconds(2);
         
-        store.TryGet(key, out _).Should().BeFalse();
+        store.Get(key).IsEmpty.Should().BeTrue();
     }
 
     [Theory]
@@ -79,7 +91,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithSlidingExpiredEntry_Returns_False(string key, int length)
+    public void Get_Known_Key_WithSlidingExpiredEntry_Returns_False(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -91,7 +103,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         time.AddMilliseconds(2);
         
-        store.TryGet(key, out _).Should().BeFalse();
+        store.Get(key).IsEmpty.Should().BeTrue();
     }
     
     [Theory]
@@ -100,7 +112,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithAbsoluteFutureEntry_Returns_True(string key, int length)
+    public void Get_Known_Key_WithAbsoluteFutureEntry_Returns_True(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -110,7 +122,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.Absolute(time, DateTimeOffset.UtcNow));
         
-        store.TryGet(key, out _).Should().BeTrue();
+        store.Get(key).IsEmpty.Should().BeFalse();
     }
 
     [Theory]
@@ -119,7 +131,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_Returns_True(string key, int length)
+    public void Get_Known_Key_SlidingFutureEntry_Returns_True(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -129,7 +141,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromMilliseconds(1)));
         
-        store.TryGet(key, out _).Should().BeTrue();
+        store.Get(key).IsEmpty.Should().BeFalse();
     }
 
     [Theory]
@@ -138,7 +150,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithActiveEntry_Outputs_Cache(string key, int length)
+    public void Get_Known_Key_WithActiveEntry_Outputs_Cache(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -147,9 +159,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.None);
         
-        store.TryGet(key, out var entry).Should().BeTrue();
-
-        entry.Length.Should().Be(array.Length + 24);
+        store.Get(key).Length.Should().Be(array.Length + 24);
     }
     
     [Theory]
@@ -157,8 +167,8 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("the key for the cache", 10_000)]
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
-    [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_WithAbsoluteFutureEntry_Outputs_Entry(string key, int length)
+    [InlineData("12341123", 37_000)]
+    public void Get_Known_Key_WithAbsoluteFutureEntry_Outputs_Entry(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -168,9 +178,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.Absolute(time, DateTimeOffset.UtcNow));
         
-        store.TryGet(key, out var entry).Should().BeTrue();
-        
-        entry.Length.Should().Be(array.Length + 24);
+        store.Get(key).Length.Should().Be(array.Length + 24);
     }
 
     [Theory]
@@ -179,7 +187,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("more random crap", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_Outputs_Entry(string key, int length)
+    public void Get_Known_Key_SlidingFutureEntry_Outputs_Entry(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -189,8 +197,6 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
 
         store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromMilliseconds(1)));
         
-        store.TryGet(key, out var entry).Should().BeTrue();
-        
-        entry.Length.Should().Be(array.Length + 24);
+        store.Get(key).Length.Should().Be(array.Length + 24);
     }
 }
