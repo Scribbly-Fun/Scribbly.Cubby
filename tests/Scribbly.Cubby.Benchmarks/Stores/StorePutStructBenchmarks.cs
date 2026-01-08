@@ -14,7 +14,7 @@ public class StorePutStructBenchmarks
     private BytesKey[] _keys = null!;
     private byte[][] _values = null!;
 
-    private SharedConcurrentStore _sharedEntries = null!;
+    private ShardedConcurrentStore _shardedEntries = null!;
     
     [GlobalSetup]
     public void Setup()
@@ -30,7 +30,7 @@ public class StorePutStructBenchmarks
             _values[i] = new byte[64];
         }
 
-        _sharedEntries = SharedConcurrentStore.FromOptions(options, TimeProvider.System);
+        _shardedEntries = ShardedConcurrentStore.FromOptions(options, TimeProvider.System);
     }
     
     [Benchmark]
@@ -38,7 +38,7 @@ public class StorePutStructBenchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _sharedEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
+            _shardedEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
         });
     }
 }

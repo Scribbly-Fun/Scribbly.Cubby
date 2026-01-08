@@ -44,7 +44,7 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
 
         await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
 
-        var value = store.Get(key).Span.GetValue();
+        var value = store.Get(key).GetValue();
         
         value.ToArray().Should().BeEquivalentTo(array);
     }
@@ -87,7 +87,7 @@ public abstract class Put_Entry_Client_TestBase<T>(WebApplicationFactory<T> appl
         
         await client.Put(key, array, CacheEntryOptions.None, CancellationToken.None);
         
-        var value = store.Get(key).Span.GetValue();
+        var value = store.Get(key).GetValue();
 
         value.ToArray().Should().BeEquivalentTo(array);
     }
