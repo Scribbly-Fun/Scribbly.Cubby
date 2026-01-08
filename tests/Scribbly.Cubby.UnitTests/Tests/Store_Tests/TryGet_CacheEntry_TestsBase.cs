@@ -19,7 +19,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithActiveEntry_Returns_True(string key, int length)
@@ -37,7 +37,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithTombstoneEntry_Returns_False(string key, int length)
@@ -55,7 +55,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithAbsoluteExpiredEntry_Returns_False(string key, int length)
@@ -76,7 +76,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithSlidingExpiredEntry_Returns_False(string key, int length)
@@ -97,7 +97,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithAbsoluteFutureEntry_Returns_True(string key, int length)
@@ -116,7 +116,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_SlidingFutureEntry_Returns_True(string key, int length)
@@ -135,7 +135,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithActiveEntry_Outputs_Cache(string key, int length)
@@ -155,7 +155,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_WithAbsoluteFutureEntry_Outputs_Entry(string key, int length)
@@ -176,7 +176,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void TryGet_Known_Key_SlidingFutureEntry_Outputs_Entry(string key, int length)
@@ -192,5 +192,26 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
         store.TryGet(key, out var entry).Should().BeTrue();
         
         entry.Length.Should().Be(array.Length + 24);
+    }
+
+    [Theory(Skip = "Determine a good way to test sliding times")]
+    [InlineData("key", 1000)]
+    [InlineData("the key for the cache", 10_000)]
+    [InlineData("some key value i can't think of", 121)]
+    [InlineData("💪💪💪💪💪💪", 77_987)]
+    [InlineData("12341123", 65_535)]
+    public void TryGet_Known_Key_SlidingFutureEntry_SlidesExpiration(string key, int length)
+    {
+        byte[] array = new byte[length];
+        Random.Shared.NextBytes(array);
+
+        var time = new AdjustableTimeProvider(TimeSpan.FromMilliseconds(-1));
+        using var store = CreateStore(new CubbyServerOptions(), time);
+
+        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromMilliseconds(1)));
+        
+        store.TryGet(key, out var entry).Should().BeTrue();
+        
+        entry.GetHeader().GetExpiration().Should().BeGreaterOrEqualTo(time.GetUtcNow().UtcTicks);
     }
 }

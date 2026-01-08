@@ -31,7 +31,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_WithActiveEntry_Returns_Entry(string key, int length)
@@ -49,7 +49,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_WithTombstoneEntry_Returns_False(string key, int length)
@@ -67,7 +67,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_WithAbsoluteExpiredEntry_Returns_False(string key, int length)
@@ -88,7 +88,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_WithSlidingExpiredEntry_Returns_False(string key, int length)
@@ -109,7 +109,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_WithAbsoluteFutureEntry_Returns_True(string key, int length)
@@ -128,7 +128,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_SlidingFutureEntry_Returns_True(string key, int length)
@@ -147,7 +147,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_WithActiveEntry_Outputs_Cache(string key, int length)
@@ -165,7 +165,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 37_000)]
     public void Get_Known_Key_WithAbsoluteFutureEntry_Outputs_Entry(string key, int length)
@@ -184,7 +184,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
     [Theory]
     [InlineData("key", 1000)]
     [InlineData("the key for the cache", 10_000)]
-    [InlineData("more random crap", 121)]
+    [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
     public void Get_Known_Key_SlidingFutureEntry_Outputs_Entry(string key, int length)
