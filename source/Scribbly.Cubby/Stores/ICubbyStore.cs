@@ -19,7 +19,7 @@ public interface ICubbyStore : ICubbyStoreEviction, IDisposable
     /// <param name="key">The key for the value requested</param>
     /// <returns>The value from the store</returns>
     /// <exception cref="InvalidOperationException">When the key is not found in the store</exception>
-    ReadOnlyMemory<byte> Get(BytesKey key);
+    ReadOnlySpan<byte> Get(BytesKey key);
 
     /// <summary>
     /// Attempts to Get the value from the cache

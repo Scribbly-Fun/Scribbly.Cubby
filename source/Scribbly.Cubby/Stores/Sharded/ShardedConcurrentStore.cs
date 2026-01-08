@@ -8,21 +8,21 @@ namespace Scribbly.Cubby.Stores.Sharded;
 /// <summary>
 /// A cache storage that uses arrays of concurrent dictionaries to improve multithreaded locking contention.
 /// </summary>
-internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteraction
+internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteraction
 {
     private readonly TimeProvider _provider;
 
     /// <summary>
     /// Creates a new sharded dictionary where the number of shards is equal to the number of processors. 
     /// </summary>
-    internal static SharedConcurrentStore FromOptions(CubbyServerOptions serverOptions, TimeProvider provider)
+    internal static ShardedConcurrentStore FromOptions(CubbyServerOptions serverOptions, TimeProvider provider)
         => new(serverOptions, provider);
     
     private int _activeWriters;
     
     private readonly ConcurrentDictionary<BytesKey, byte[]>[] _shards;
 
-    private SharedConcurrentStore(CubbyServerOptions serverOptions, TimeProvider provider)
+    private ShardedConcurrentStore(CubbyServerOptions serverOptions, TimeProvider provider)
     {
         _provider = provider;
         _shards = new ConcurrentDictionary<BytesKey, byte[]>[serverOptions.Cores];
@@ -60,7 +60,7 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
     public bool Exists(BytesKey key) => GetShard(key).ContainsKey(key);
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> Get(BytesKey key)
+    public ReadOnlySpan<byte> Get(BytesKey key)
     {
         Interlocked.Increment(ref _activeWriters);
         
@@ -68,7 +68,7 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
         {
             ConcurrentDictionary<BytesKey, byte[]> shard = GetShard(key);
         
-            var entry = shard[key];
+            var entry = shard[key].GetEntryFromBuffer();
 
             var header = entry.GetHeader();
             var flags = header.GetFlags();
@@ -110,12 +110,13 @@ internal sealed class SharedConcurrentStore : ICubbyStore, ICubbyStoreEvictionIn
         try
         {
             var shard = GetShard(key);
-            if (!shard.TryGetValue(key, out var entry))
+            if (!shard.TryGetValue(key, out var buffer))
             {
                 value = null;
                 return false;
             }
 
+            var entry = buffer.GetEntryFromBuffer();
             var header = entry.GetHeader();
             var flags = header.GetFlags();
 

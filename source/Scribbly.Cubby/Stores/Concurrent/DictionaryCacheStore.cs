@@ -52,13 +52,13 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     public bool Exists(BytesKey key) => _store.ContainsKey(key);
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> Get(BytesKey key)
+    public ReadOnlySpan<byte> Get(BytesKey key)
     {
         Interlocked.Increment(ref _activeWriters);
         
         try
         {
-            var entry = _store[key];
+            var entry = _store[key].GetEntryFromBuffer();
 
             var header = entry.GetHeader();
             var flags = header.GetFlags();
@@ -99,12 +99,13 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
         
         try
         {
-            if (!_store.TryGetValue(key, out var entry))
+            if (!_store.TryGetValue(key, out var buffer))
             {
                 value = null;
                 return false;
             }
 
+            var entry = buffer.GetEntryFromBuffer();
             var header = entry.GetHeader();
             var flags = header.GetFlags();
 

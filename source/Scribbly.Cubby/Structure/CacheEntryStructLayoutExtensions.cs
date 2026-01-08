@@ -31,6 +31,22 @@ internal static class CacheEntryStructLayoutExtensions
 
     extension(byte[] cacheData)
     {
+        /// <summary>
+        /// Returns a span containing the header as well as all value bytes
+        /// </summary>
+        /// <returns>The span containing the entire entry</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Span<byte> GetEntryFromBuffer()
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(cacheData.Length, EntryLayout.HeaderSize);
+
+            var span = cacheData.AsSpan();
+
+            var length = span.GetValueLength();
+
+            return span[..(EntryLayout.HeaderSize + length)];
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Span<byte> GetHeader()
         {
