@@ -25,7 +25,7 @@ public class CubbyServerOptions
     public enum StoreType
     {
         /// <summary>
-        /// The sharded store
+        /// A cubby store that uses a concurrent dictionary per CPU Core (or specified)
         /// </summary>
         Sharded,
         
@@ -33,6 +33,11 @@ public class CubbyServerOptions
         /// The basic concurrent dictionary
         /// </summary>
         Concurrent,
+        
+        /// <summary>
+        /// A cubby store that utilized manually locks and collection marshal
+        /// </summary>
+        Marshalled,
         
         /// <summary>
         /// The lock free store

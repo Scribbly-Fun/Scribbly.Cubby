@@ -148,6 +148,9 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     /// <returns>A new bytes key</returns>
     public static implicit operator BytesKey(ReadOnlySpan<byte> value) => new BytesKey(value.ToArray());
     
+    /// <summary>
+    /// Attempts to parse the string value and create a new Byte key
+    /// </summary>
     public static bool TryParse(
         string? value,
         IFormatProvider? _,

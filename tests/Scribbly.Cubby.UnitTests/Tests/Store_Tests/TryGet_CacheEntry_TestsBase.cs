@@ -119,7 +119,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_Returns_True(string key, int length)
+    public void TryGet_Known_Key_With_SlidingFutureEntry_Returns_True(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -179,7 +179,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_Outputs_Entry(string key, int length)
+    public void TryGet_Known_Key_With_SlidingFutureEntry_Outputs_Entry(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -200,7 +200,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_SlidesExpiration(string key, int length)
+    public void TryGet_Known_Key_With_SlidingFutureEntry_SlidesExpiration(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);

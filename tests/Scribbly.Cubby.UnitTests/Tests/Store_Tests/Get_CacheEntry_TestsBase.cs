@@ -173,7 +173,7 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
 
-        var time = new AdjustableTimeProvider(TimeSpan.FromMilliseconds(-1));
+        var time = new AdjustableTimeProvider(TimeSpan.FromMilliseconds(-500));
         using var store = CreateStore(new CubbyServerOptions(), time);
 
         store.Put(key, array, CacheEntryOptions.Absolute(time, DateTimeOffset.UtcNow));

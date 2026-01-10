@@ -18,4 +18,18 @@ internal static class DictionaryExtensions
             return true;
         }
     }
+
+    extension(Dictionary<BytesKey, byte[]> dictionary)
+    {
+        internal bool TryRemoveRentedArray(BytesKey key)
+        {
+            if (!dictionary.Remove(key, out var entry))
+            {
+                return false;
+            }
+            
+            ArrayPool<byte>.Shared.Return(entry, clearArray: false);
+            return true;
+        }
+    }
 }
