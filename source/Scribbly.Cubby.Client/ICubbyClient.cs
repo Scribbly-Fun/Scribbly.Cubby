@@ -9,11 +9,6 @@ namespace Scribbly.Cubby.Client;
 public interface ICubbyClient
 {
     /// <summary>
-    /// checks if an item exists in the cache
-    /// </summary>
-    ValueTask<bool> Exists(BytesKey key, CancellationToken token = default);
-    
-    /// <summary>
     /// Inserts or creates a new cached record.
     /// </summary>
     ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options = null, CancellationToken token = default);
@@ -40,4 +35,20 @@ public interface ICubbyClient
     [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
     [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
     ValueTask<EntryResponse<T>> GetObject<T>(BytesKey key, CancellationToken token = default) where T : notnull;
+    
+    /// <summary>
+    /// checks if an item exists in the cache
+    /// </summary>
+    ValueTask<bool> Exists(BytesKey key, CancellationToken token = default);
+
+    /// <summary>
+    /// checks if an item exists in the cache
+    /// </summary>
+    ValueTask<RefreshResult> Refresh(BytesKey key, CancellationToken token = default);
+
+    /// <summary>
+    /// checks if an item exists in the cache
+    /// </summary>
+    ValueTask<EvictResult> Evict(BytesKey key, CancellationToken token = default);
 }
+    

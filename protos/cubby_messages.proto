@@ -46,9 +46,13 @@ message PutRequest {
   */
   optional int32 encoding = 4;
   /**
-  * The amount of time before the cache should expire.
+  * The absolute expiration time.
   */
   optional int64 expiration = 5;
+  /**
+  * The amount of time before the cache should expire.
+  */
+  optional int64 duration = 6;
 }
 
 /**

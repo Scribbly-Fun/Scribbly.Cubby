@@ -12,10 +12,16 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
     /// <inheritdoc />
     public PutResult Put(in BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options = null)
     {
+        options ??= CacheEntryOptions.None;
+        
         var result = client.Put(new PutRequest
         {
             Key = ByteString.CopyFrom(key),
             Value = ByteString.CopyFrom(value.Span),
+            Encoding = (short)options.Encoding,
+            Flags = (short)options.Encoding,
+            Expiration = options.AbsoluteExpiration,
+            Duration = options.SlidingDuration
         });
 
         return result switch
@@ -31,10 +37,16 @@ internal class CubbyGrpcTransport(CacheService.CacheServiceClient client) : IGrp
     /// <inheritdoc />
     public async ValueTask<PutResult> PutAsync(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options, CancellationToken token = default)
     {
+        options ??= CacheEntryOptions.None;
+
         var result = await client.PutAsync(new PutRequest
         {
             Key = ByteString.CopyFrom(key),
             Value = ByteString.CopyFrom(value.Span),
+            Encoding = (short)options.Encoding,
+            Flags = (short)options.Flags,
+            Expiration = options.AbsoluteExpiration,
+            Duration = options.SlidingDuration
             
         }, cancellationToken: token);
 

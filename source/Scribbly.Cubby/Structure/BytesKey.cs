@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Scribbly.Cubby;
 
@@ -146,4 +147,20 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     /// <param name="value">A string used to encode a UTF 8 byte array used as the key.</param>
     /// <returns>A new bytes key</returns>
     public static implicit operator BytesKey(ReadOnlySpan<byte> value) => new BytesKey(value.ToArray());
+    
+    public static bool TryParse(
+        string? value,
+        IFormatProvider? _,
+        out BytesKey result)
+    {
+        result = default;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+        
+        result= value;
+        return true;
+    }
 }

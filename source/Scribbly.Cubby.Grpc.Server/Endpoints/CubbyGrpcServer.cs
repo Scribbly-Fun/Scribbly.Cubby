@@ -6,6 +6,9 @@ using CSharpPutResult = Scribbly.Cubby.Stores.PutResult;
 using GrpcPutResult = Scribbly.Cubby.Proto.PutResult;
 using CSharpEvictResult = Scribbly.Cubby.Stores.EvictResult;
 using GrpcEvictResult = Scribbly.Cubby.Proto.EvictResult;
+using CsharpRefreshResult = Scribbly.Cubby.Stores.RefreshResult;
+using GrpcRefreshResult = Scribbly.Cubby.Proto.RefreshRequest;
+using RefreshResult = Scribbly.Cubby.Proto.RefreshResult;
 
 namespace Scribbly.Cubby.Endpoints;
 
@@ -52,6 +55,36 @@ internal sealed class CubbyGrpcServer(ICubbyStore store, TimeProvider provider) 
     }
 
     /// <inheritdoc />
+    public override Task<ExistsResponse> Exists(ExistsRequest request, ServerCallContext context)
+    {
+        var key = new BytesKey(request.Key.ToByteArray());
+        var result = store.Exists(key);
+
+        return Task.FromResult(new ExistsResponse
+        {
+            Found = result
+        });
+    }
+
+    /// <inheritdoc />
+    public override Task<RefreshResponse> Refresh(GrpcRefreshResult request, ServerCallContext context)
+    {
+        var key = new BytesKey(request.Key.ToByteArray());
+        var result = store.Refresh(key);
+
+        return Task.FromResult(new RefreshResponse
+        {
+            Result = result switch
+            {
+                CsharpRefreshResult.Undefined => RefreshResult.Undefined,
+                CsharpRefreshResult.Updated => RefreshResult.Updated ,
+                CsharpRefreshResult.NotSlidingEntry => RefreshResult.NotSliding,
+                _ => throw new ArgumentOutOfRangeException()
+            }
+        });
+    }
+
+    /// <inheritdoc />
     public override Task<EvictResponse> Evict(EvictRequest request, ServerCallContext context)
     {
         var key = new BytesKey(request.Key.ToByteArray());
@@ -68,4 +101,5 @@ internal sealed class CubbyGrpcServer(ICubbyStore store, TimeProvider provider) 
             }
         });
     }
+
 }

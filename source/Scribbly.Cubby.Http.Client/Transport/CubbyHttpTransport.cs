@@ -15,7 +15,13 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
         
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}");
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby",
+            Query = $"key={key}" 
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Put, uri.Uri);
         request.Content = new ByteArrayContent(value.ToArray());
         request.Headers.Add(Headers.CubbyHeaderFlags, options.Flags.ToFlagsString());
         request.Headers.Add(Headers.CubbyHeaderEncoding, options.Encoding.ToEncodingString());
@@ -40,11 +46,17 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
         
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}");
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby",
+            Query = $"key={key}" 
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Put, uri.Uri);
         request.Content = new ByteArrayContent(value.ToArray());
         request.Headers.Add(Headers.CubbyHeaderFlags, options.Flags.ToFlagsString());
         request.Headers.Add(Headers.CubbyHeaderEncoding, options.Encoding.ToEncodingString());
-        request.Headers.Add(Headers.CubbyHeaderExpiration, options.SlidingDuration.ToString());
+        request.Headers.Add(Headers.CubbyHeaderExpiration, TimeSpan.FromTicks(options.SlidingDuration).ToString());
 
         using var response = await client.SendAsync(request, token);
 
@@ -62,8 +74,14 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     public ReadOnlyMemory<byte> Get(in BytesKey key)
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
+        
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby",
+            Query = $"key={key}" 
+        };
      
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"/cubby/{key}");
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri.Uri);
         using var response = client.Send(request);
 
         using var stream = response.Content.ReadAsStream();
@@ -78,7 +96,13 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
-        using var response = await client.GetAsync($"/cubby/{key}", token);
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby",
+            Query = $"key={key}" 
+        };
+        
+        using var response = await client.GetAsync(uri.Uri, token);
 
         return await response.Content.ReadAsByteArrayAsync(token);
     }
@@ -87,11 +111,18 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     public bool Exists(in BytesKey key)
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}/evict");
+        
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby/exists",
+            Query = $"key={key}" 
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Put, uri.Uri);
         
         using var response = client.Send(request);
 
-        return response.StatusCode == HttpStatusCode.Accepted;
+        return response.StatusCode == HttpStatusCode.OK;
     }
     
     /// <inheritdoc />
@@ -99,19 +130,32 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby/exists",
+            Query = $"key={key}" 
+        };
+        
         using var response = await client.PutAsync(
-            $"/cubby/{key}/exists",
+            uri.Uri,
             null, 
             token);
 
-        return response.StatusCode == HttpStatusCode.Accepted;
+        return response.StatusCode == HttpStatusCode.OK;
     }
     
     /// <inheritdoc />
     public RefreshResult Refresh(in BytesKey key)
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}/refresh");
+        
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby/refresh",
+            Query = $"key={key}" 
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Put, uri.Uri);
         
         using var response = client.Send(request);
 
@@ -128,8 +172,14 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby/refresh",
+            Query = $"key={key}" 
+        };
+        
         using var response = await client.PutAsync(
-            $"/cubby/{key}/exists",
+            uri.Uri,
             null, 
             token);
 
@@ -145,7 +195,14 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     public EvictResult Evict(in BytesKey key)
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"/cubby/{key}/evict");
+        
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby",
+            Query = $"key={key}" 
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Put, uri.Uri);
         
         using var response = client.Send(request);
 
@@ -162,9 +219,14 @@ internal class CubbyHttpTransport(IHttpClientFactory factory) : IHttpCubbyStoreT
     {
         using var client = factory.CreateClient(nameof(CubbyHttpTransport));
         
-        using var response = await client.PutAsync(
-            $"/cubby/{key}/exists",
-            null, 
+        var uri = new UriBuilder(client.BaseAddress!)
+        {
+            Path = "/cubby",
+            Query = $"key={key}" 
+        };
+        
+        using var response = await client.DeleteAsync(
+            uri.Uri,
             token);
 
         return response.StatusCode switch

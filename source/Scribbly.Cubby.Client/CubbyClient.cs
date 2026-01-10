@@ -6,19 +6,9 @@ using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Client;
 
-internal class CubbyClient(
-    ICubbyStoreTransport transport, 
-    ICubbySerializer serializer, 
-    ICubbyCompressor compressor) 
+internal class CubbyClient(ICubbyStoreTransport transport, ICubbySerializer serializer, ICubbyCompressor compressor) 
     : ICubbyClient
 {
-    /// <inheritdoc />
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<bool> Exists(BytesKey key, CancellationToken token = default)
-    {
-        return transport.ExistsAsync(key, token);
-    }
-
     /// <inheritdoc />
     public ValueTask<PutResult> Put(BytesKey key, ReadOnlyMemory<byte> value, CacheEntryOptions? options, CancellationToken token = default)
     {
@@ -108,4 +98,26 @@ internal class CubbyClient(
             ?? throw new SerializationException("Failed to convert the stored bytes to the requested object")
         );
     }
+    
+    /// <inheritdoc />
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueTask<bool> Exists(BytesKey key, CancellationToken token = default)
+    {
+        return transport.ExistsAsync(key, token);
+    }
+    
+    /// <inheritdoc />
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueTask<RefreshResult> Refresh(BytesKey key, CancellationToken token = default)
+    {
+        return transport.RefreshAsync(key, token);
+    }
+
+    /// <inheritdoc />
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueTask<EvictResult> Evict(BytesKey key, CancellationToken token = default)
+    {
+        return transport.EvictAsync(key, token);
+    }
+
 }
