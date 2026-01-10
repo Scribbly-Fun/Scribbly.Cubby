@@ -119,7 +119,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_Returns_True(string key, int length)
+    public void TryGet_Known_Key_With_SlidingFutureEntry_Returns_True(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
@@ -179,15 +179,15 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_Outputs_Entry(string key, int length)
+    public void TryGet_Known_Key_With_SlidingFutureEntry_Outputs_Entry(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
 
-        var time = new AdjustableTimeProvider(TimeSpan.FromMilliseconds(-1));
+        var time = new AdjustableTimeProvider(TimeSpan.FromSeconds(-1));
         using var store = CreateStore(new CubbyServerOptions(), time);
 
-        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromMilliseconds(1)));
+        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromSeconds(10)));
         
         store.TryGet(key, out var entry).Should().BeTrue();
         
@@ -200,7 +200,7 @@ public abstract class TryGet_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsB
     [InlineData("some key value i can't think of", 121)]
     [InlineData("💪💪💪💪💪💪", 77_987)]
     [InlineData("12341123", 65_535)]
-    public void TryGet_Known_Key_SlidingFutureEntry_SlidesExpiration(string key, int length)
+    public void TryGet_Known_Key_With_SlidingFutureEntry_SlidesExpiration(string key, int length)
     {
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);

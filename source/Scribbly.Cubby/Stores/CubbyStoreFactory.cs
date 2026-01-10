@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Stores.Concurrent;
+using Scribbly.Cubby.Stores.Marshalled;
 using Scribbly.Cubby.Stores.Sharded;
 
 namespace Scribbly.Cubby.Stores;
@@ -34,6 +35,7 @@ public sealed class CubbyStoreFactory(IOptions<CubbyServerOptions> options, Time
         return cubbyOptions switch
         {
             { Store: CubbyServerOptions.StoreType.Sharded } => ShardedConcurrentStore.FromOptions(cubbyOptions, provider),
+            { Store: CubbyServerOptions.StoreType.Marshalled } => MarshalledStore.FromOptions(cubbyOptions, provider),
             { Store: CubbyServerOptions.StoreType.Concurrent } => ConcurrentStore.FromOptions(cubbyOptions, provider),
             
             _ => throw new ArgumentOutOfRangeException(nameof(options), options, null)
