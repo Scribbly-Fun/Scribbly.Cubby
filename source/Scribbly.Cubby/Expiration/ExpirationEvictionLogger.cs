@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Scribbly.Cubby.Stores;
 
 // ReSharper disable once CheckNamespace
 namespace Scribbly.Cubby;
 
+[ExcludeFromCodeCoverage]
 internal static partial class ExpirationEvictionLogger
 {
     [LoggerMessage(

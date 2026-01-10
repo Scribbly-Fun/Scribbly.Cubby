@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Scribbly.Cubby.Stores.LockFree;
 
+[ExcludeFromCodeCoverage]
 [Experimental("SCRB001", Message = "Not yet implemented")]
 sealed class LockFreeHashTable
 {
@@ -78,6 +79,7 @@ sealed class LockFreeHashTable
     }
 }
 
+[ExcludeFromCodeCoverage]
 [Experimental("SCRB001", Message = "Not yet implemented")]
 sealed class CacheEngine
 {
@@ -105,6 +107,7 @@ sealed class CacheEngine
     }
 }
 
+[ExcludeFromCodeCoverage]
 [Experimental("SCRB001", Message = "Not yet implemented")]
 sealed class CacheShard
 {

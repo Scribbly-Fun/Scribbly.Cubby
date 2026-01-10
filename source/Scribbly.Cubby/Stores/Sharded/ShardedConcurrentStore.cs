@@ -57,7 +57,45 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
     }
     
     /// <inheritdoc />
-    public bool Exists(BytesKey key) => GetShard(key).ContainsKey(key);
+    public bool Exists(BytesKey key)
+    {
+        Interlocked.Increment(ref _activeWriters);
+
+        try
+        {
+            var shard = GetShard(key);
+            if (!shard.TryGetValue(key, out var buffer))
+            {
+                return false;
+            }
+            
+            var header = buffer.GetHeader();
+            var flags = header.GetFlags();
+
+            if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+            {
+                return false;
+            }
+        
+            if (header.IsNeverExpiringEntry(out var expirationTicks))
+            {
+                return true;
+            }
+
+            var now = _provider.GetUtcNow().UtcTicks;
+            
+            if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+            {
+                return false;
+            }
+            
+            return true;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
+    }
 
     /// <inheritdoc />
     public ReadOnlySpan<byte> Get(BytesKey key)
