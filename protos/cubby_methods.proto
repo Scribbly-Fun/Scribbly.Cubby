@@ -11,15 +11,25 @@ import "cubby_messages.proto";
  */
 service CacheService {
   /**
+   * Inserts or updates an item in the cache
+   */
+  rpc Put (PutRequest) returns (PutResponse);
+
+  /**
    * Gets an item from the cache
    */
   rpc Get (GetRequest) returns (GetResponse);
 
   /**
-   * Inserts or updates an item in the cache
+   * Attempts to slide out the expiration time for a sliding cache entry
    */
-  rpc Put (PutRequest) returns (PutResponse);
+  rpc Refresh (RefreshRequest) returns (RefreshResponse);
 
+  /**
+   * Checks for an item from the cache
+   */
+  rpc Exists (ExistsRequest) returns (ExistsResponse);
+  
   /**
    * Revokes and removes a entry from the cache.
    */

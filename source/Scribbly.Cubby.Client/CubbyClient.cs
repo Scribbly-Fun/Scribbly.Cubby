@@ -16,7 +16,7 @@ internal class CubbyClient(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueTask<bool> Exists(BytesKey key, CancellationToken token = default)
     {
-        return transport.Exists(key, token);
+        return transport.ExistsAsync(key, token);
     }
 
     /// <inheritdoc />
@@ -25,10 +25,10 @@ internal class CubbyClient(
         if ((options?.Flags & CacheEntryFlags.Compressed) != 0)
         {
             var compressed = compressor.Compress(value.Span);
-            return transport.Put(key, compressed.ToArray(), options, token);
+            return transport.PutAsync(key, compressed.ToArray(), options, token);
         }
         
-        return transport.Put(key, value, options, token);
+        return transport.PutAsync(key, value, options, token);
     }
 
     /// <inheritdoc />
@@ -42,16 +42,16 @@ internal class CubbyClient(
         if ((options?.Flags & CacheEntryFlags.Compressed) != 0)
         {
             var compressed = compressor.Compress(encodedValue);
-            return await transport.Put(key, compressed.ToArray(), options, token);
+            return await transport.PutAsync(key, compressed.ToArray(), options, token);
         }
         
-        return await transport.Put(key, encodedValue.ToArray(), options, token);
+        return await transport.PutAsync(key, encodedValue.ToArray(), options, token);
     }
 
     /// <inheritdoc />
     public async ValueTask<EntryResponse> Get(BytesKey key, CancellationToken token = default)
     {
-        var entry = await transport.Get(key, token);
+        var entry = await transport.GetAsync(key, token);
 
         if (entry.IsEmpty)
         {
@@ -81,7 +81,7 @@ internal class CubbyClient(
     public async ValueTask<EntryResponse<T>> GetObject<T>(BytesKey key, CancellationToken token = default)
         where T : notnull
     {
-        var entry = await transport.Get(key, token);
+        var entry = await transport.GetAsync(key, token);
         
         if (entry.IsEmpty)
         {
