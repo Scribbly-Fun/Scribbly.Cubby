@@ -1,18 +1,11 @@
 ﻿using FluentAssertions;
 using Scribbly.Cubby.Stores;
+using Scribbly.Cubby.UnitTests.Setup;
 
 namespace Scribbly.Cubby.UnitTests.Tests.Structure.CacheEntryOptions_Tests;
 
 public class Sliding_Options_Factory_Tests
 {
-    private class StaticTimeProvider : TimeProvider
-    {
-        /// <inheritdoc />
-        public override DateTimeOffset GetUtcNow()
-        {
-            return new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromSeconds(0));
-        }
-    }
     
     [Theory]
     [InlineData(CacheEntryFlags.None)]
@@ -88,5 +81,29 @@ public class Sliding_Options_Factory_Tests
         var timeProvider = new StaticTimeProvider();
         var now = timeProvider.GetUtcNow();
         CacheEntryOptions.Sliding(timeProvider, timespan).AbsoluteExpiration.Should().Be(now.Ticks + timespan.Ticks);
+    }
+
+    [Theory]
+    [InlineData(12544)]
+    [InlineData(22)]
+    [InlineData(125_344)]
+    [InlineData(123_125_344)]
+    [InlineData(99_987)]
+    public void GivenImplicateTimespan_SlidingExpiration_Should_Be_Duration(long duration)
+    {
+        CacheEntryOptions timespan = TimeSpan.FromTicks(duration);
+        timespan.SlidingDuration.Should().Be(duration);
+    }
+
+    [Theory]
+    [InlineData(12544)]
+    [InlineData(354_222)]
+    [InlineData(125_344)]
+    [InlineData(123_125_344)]
+    [InlineData(99_987)]
+    public void GivenImplicateTimespan_AbsoluteExpiration_Should_Be_Future(long duration)
+    {
+        CacheEntryOptions timespan = TimeSpan.FromTicks(duration);
+        timespan.AbsoluteExpiration.Should().BeGreaterThan(DateTimeOffset.UtcNow.Ticks);
     }
 }

@@ -52,4 +52,48 @@ public class Never_Options_Factory_Tests
     [Fact]
     public void NewNever_Should_Set_AbsoluteExpiration_Zero() => 
         CacheEntryOptions.Never().AbsoluteExpiration.Should().Be(0);
+    
+    [Theory]
+    [InlineData(CacheEntryFlags.None)]
+    [InlineData(CacheEntryFlags.Compressed)]
+    [InlineData(CacheEntryFlags.Tombstone)]
+    [InlineData(CacheEntryFlags.None | CacheEntryFlags.Compressed | CacheEntryFlags.Tombstone)]
+    public void GivenImplicateFlag_Should_Set_Flags_ToValue_WhenNotSliding(CacheEntryFlags flag)
+    {
+        CacheEntryOptions options = flag;
+        options.Flags.Should().Be(flag);
+    }
+
+    [Theory]
+    [InlineData(CacheEntryFlags.None)]
+    [InlineData(CacheEntryFlags.Compressed)]
+    [InlineData(CacheEntryFlags.Tombstone)]
+    [InlineData(CacheEntryFlags.None | CacheEntryFlags.Compressed | CacheEntryFlags.Tombstone)]
+    public void GivenImplicateFlag_Should_Should_Set_Duration_Zero(CacheEntryFlags flag)
+    {
+        CacheEntryOptions options = flag;
+        options.SlidingDuration.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData(CacheEntryFlags.None)]
+    [InlineData(CacheEntryFlags.Compressed)]
+    [InlineData(CacheEntryFlags.Tombstone)]
+    [InlineData(CacheEntryFlags.None | CacheEntryFlags.Compressed | CacheEntryFlags.Tombstone)]
+    public void GivenImplicateFlag_Should_Should_Set_Expiration_Zero(CacheEntryFlags flag)
+    {
+        CacheEntryOptions options = flag;
+        options.AbsoluteExpiration.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData(CacheEntryFlags.None)]
+    [InlineData(CacheEntryFlags.Compressed)]
+    [InlineData(CacheEntryFlags.Tombstone)]
+    [InlineData(CacheEntryFlags.None | CacheEntryFlags.Compressed | CacheEntryFlags.Tombstone)]
+    public void GivenImplicateFlag_Should_Should_Set_Encoding_None(CacheEntryFlags flag)
+    {
+        CacheEntryOptions options = flag;
+        options.Encoding.Should().Be(CacheEntryEncoding.None);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Scribbly.Cubby.Stores;
 
 // ReSharper disable once CheckNamespace
@@ -7,6 +8,7 @@ namespace Scribbly.Cubby;
 /// <summary>
 /// Logging methods for the background processor.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static partial class CacheCleanupAsyncLogger
 {
     [LoggerMessage(EventId = 10_001, Level = LogLevel.Information, Message = "Starting Cache Cleanup Background Processor, Store: {Store} Delay: {Delay}")]

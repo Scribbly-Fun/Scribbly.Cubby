@@ -1,5 +1,5 @@
 ﻿using Scribbly.Cubby.Stores;
-using Scribbly.Cubby.Stores.Sharded;
+using Scribbly.Cubby.Stores.Concurrent;
 
 namespace Scribbly.Cubby.UnitTests.Tests.Store_Tests.Concurrent_Dictionary_Tests;
 
@@ -8,6 +8,6 @@ public sealed class Concurrent_TryGet_CacheEntry_Tests : TryGet_CacheEntry_Tests
     /// <inheritdoc />
     protected override ICubbyStore CreateStore(CubbyServerOptions options, TimeProvider provider)
     {
-        return ShardedConcurrentStore.FromOptions(options, provider);
+        return ConcurrentStore.FromOptions(options, provider);
     }
 }

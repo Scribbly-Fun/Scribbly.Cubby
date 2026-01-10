@@ -80,4 +80,17 @@ public class Absolute_Options_Factory_Tests
         
         CacheEntryOptions.Absolute(absolute).AbsoluteExpiration.Should().Be(absolute.Ticks);
     }
+
+    [Theory]
+    [InlineData(12544)]
+    [InlineData(54_566)]
+    [InlineData(125_344)]
+    [InlineData(123_125_344)]
+    [InlineData(99_987)]
+    public void GivenImplicateExpiration_AbsoluteExpiration_Should_Expiration(long duration)
+    {
+        CacheEntryOptions absolute = DateTimeOffset.UtcNow.Add(TimeSpan.FromTicks(duration));
+        
+        absolute.AbsoluteExpiration.Should().BeGreaterThan(DateTimeOffset.UtcNow.Ticks);
+    }
 }

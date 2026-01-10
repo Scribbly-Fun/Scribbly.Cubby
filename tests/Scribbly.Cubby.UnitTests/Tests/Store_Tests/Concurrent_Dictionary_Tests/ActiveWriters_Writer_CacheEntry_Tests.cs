@@ -3,7 +3,7 @@ using Scribbly.Cubby.Stores.Concurrent;
 
 namespace Scribbly.Cubby.UnitTests.Tests.Store_Tests.Concurrent_Dictionary_Tests;
 
-public sealed class Concurrent_Get_CacheEntry_Tests : Get_CacheEntry_TestsBase
+public sealed class ActiveWriters_Writer_CacheEntry_Tests : ActiveWriters_CacheEntry_TestsBase
 {
     /// <inheritdoc />
     protected override ICubbyStore CreateStore(CubbyServerOptions options, TimeProvider provider)
