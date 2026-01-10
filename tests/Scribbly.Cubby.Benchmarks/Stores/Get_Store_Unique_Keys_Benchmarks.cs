@@ -51,7 +51,7 @@ public class Get_Store_Unique_Keys_Benchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _shardedEntries.Put(_keys[i], _values[i], CacheEntryOptions.None);
+            var _ = _shardedEntries.Get(_keys[i]);
         });
     }
     
@@ -60,7 +60,7 @@ public class Get_Store_Unique_Keys_Benchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _marshalledStore.Put(_keys[i], _values[i], CacheEntryOptions.None);
+            var _ = _marshalledStore.Get(_keys[i]);
         });
     }
     
@@ -69,7 +69,7 @@ public class Get_Store_Unique_Keys_Benchmarks
     {
         Parallel.For(0, EntryCount, new ParallelOptions { MaxDegreeOfParallelism = Threads }, i =>
         {
-            _concurrentStore.Put(_keys[i], _values[i], CacheEntryOptions.None);
+            var _ = _concurrentStore.Get(_keys[i]);
         });
     }
 }
