@@ -49,7 +49,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
     
     /// <inheritdoc />
-    public bool Exists(BytesKey key)
+    public bool Exists(in BytesKey key)
     {
         Interlocked.Increment(ref _activeWriters);
 
@@ -83,7 +83,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
 
     /// <inheritdoc />
-    public ReadOnlySpan<byte> Get(BytesKey key)
+    public ReadOnlySpan<byte> Get(in BytesKey key)
     {
         Interlocked.Increment(ref _activeWriters);
         
@@ -124,7 +124,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
 
     /// <inheritdoc />
-    public bool TryGet(BytesKey key, out ReadOnlySpan<byte> value)
+    public bool TryGet(in BytesKey key, out ReadOnlySpan<byte> value)
     {
         Interlocked.Increment(ref _activeWriters);
         
@@ -174,7 +174,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
     
     /// <inheritdoc />
-    public PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
+    public PutResult Put(in BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options)
     {
         Interlocked.Increment(ref _activeWriters);
 
@@ -209,7 +209,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
 
     /// <inheritdoc />
-    public RefreshResult Refresh(BytesKey key)
+    public RefreshResult Refresh(in BytesKey key)
     {
         Interlocked.Increment(ref _activeWriters);
 
@@ -238,7 +238,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
 
     /// <inheritdoc />
-    public EvictResult Evict(BytesKey key) => _store.TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
+    public EvictResult Evict(in BytesKey key) => _store.TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
     
     /// <inheritdoc />
     public void Dispose()

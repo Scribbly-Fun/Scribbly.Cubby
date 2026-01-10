@@ -7,29 +7,50 @@ namespace Scribbly.Cubby;
 /// </summary>
 public readonly struct BytesKey : IEquatable<BytesKey>
 {
-    private readonly byte[] _data;
+    private readonly ReadOnlyMemory<byte> _bytes;
     private readonly int _hash;
+    
+    /// <summary>
+    /// Creates a new key from a byte array
+    /// </summary>
+    /// <param name="bytes">The bytes</param>
+    public BytesKey(byte[] bytes)
+    {
+        _bytes = bytes;
+        _hash = ComputeHash(bytes);
+    }
 
     /// <summary>
     /// Creates a new key from a byte array
     /// </summary>
-    /// <param name="data">The bytes</param>
-    public BytesKey(byte[] data)
+    /// <param name="bytes">The bytes</param>
+    public BytesKey(ReadOnlyMemory<byte> bytes)
     {
-        _data = data;
-        _hash = ComputeHash(data);
+        _bytes = bytes;
+        _hash = ComputeHash(bytes.Span);
     }
+
+    /// <summary>
+    /// Creates a new key from a byte array
+    /// </summary>
+    /// <param name="bytes">The bytes</param>
+    public BytesKey(ReadOnlySpan<byte> bytes)
+    {
+        _bytes = bytes.ToArray();
+        _hash = ComputeHash(bytes);
+    }
+
     
     /// <summary>
     /// Gets the requested byte at the index provided
     /// </summary>
     /// <param name="index">The bytes index</param>
-    public byte this[int index] => _data[index];
+    public byte this[int index] => _bytes.Span[index];
 
 
     /// <inheritdoc />
     public bool Equals(BytesKey other)
-        => _hash == other._hash && _data.AsSpan().SequenceEqual(other._data);
+        => _hash == other._hash && _bytes.Span.SequenceEqual(other._bytes.Span);
 
     /// <inheritdoc />
     public override bool Equals(object? obj) => 
@@ -58,7 +79,7 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     }
     
     /// <inheritdoc />
-    public override string ToString() => Encoding.UTF8.GetString(_data);
+    public override string ToString() => Encoding.UTF8.GetString(_bytes.Span);
     
     /// <inheritdoc />
     public override int GetHashCode() => _hash;
@@ -80,21 +101,30 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     /// </summary>
     /// <param name="key">The bytes key to covert to a string</param>
     /// <returns>A string encoded as UTF8</returns>
-    public static implicit operator string(BytesKey key) => Encoding.UTF8.GetString(key._data);
+    public static implicit operator string(BytesKey key) => Encoding.UTF8.GetString(key._bytes.Span);
     
     /// <summary>
     /// Assigns a key from the value of a string.
     /// </summary>
     /// <param name="value">A string used to encode a UTF 8 byte array used as the key.</param>
     /// <returns>A new bytes key</returns>
-    public static implicit operator BytesKey(string value) => new BytesKey(Encoding.UTF8.GetBytes(value));
+    public static implicit operator BytesKey(string value)
+    {
+        var chars = value.AsSpan();
+        var byteCount = Encoding.UTF8.GetByteCount(chars);
+        
+        Span<byte> bytes = new byte[byteCount]; 
+        Encoding.UTF8.GetBytes(chars, bytes);
+        
+        return new BytesKey(bytes);
+    }
 
     /// <summary>
     /// Assigns a string from the value of the internal buffer in the key.
     /// </summary>
     /// <param name="key">The bytes key to covert to a string</param>
     /// <returns>A string encoded as UTF8</returns>
-    public static implicit operator byte[](BytesKey key) => key._data;
+    public static implicit operator byte[](BytesKey key) => key._bytes.ToArray();
     
     /// <summary>
     /// Assigns a key from the value of a string.
@@ -108,7 +138,7 @@ public readonly struct BytesKey : IEquatable<BytesKey>
     /// </summary>
     /// <param name="key">The bytes key to covert to a string</param>
     /// <returns>A string encoded as UTF8</returns>
-    public static implicit operator ReadOnlySpan<byte>(BytesKey key) => key._data.AsSpan();
+    public static implicit operator ReadOnlySpan<byte>(BytesKey key) => key._bytes.Span;
     
     /// <summary>
     /// Assigns a key from the value of a string.

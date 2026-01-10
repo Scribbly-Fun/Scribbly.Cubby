@@ -7,6 +7,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 var cubbyAot = builder.AddProject<Projects.Scribbly_Cubby_Host>("scrb-cubby")
     .WithEnvironment("SCRB_CUBBY_HTTPS", "True");
 
+var cubbyDockerFile = builder
+    .AddDockerfile("scrb-cubby-dockerfile", "../../", "Dockerfile");
+
 var cubbyContainer = builder
     .AddCubbyContainer("scrb-cubby-container");
 
