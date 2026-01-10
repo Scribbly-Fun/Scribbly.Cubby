@@ -49,7 +49,38 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
     
     /// <inheritdoc />
-    public bool Exists(BytesKey key) => _store.ContainsKey(key);
+    public bool Exists(BytesKey key)
+    {
+        Interlocked.Increment(ref _activeWriters);
+
+        try
+        {
+            if (!_store.TryGetValue(key, out var buffer))
+            {
+                return false;
+            }
+            
+            var header = buffer.GetHeader();
+            var flags = header.GetFlags();
+
+            if (flags.IsTombstone() && _store.TryRemoveRentedArray(key))
+            {
+                return false;
+            }
+        
+            if (header.IsNeverExpiringEntry(out var expirationTicks))
+            {
+                return true;
+            }
+
+            var now = _provider.GetUtcNow().UtcTicks;
+            return !expirationTicks.IsExpired(now) || !_store.TryRemoveRentedArray(key);
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
+    }
 
     /// <inheritdoc />
     public ReadOnlySpan<byte> Get(BytesKey key)
