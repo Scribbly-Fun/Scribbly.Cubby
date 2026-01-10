@@ -23,14 +23,16 @@ public static class EndpointRouteBuilderExtensions
         {
             var group = builder.MapGroup(prefix);
             
-            group.MapGet("/{key}", CubbyHttpEndpoints.Get);
+            group.MapGet("/", CubbyHttpEndpoints.Get);
             
-            group.MapPut("/{key}", CubbyHttpEndpoints.Put);
+            group.MapPut("/", CubbyHttpEndpoints.Put);
             
-            group.MapDelete("/{key}", CubbyHttpEndpoints.Evict);
-            
-            group.MapPut("/{key}/refresh", CubbyHttpEndpoints.Refresh);
+            group.MapDelete("/", CubbyHttpEndpoints.Evict);
 
+            group.MapPut("/exists", CubbyHttpEndpoints.Exists);
+            
+            group.MapPut("/refresh", CubbyHttpEndpoints.Refresh);
+            
             return group;
         }
     }

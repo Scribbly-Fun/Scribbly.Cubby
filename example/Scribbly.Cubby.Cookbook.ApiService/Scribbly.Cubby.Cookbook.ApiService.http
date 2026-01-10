@@ -1,5 +1,7 @@
 ﻿@Scribbly.Cubby.Cookbook.ApiService_HostAddress = https://localhost:7514
 
+### DEFULT CLIENT
+
 POST {{host}}/entry/my_key
 Content-Type: application/json
 
@@ -8,7 +10,7 @@ Content-Type: application/json
     "value": "my value"
 }
 
-###
+### CUBBY CLIENT
 
 GET {{host}}/entry/my_key
 
@@ -26,7 +28,7 @@ Content-Type: application/json
 
 GET {{host}}/cubby/client/my_key
 
-###
+### HTTP CUBBY CLIENT
 
 POST {{host}}/cubby/http/my_key
 Content-Type: application/json
@@ -52,6 +54,10 @@ GET {{host}}/cubby/http/my_key
 
 ###
 
+DELETE {{host}}/cubby/http/my_key
+
+### GRPC CUBBY CLIENT
+
 POST {{host}}/cubby/grpc/my_key
 Content-Type: application/json
 
@@ -63,5 +69,9 @@ Content-Type: application/json
 ###
 
 GET {{host}}/cubby/grpc/my_key
+
+###
+
+DELETE {{host}}/cubby/grpc/my_key
 
 ###

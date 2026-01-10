@@ -46,9 +46,13 @@ message PutRequest {
   */
   optional int32 encoding = 4;
   /**
-  * The amount of time before the cache should expire.
+  * The absolute expiration time.
   */
   optional int64 expiration = 5;
+  /**
+  * The amount of time before the cache should expire.
+  */
+  optional int64 duration = 6;
 }
 
 /**
@@ -77,6 +81,52 @@ enum PutResult {
   * The PUT resulted in a existing record update
   */
   PUT_RESULT_UPDATED = 2;
+}
+
+/**
+ * A request object used to check for cache records
+ */
+message ExistsRequest {
+  bytes key = 1;
+}
+
+/**
+ * The results of a eviction attempt
+ */
+message ExistsResponse {
+  bool Found = 1;
+}
+
+/**
+ * A request object used to refresh a sliding cache record
+ */
+message RefreshRequest {
+  bytes key = 1;
+}
+
+/**
+ * The results of a refresh action
+ */
+message RefreshResponse {
+  RefreshResult Result = 1;
+}
+
+/**
+ * The results of a attempted cache entry refresh
+ */
+enum RefreshResult {
+  /**
+   * Unknown
+   */
+  REFRESH_RESULT_UNDEFINED = 0;
+  /**
+   * The Refresh action slid the expiration
+   */
+  REFRESH_RESULT_UPDATED = 1;
+  /**
+   * The Refreshed entry is not sliding
+   */
+  REFRESH_RESULT_NOT_SLIDING = 2;
 }
 
 /**

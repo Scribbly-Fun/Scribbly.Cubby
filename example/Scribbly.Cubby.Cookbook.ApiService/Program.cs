@@ -135,6 +135,20 @@ app.MapGet("cubby/http/{key}", async (IHttpCubbyClient cache, string key, Cancel
     };
 });
 
+app.MapDelete("cubby/http/{key}", async (IHttpCubbyClient cache, string key, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+    var result = await cache.Evict(key, token);
+    
+    watch.Stop();
+    
+    return new
+    {
+        time = watch.Elapsed,
+        result = result,
+    };
+});
+
 app.MapPost("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();
@@ -161,6 +175,20 @@ app.MapGet("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, Cancel
     {
         time = watch.Elapsed,
         item = item,
+    };
+});
+
+app.MapDelete("cubby/grpc/{key}", async (IGrpcCubbyClient cache, string key, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+    var result = await cache.Evict(key, token);
+    
+    watch.Stop();
+    
+    return new
+    {
+        time = watch.Elapsed,
+        result = result,
     };
 });
 

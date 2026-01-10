@@ -11,7 +11,7 @@ public interface ICubbyStore : ICubbyStoreEviction, IDisposable
     /// </summary>
     /// <param name="key">The key to query the store</param>
     /// <returns>True when found, false when not.</returns>
-    bool Exists(BytesKey key);
+    bool Exists(in BytesKey key);
     
     /// <summary>
     /// Gets the value from the cache
@@ -19,7 +19,7 @@ public interface ICubbyStore : ICubbyStoreEviction, IDisposable
     /// <param name="key">The key for the value requested</param>
     /// <returns>The value from the store</returns>
     /// <exception cref="InvalidOperationException">When the key is not found in the store</exception>
-    ReadOnlySpan<byte> Get(BytesKey key);
+    ReadOnlySpan<byte> Get(in BytesKey key);
 
     /// <summary>
     /// Attempts to Get the value from the cache
@@ -27,7 +27,7 @@ public interface ICubbyStore : ICubbyStoreEviction, IDisposable
     /// <param name="key">The key for the value requested</param>
     /// <param name="value">The value from the store</param>
     /// <returns>True when found, false when not</returns>
-    bool TryGet(BytesKey key, out ReadOnlySpan<byte> value);
+    bool TryGet(in BytesKey key, out ReadOnlySpan<byte> value);
 
     /// <summary>
     /// Inserts or updates a cached value.
@@ -35,13 +35,13 @@ public interface ICubbyStore : ICubbyStoreEviction, IDisposable
     /// <param name="key">The key used from the cache</param>
     /// <param name="value">The cached value to update or create </param>
     /// <param name="options">Options declaring how the cache will be stored.</param>
-    PutResult Put(BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options);
+    PutResult Put(in BytesKey key, ReadOnlySpan<byte> value, CacheEntryOptions options);
 
     /// <summary>
     /// Refreshed a cache entry when
     /// </summary>
     /// <param name="key">The key used from the cache</param>
-    RefreshResult Refresh(BytesKey key);
+    RefreshResult Refresh(in BytesKey key);
 }
 
 /// <summary>
@@ -53,7 +53,7 @@ public interface ICubbyStoreEviction
     /// removes the cached value
     /// </summary>
     /// <param name="key">The key</param>
-    EvictResult Evict(BytesKey key);
+    EvictResult Evict(in BytesKey key);
 }
 
 /// <summary>

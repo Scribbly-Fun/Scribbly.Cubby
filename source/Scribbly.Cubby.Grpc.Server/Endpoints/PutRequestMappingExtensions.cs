@@ -9,11 +9,28 @@ internal static class PutRequestMappingExtensions
     {
         internal CacheEntryOptions ToOptions(TimeProvider provider)
         {
-            return CacheEntryOptions.From(
-                provider,
-                flags: (CacheEntryFlags)request.Flags,
-                encoding:(CacheEntryEncoding)request.Encoding,
-                expiration: TimeSpan.FromTicks(request.Expiration));
+            var flags = (CacheEntryFlags)request.Flags;
+            
+            return request switch
+            {
+                { Duration: > 0, Expiration: > 0 } when flags.HasFlag(CacheEntryFlags.Sliding) => CacheEntryOptions.Sliding(
+                    provider,
+                    flags: flags,
+                    encoding: (CacheEntryEncoding)request.Encoding,
+                    duration: TimeSpan.FromTicks(request.Duration)),
+
+                { Expiration: > 0, Duration: 0 } when !flags.HasFlag(CacheEntryFlags.Sliding) => CacheEntryOptions.Absolute(
+                    provider,
+                    flags: flags,
+                    encoding: (CacheEntryEncoding)request.Encoding,
+                    expirationTime: new DateTimeOffset(request.Expiration, TimeSpan.Zero)),
+
+                _ => CacheEntryOptions.From(
+                    provider,
+                    flags: flags,
+                    encoding: (CacheEntryEncoding)request.Encoding,
+                    expiration: TimeSpan.FromTicks(request.Expiration))
+            };
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Scribbly.Cubby.Endpoints;
 internal static class CubbyHttpEndpoints
 {
     internal static IResult Get(
-        [FromRoute] string key, 
+        [FromQuery] BytesKey key, 
         HttpContext context,
         ICubbyStore store)
     {
@@ -20,7 +20,6 @@ internal static class CubbyHttpEndpoints
     }
     
     internal static async Task<IResult> Put(
-        [FromRoute] string key, 
         [AsParameters] CacheParameters parameters,
         HttpContext context,
         TimeProvider provider,
@@ -34,7 +33,7 @@ internal static class CubbyHttpEndpoints
 
         var buffer = ms.GetBuffer().AsSpan(0, (int)ms.Length).ToArray();
         
-        var results = store.Put(key, buffer, parameters.ToEntryOptions(provider));
+        var results = store.Put(parameters.Key, buffer, parameters.ToEntryOptions(provider));
 
         return results switch
         {
@@ -45,8 +44,31 @@ internal static class CubbyHttpEndpoints
         };
     }
     
+    internal static IResult Exists(
+        [FromQuery] BytesKey key, 
+        ICubbyStore store)
+    {
+        var result = store.Exists(key);
+        return result ? Results.Ok() : Results.NotFound();
+    }
+    
+    internal static IResult Refresh(
+        [FromQuery] BytesKey key, 
+        ICubbyStore store)
+    {
+        var result = store.Refresh(key);
+
+        return result switch
+        {
+            RefreshResult.Updated => Results.Accepted(),
+            RefreshResult.NotSlidingEntry => Results.BadRequest(),
+            RefreshResult.Undefined => Results.NotFound(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+    
     internal static IResult Evict(
-        [FromRoute] string key,
+        [FromQuery] BytesKey key,
         ICubbyStore store)
     {
         var results = store.Evict(key);
@@ -58,13 +80,5 @@ internal static class CubbyHttpEndpoints
             EvictResult.Removed => Results.Ok(),
             _ => throw new ArgumentOutOfRangeException()
         };
-    }
-
-    internal static IResult Refresh(
-        [FromRoute] string key, 
-        [AsParameters] CacheParameters parameters,
-        ICubbyStore store)
-    {
-        throw new NotImplementedException();
     }
 }
