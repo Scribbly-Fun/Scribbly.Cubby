@@ -90,6 +90,8 @@ public static class HostApplicationBuilderExtensions
                     })
                     .ValidateCubbyOptions();
             }
+
+            hostBuilder.Services.AddSingleton<CubbyServerOptions>(options);
             
             return new CubbyServerBuilder(options, hostBuilder);
         }

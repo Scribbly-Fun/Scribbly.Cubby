@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Scribbly.Cubby.Server;
+using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Builder;
 
@@ -20,6 +21,8 @@ public static class CubbyServerBuilderExtensions
         /// <returns>The configured host.</returns>
         public ICubbyServerBuilder WithCubbyGrpcServer()
         {
+            cubbyBuilder.ServerOptions.Transports |= CubbyServerOptions.EnabledTransports.Grpc;
+            
             cubbyBuilder.HostBuilder.Services.AddGrpc(ops =>
             {
                 ops.EnableDetailedErrors = false;

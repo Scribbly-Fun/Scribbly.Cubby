@@ -11,7 +11,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Scribbly.Cubby.Server" />
     <InternalsVisibleTo Include="Scribbly.Cubby.Client" />
-    <InternalsVisibleTo Include="Scribbly.Cubby.Hosted" />
+    <InternalsVisibleTo Include="Scribbly.Cubby.Host" />
     <InternalsVisibleTo Include="Scribbly.Cubby.Grpc.Client" />
     <InternalsVisibleTo Include="Scribbly.Cubby.Grpc.Server" />
     <InternalsVisibleTo Include="Scribbly.Cubby.Http.Client" />

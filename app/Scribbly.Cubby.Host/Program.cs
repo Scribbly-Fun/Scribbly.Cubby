@@ -1,6 +1,7 @@
+using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Host.Setup;
 using Scribbly.Cubby.Server;
-using Scribbly.Cubby.Setup;
 using Scribbly.Cubby.Stores;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -34,6 +35,18 @@ builder
     .WithCubbyHttpServer();
 
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+if (logger.IsEnabled(LogLevel.Information))
+{
+    var options = app.Services.GetRequiredService<CubbyServerOptions>();
+    app.Services.GetRequiredService<ILogger<Program>>().LogApplicationStartup(
+        options.Store,
+        options.Transports,
+        options.Cores,
+        options.Capacity);
+}
 
 if (app.Environment.IsDevelopment())
 {
