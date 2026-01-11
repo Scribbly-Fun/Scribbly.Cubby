@@ -30,6 +30,11 @@ public class CubbyClientOptions
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
 
     /// <summary>
+    /// When true cubby will register a cubby client used for the MS distributed cache.
+    /// </summary>
+    public bool RegisterDistributedCache { get; set; } = true;
+
+    /// <summary>
     /// Configures the Cubby serializer implementation.
     /// </summary>
     /// <typeparam name="TSerializer"></typeparam>
