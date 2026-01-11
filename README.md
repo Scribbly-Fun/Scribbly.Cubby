@@ -316,6 +316,23 @@ app.MapGet("cubby/client/{key}", async (ICubbyClient cache, string key, Cancella
 });
 ```
 
+We also support APIs to Get or Create caches
+
+```csharp
+app.MapPost("cubby/http/get-or-create-async/{key}", async (IHttpCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    return await cache.GetOrCreateAsync<Item, Item>(key, item, async (input, ctx) =>
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(5), ctx);
+        
+        return (TimeSpan.FromSeconds(15), input with
+        {
+            Value = input.Value + "Value from the factory"
+        });
+    }, token);
+});
+```
+
 Cubby also supports Microsoft's `IDistributedCache`
 
 >[!Warning]
