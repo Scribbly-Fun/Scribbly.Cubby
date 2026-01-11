@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
-        <CubbyContainerImageTag>0.1.0-24-http-client.1</CubbyContainerImageTag>
+        <CubbyContainerImageTag>0.1.0-rc.2</CubbyContainerImageTag>
     </PropertyGroup>
 
     <ItemGroup>

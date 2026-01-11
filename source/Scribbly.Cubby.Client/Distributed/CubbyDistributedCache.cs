@@ -2,7 +2,7 @@
 
 namespace Scribbly.Cubby.Client;
 
-internal class CubbyDistributedCache(ICubbyStoreTransport transport) : IDistributedCache
+internal class CubbyDistributedCache(ICubbyStoreTransport transport, TimeProvider provider) : IDistributedCache
 {
     /// <inheritdoc />
     public byte[] Get(string key)
@@ -23,13 +23,13 @@ internal class CubbyDistributedCache(ICubbyStoreTransport transport) : IDistribu
     /// <inheritdoc />
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
     {
-        transport.Put(key, value, options.CubbyOptions);
+        transport.Put(key, value, options.ToCubbyOptions(provider));
     }
 
     /// <inheritdoc />
     public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
     {
-        await transport.PutAsync(key, value, options.CubbyOptions, token);
+        await transport.PutAsync(key, value, options.ToCubbyOptions(provider), token);
     }
     
     /// <inheritdoc />
