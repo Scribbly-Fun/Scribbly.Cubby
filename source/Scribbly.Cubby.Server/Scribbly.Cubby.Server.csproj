@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Scribbly.Cubby.Client\Scribbly.Cubby.Client.csproj" />
     <ProjectReference Include="..\Scribbly.Cubby\Scribbly.Cubby.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Scribbly.Cubby.Host" />
   </ItemGroup>
 
   <ItemGroup>

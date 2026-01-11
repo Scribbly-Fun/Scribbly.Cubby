@@ -47,6 +47,24 @@ public class CubbyServerOptions
     }
     
     /// <summary>
+    ///     Flags indicating what transports have been enabled.
+    /// </summary>
+    [Flags]
+    internal enum EnabledTransports : byte
+    {
+        None =    0,
+        Http =    1 << 0,
+        Grpc =    2 << 0,
+        Tcp =     3 << 0,
+        Custom =  4 << 0
+    }
+
+    /// <summary>
+    ///     The enabled transports.
+    /// </summary>
+    internal EnabledTransports Transports { get; set; } = EnabledTransports.None;
+    
+    /// <summary>
     ///     Defines the type of store to use.
     /// </summary>
     /// <remarks>
