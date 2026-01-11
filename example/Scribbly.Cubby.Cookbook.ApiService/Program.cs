@@ -121,6 +121,49 @@ app.MapPost("cubby/http/{key}", async (IHttpCubbyClient cache, string key, [From
     };
 });
 
+app.MapPost("cubby/http/get-or-create-async/{key}", async (IHttpCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+
+    var results = await cache.GetOrCreateAsync<Item, Item>(key, item, async (input, ctx) =>
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(5), ctx);
+        
+        return (TimeSpan.FromSeconds(15), input with
+        {
+            Value = input.Value + "Value from the factory"
+        });
+    }, token);
+    
+    watch.Stop();
+
+    return new
+    {
+        time = watch.Elapsed,
+        result = results
+    };
+});
+
+app.MapPost("cubby/http/get-or-create/{key}", async (IHttpCubbyClient cache, string key, [FromBody] Item item, CancellationToken token) =>
+{
+    var watch = Stopwatch.StartNew();
+
+    var results = await cache.GetOrCreate<Item, Item>(key, item, input 
+        => (TimeSpan.FromSeconds(15), input with
+        {
+            Value = input.Value + "Value from the factory"
+        }),     
+        token);
+    
+    watch.Stop();
+
+    return new
+    {
+        time = watch.Elapsed,
+        result = results
+    };
+});
+
 app.MapGet("cubby/http/{key}", async (IHttpCubbyClient cache, string key, CancellationToken token) =>
 {
     var watch = Stopwatch.StartNew();

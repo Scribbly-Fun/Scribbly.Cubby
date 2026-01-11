@@ -110,5 +110,4 @@ public readonly struct EntryResponse<T> where T : notnull
         Expiration = 0,
         Value = default(T)
     };
-    
 }

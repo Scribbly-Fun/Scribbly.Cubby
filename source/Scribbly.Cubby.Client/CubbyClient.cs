@@ -120,4 +120,119 @@ internal class CubbyClient(ICubbyStoreTransport transport, ICubbySerializer seri
         return transport.EvictAsync(key, token);
     }
 
+    /// <inheritdoc />
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    public async ValueTask<EntryResponse<TReturn>> GetOrCreateAsync<TInput, TReturn>(BytesKey key, TInput input, Func<TInput, CancellationToken, Task<FactoryResponse<TReturn>>> factory, CancellationToken token = default) where TReturn : notnull
+    {
+        var exists = await transport.ExistsAsync(key, token);
+
+        if (exists)
+        {
+            return await GetObject<TReturn>(key, token);
+        }
+        
+        var (options, value) = await factory(input, token);
+
+        if (value is null)
+        {
+            return EntryResponse<TReturn>.Empty;
+        }
+
+        var result = await PutObject(key, value, options, token);
+
+        return result switch
+        {
+            PutResult.Created or PutResult.Updated => EntryResponse<TReturn>.Create(options.Flags, options.Encoding, options.AbsoluteExpiration, value),
+            _ => EntryResponse<TReturn>.Empty
+        };
+    }
+
+    /// <inheritdoc />
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    public async ValueTask<EntryResponse<TReturn>> GetOrCreateAsync<TReturn>(BytesKey key, Func<CancellationToken, Task<FactoryResponse<TReturn>>> factory, CancellationToken token = default) where TReturn : notnull
+    {
+        var exists = await transport.ExistsAsync(key, token);
+
+        if (exists)
+        {
+            return await GetObject<TReturn>(key, token);
+        }
+        
+        var (options, value) = await factory(token);
+
+        if (value is null)
+        {
+            return EntryResponse<TReturn>.Empty;
+        }
+
+        var result = await PutObject(key, value, options, token);
+
+        return result switch
+        {
+            PutResult.Created or PutResult.Updated => EntryResponse<TReturn>.Create(options.Flags, options.Encoding, options.AbsoluteExpiration, value),
+            _ => EntryResponse<TReturn>.Empty
+        };
+    }
+
+    /// <inheritdoc />
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    public async ValueTask<EntryResponse<TReturn>> GetOrCreate<TInput, TReturn>(BytesKey key, TInput input, Func<TInput, FactoryResponse<TReturn>> factory, CancellationToken token = default) where TReturn : notnull
+    {
+        var exists = await transport.ExistsAsync(key, token);
+
+        if (exists)
+        {
+            return await GetObject<TReturn>(key, token);
+        }
+        
+        var (options, value) = factory(input);
+
+        if (value is null)
+        {
+            return EntryResponse<TReturn>.Empty;
+        }
+
+        var result = await PutObject(key, value, options, token);
+
+        return result switch
+        {
+            PutResult.Created or PutResult.Updated => EntryResponse<TReturn>.Create(options.Flags, options.Encoding, options.AbsoluteExpiration, value),
+            _ => EntryResponse<TReturn>.Empty
+        };
+    }
+
+    /// <inheritdoc />
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    [RequiresUnreferencedCode("Calls Scribbly.Cubby.Client.Serializer.ICubbySerializer.Deserialize<T>(ReadOnlySpan<Byte>, SerializerOptions)")]
+    public async ValueTask<EntryResponse<TReturn>> GetOrCreate<TReturn>(BytesKey key, Func<FactoryResponse<TReturn>> factory, CancellationToken token = default) where TReturn : notnull
+    {
+        var exists = await transport.ExistsAsync(key, token);
+
+        if (exists)
+        {
+            return await GetObject<TReturn>(key, token);
+        }
+        
+        var (options, value) = factory();
+
+        if (value is null)
+        {
+            return EntryResponse<TReturn>.Empty;
+        }
+
+        var result = await PutObject(key, value, options, token);
+
+        return result switch
+        {
+            PutResult.Created or PutResult.Updated => EntryResponse<TReturn>.Create(options.Flags, options.Encoding, options.AbsoluteExpiration, value),
+            _ => EntryResponse<TReturn>.Empty
+        };
+    }
 }
