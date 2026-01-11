@@ -38,6 +38,16 @@ Content-Type: application/json
     "value": "my value"
 }
 
+### GET or Create
+
+POST {{host}}/cubby/http/get-or-create-async/my_key
+Content-Type: application/json
+
+{
+    "key": "my_key",
+    "value": "my value"
+}
+
 ### With Compression
 
 POST {{host}}/cubby/http/my_key?compress=true
