@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Scribbly.Cubby.Client.Serializer;
 
@@ -38,8 +39,12 @@ public static class HostApplicationBuilderExtensions
             services.AddSingleton<ICubbySerializer>(options.Serializer);
             
             services.AddScoped<ICubbyClient, CubbyClient>();
-            
-            services.AddSingleton<IDistributedCache, CubbyDistributedCache>();
+
+            if (options.RegisterDistributedCache)
+            {
+                services.TryAddSingleton(TimeProvider.System);
+                services.TryAddSingleton<IDistributedCache, CubbyDistributedCache>();
+            }
             
             return cubbyBuilder;
         }
