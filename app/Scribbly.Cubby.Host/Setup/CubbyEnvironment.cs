@@ -20,10 +20,10 @@ internal static partial class ApplicationLogger
     [LoggerMessage(EventId = 10_000, Level = LogLevel.Information, Message = 
         """
         Started Cubby With Options: 
-            Store: {Store}
-            Transports: {Transports}
-            CPU Cores: {Cores}
-            Capacity: {Capacity}
+        * Store: {Store}
+        * Transports: {Transports}
+        * CPU Cores: {Cores}
+        * Capacity: {Capacity}
         """)]
     internal static partial void LogApplicationStartup(
         this ILogger logger,

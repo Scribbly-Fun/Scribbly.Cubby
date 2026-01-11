@@ -22,7 +22,6 @@ public static class CubbyServerBuilderExtensions
         public ICubbyServerBuilder WithCubbyHttpServer()
         {
             cubbyBuilder.ServerOptions.Transports |= CubbyServerOptions.EnabledTransports.Http;
-
             return cubbyBuilder;
         }
     }

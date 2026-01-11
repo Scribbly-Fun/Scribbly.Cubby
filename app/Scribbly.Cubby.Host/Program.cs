@@ -40,7 +40,7 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 if (logger.IsEnabled(LogLevel.Information))
 {
-    var options = app.Services.GetRequiredService<IOptions<CubbyServerOptions>>().Value;
+    var options = app.Services.GetRequiredService<CubbyServerOptions>();
     app.Services.GetRequiredService<ILogger<Program>>().LogApplicationStartup(
         options.Store,
         options.Transports,

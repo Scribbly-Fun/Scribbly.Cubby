@@ -54,9 +54,10 @@ public class CubbyServerOptions
     {
         None =    0,
         Http =    1 << 0,
-        Grpc =    2 << 0,
-        Tcp =     3 << 0,
-        Custom =  4 << 0
+        Grpc =    1 << 1,
+        [Experimental("SCRB004", Message = "Not yet implemented")]
+        Tcp =     1 << 2,
+        Custom =  1 << 3
     }
 
     /// <summary>
