@@ -9,19 +9,19 @@ public class Factory_Response_Create_Tests
     record Value(int V);
     
     [Fact]
-    public void Given_Default_Constructor_Should_SetOptions_None()
+    public void Given_Default_Should_SetOptions_None()
     {
         FactoryResponse<string> response = default;
-        response.Options.Should().Be(CacheEntryOptions.None);
+        response.Options.Should().BeNull();
     }
 
     [Fact]
-    public void Given_Default_Constructor_Should_SetValue_Null()
+    public void Given_Default_Should_SetValue_Null()
     {
         FactoryResponse<string> response = default;
         response.Value.Should().BeNull();
     }
-    
+
     [Fact]
     public void Given_Options_And_Value_Constructor_Should_SetOptions()
     {
