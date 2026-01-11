@@ -123,7 +123,7 @@ public readonly struct FactoryResponse<T> where T : notnull
     /// </summary>
     [MemberNotNullWhen(returnValue: true, nameof(Value))]
     public bool Found => Value is not null;
-    
+
     /// <summary>
     /// The options used by the cache when inserting a new entry
     /// </summary>
@@ -134,6 +134,15 @@ public readonly struct FactoryResponse<T> where T : notnull
     /// </summary>
     public required T? Value { get; init; }
 
+    /// <summary>
+    /// Creates a new instance with defaults.
+    /// </summary>
+    public FactoryResponse()
+    {
+        Options = CacheEntryOptions.None;
+        Value = default(T);
+    }
+    
     /// <summary>
     /// Deconstructs the factory result.
     /// </summary>
