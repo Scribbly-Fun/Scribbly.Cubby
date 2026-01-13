@@ -40,6 +40,39 @@ Cubby is a 'choose your own adventure' cross platform native AOT .net distribute
 
 Below is a brief snip of code to get you started before reading more.
 
+```shell
+docker run -p 5000:8080 scribbly/cubby:***
+```
+
+```csharp
+var builder = WebApplication.CreateSlimBuilder(args);
+
+builder.Services
+    .AddCubbyClient(ops =>
+    {
+        // Set the server's URL 
+        ops.Host = "https://localhost:5000"
+        
+        // Configure the client scope, defaults to a Singleton
+        ops.Lifetime = ServiceLifetime.Singleton;
+        
+        // Setup a custom serializer configuration
+        ops.AddSystemTextSerializer(ops =>
+        {
+            ops.TypeInfoResolverChain.Insert(0, ItemJsonContext.Default);
+        });
+    })
+    // Register communication transport
+    .WithCubbyHttpClient() 
+    .WithCubbyGrpcClient();
+
+var app = builder.Build();
+app.Run();
+```
+
+> And thats it, but there's so much more. Sure cubby is published as a docker image for you, 
+however it can also be run from within an existing dotnet application, as a standalone AOT binary, and from an Aspire apphost. 
+
 # Cubby Host
 
 The cubby host is a native AOT application that can be hosted on bare metal or containers.  Cubby host can also be used as a
