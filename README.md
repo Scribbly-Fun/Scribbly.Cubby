@@ -5,7 +5,6 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/Scribbly-Fun/Scribbly.Cubby?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/Scribbly-Fun/Scribbly.Cubby?style=social)
 ![Docker Pulls](https://img.shields.io/docker/pulls/scribbly/cubby)
-![GitHub all releases](https://img.shields.io/github/downloads/Scribbly-Fun/Scribbly.Cubby/total) 
 ![Nuget](https://img.shields.io/nuget/dt/Scribbly.Cubby)
 [![Tests](https://github.com/Scribbly-Fun/Scribbly.Cubby/actions/workflows/dotnet-test.yml/badge.svg)](https://github.com/Scribbly-Fun/Scribbly.Cubby/actions/workflows/dotnet-test.yml)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Scribbly-Fun/Scribbly.Cubby/main)
@@ -263,7 +262,55 @@ Cubby supports multiple transports configured in the hosted application or using
 
 ### HTTP
 
+Enables HTTP endpoints used to create, fetch, evict, and refresh cache entries. All cubby features
+are fully supported using the HTTP transport option. 
+
+> HTTP endpoints will be bound to a group prefix /cubby to prevent clashes with your main application
+
+To utilize HTTP add a refernce to the `Scribbly.Cubby.HTTP.Server` nuget package
+
+```shell
+dotnet nuget add Scribbly.Cubby.HTTP.Server
+```
+
+And register the required services and endpoints. 
+
+```csharp
+var builder = WebApplication.CreateSlimBuilder(args);
+
+builder
+    .AddCubbyServer()
+    .WithCubbyHttpServer();
+
+var app = builder.Build();
+
+app.MapCubbyHttp();
+```
+
 ### GRPC
+
+Enables gPRC protofub transport used to create, fetch, evict, and refresh cache entries. All cubby features
+are fully supported using the gRPC transport option. 
+
+To utilize gPRC add a refernce to the `Scribbly.Cubby.GRPC.Server` nuget package
+
+```shell
+dotnet nuget add Scribbly.Cubby.GRPC.Server
+```
+
+And register the required services and endpoints. 
+
+```csharp
+var builder = WebApplication.CreateSlimBuilder(args);
+
+builder
+    .AddCubbyServer()
+    .WithCubbyGrpcServer();
+
+var app = builder.Build();
+
+app.MapCubbyGrpc();
+```
 
 ### TCP
 
