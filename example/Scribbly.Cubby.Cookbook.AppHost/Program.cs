@@ -10,8 +10,15 @@ var cubbyAot = builder.AddProject<Projects.Scribbly_Cubby_Host>("scrb-cubby")
 var cubbyDockerFile = builder
     .AddDockerfile("scrb-cubby-dockerfile", "../../", "Dockerfile");
 
+var cubbyAdminPortal = builder
+    .AddDockerfile("scrb-cubby-portal", "../../portal", "Dockerfile")
+    .WithEndpoint(3002, 3000, "http")
+    .WithReference(cubbyAot);
+
 var cubbyContainer = builder
     .AddCubbyContainer("scrb-cubby-container");
+
+cubbyContainer.WithCubbyPortal("portal");
 
 var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook")
     .WithReference(cubbyAot)

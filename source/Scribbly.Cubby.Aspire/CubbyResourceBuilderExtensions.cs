@@ -21,7 +21,7 @@ public static class CubbyResourceBuilderExtensions
         /// </summary>
         /// <param name="name">An optional name used for the resource.</param>
         /// <returns>A cubby container resource with service discovery</returns>
-        public IResourceBuilder<CubbyContainerResource> AddCubbyContainer([ResourceName] string name = "scrb-cubby")
+        public IResourceBuilder<CubbyContainerResource> AddCubbyContainer([ResourceName] string name = "cubby")
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentException.ThrowIfNullOrEmpty(name);
@@ -50,7 +50,7 @@ public static class CubbyResourceBuilderExtensions
         /// <param name="workingDirectory">The working directory for the executable</param>
         /// <returns>A cubby container resource with service discovery</returns>
         public IResourceBuilder<CubbyExecutableResource> AddCubbyExecutable(
-            [ResourceName] string name = "scrb-cubby", 
+            [ResourceName] string name = "cubby", 
             string? workingDirectory = null)
         {
             ArgumentNullException.ThrowIfNull(builder);
@@ -69,6 +69,40 @@ public static class CubbyResourceBuilderExtensions
                 .WithHealthCheck(healthCheckKey);
             
             return cubbyResource;
+        }
+    }
+
+    extension(IResourceBuilder<CubbyContainerResource> builder)
+    {
+        public void WithCubbyPortal(
+            [ResourceName] string name = "cubby-portal",
+            string? workingDirectory = null)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            ArgumentException.ThrowIfNullOrEmpty(name);
+        
+            var resource = new CubbyPortalResource(name);
+            
+            var healthCheckKey = $"{name}_check";
+        
+            builder.ApplicationBuilder.Services.AddHealthChecks().AddCheck(healthCheckKey, token => HealthCheckResult.Healthy());
+            
+#if DEBUG
+            var cubbyResource = builder.ApplicationBuilder
+                .AddDockerfile(name, "../../portal", "Dockerfile")
+                .WithEndpoint(3004, 3000, "http")
+                .WithReference(builder);
+            
+#else
+            var cubbyResource = builder
+                .AddResource(resource)
+                .WithIconName("money")
+                .WithImage(CubbyContainerImageTags.Image, CubbyContainerImageTags.Tag)
+                .WithImageRegistry(CubbyContainerImageTags.Registry)
+                .WithEndpoint(name: "http", targetPort: 5000, scheme: "http")
+                .WithHealthCheck(healthCheckKey);
+#endif
+            // return cubbyResource;
         }
     }
 }

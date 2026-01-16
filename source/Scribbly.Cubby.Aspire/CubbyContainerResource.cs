@@ -13,3 +13,14 @@ public class CubbyContainerResource : ContainerResource, IResourceWithServiceDis
         
     }
 }
+
+/// <summary>
+/// Aspire resource used to run cubby as a docker container.
+/// </summary>
+public class CubbyPortalResource : ContainerResource
+{
+    internal CubbyPortalResource(string name = "cubby-portal") : base(name)
+    {
+        
+    }
+}
