@@ -79,7 +79,7 @@ public static class CubbyResourceBuilderExtensions
         /// </summary>
         /// <param name="name">A resource name</param>
         /// <returns>The portal builder</returns>
-        public IResourceBuilder<CubbyPortalResource> WithCubbyPortal(
+        public IResourceBuilder<CubbyContainerResource> WithCubbyPortal(
             [ResourceName] string name = "cubby-portal")
         {
             ArgumentNullException.ThrowIfNull(cubbyResourceBuilder);
@@ -91,7 +91,7 @@ public static class CubbyResourceBuilderExtensions
         
             cubbyResourceBuilder.ApplicationBuilder.Services.AddHealthChecks().AddCheck(healthCheckKey, token => HealthCheckResult.Healthy());
             
-            var cubbyResource = cubbyResourceBuilder.ApplicationBuilder
+            var portalResource = cubbyResourceBuilder.ApplicationBuilder
                 .AddResource(resource)
                 .WithIconName("money")
                 .WithImage(CubbyContainerImageTags.PortalImage, CubbyContainerImageTags.PortalTag)
@@ -100,7 +100,7 @@ public static class CubbyResourceBuilderExtensions
                 .WithHealthCheck(healthCheckKey)
                 .WithReference(cubbyResourceBuilder);
 
-            return cubbyResource;
+            return cubbyResourceBuilder;
         }
     }
 }

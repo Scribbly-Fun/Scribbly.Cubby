@@ -22,7 +22,7 @@ builder.Services.AddOpenApi();
 builder.Services
     .AddCubbyClient(ops =>
     {
-        var host = Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTPS") ?? Environment.GetEnvironmentVariable("SCRB_CUBBY_HTTP");
+        var host = Environment.GetEnvironmentVariable("CUBBY_PROJECT_HTTPS") ?? Environment.GetEnvironmentVariable("CUBBY_PROJECT_HTTP");
         ops.Host = new Uri(host?? throw new InvalidOperationException());
         
         ops.Lifetime = ServiceLifetime.Singleton;
