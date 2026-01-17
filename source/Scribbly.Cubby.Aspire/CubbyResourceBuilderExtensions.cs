@@ -1,4 +1,4 @@
-﻿using Aspire.Hosting;
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -94,13 +94,13 @@ public static class CubbyResourceBuilderExtensions
                 .WithReference(builder);
             
 #else
-            var cubbyResource = builder
-                .AddResource(resource)
-                .WithIconName("money")
-                .WithImage(CubbyContainerImageTags.Image, CubbyContainerImageTags.Tag)
-                .WithImageRegistry(CubbyContainerImageTags.Registry)
-                .WithEndpoint(name: "http", targetPort: 5000, scheme: "http")
-                .WithHealthCheck(healthCheckKey);
+            //var cubbyResource = builder
+            //    .AddResource(resource)
+            //    .WithIconName("money")
+            //    .WithImage(CubbyContainerImageTags.Image, CubbyContainerImageTags.Tag)
+            //    .WithImageRegistry(CubbyContainerImageTags.Registry)
+            //    .WithEndpoint(name: "http", targetPort: 5000, scheme: "http")
+            //    .WithHealthCheck(healthCheckKey);
 #endif
             // return cubbyResource;
         }
