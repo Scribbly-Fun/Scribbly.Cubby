@@ -25,8 +25,7 @@ var cubbyContainer = builder
 // Starts a client side caching consumer as a project reference
 var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook")
     .WithReference(cubbyAot)
-    .WaitFor(cubbyAot)
-    .WaitFor(cubbyContainer);
+    .WaitFor(cubbyAot);
 
 if (builder.ExecutionContext.IsRunMode)
 {

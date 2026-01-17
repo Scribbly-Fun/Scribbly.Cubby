@@ -98,7 +98,6 @@ public static class CubbyResourceBuilderExtensions
                 .WithImageRegistry(CubbyContainerImageTags.Registry)
                 .WithEndpoint(name: "http", targetPort: 3000, scheme: "http")
                 .WithHealthCheck(healthCheckKey)
-                .WaitFor(cubbyResourceBuilder)
                 .WithReference(cubbyResourceBuilder);
 
             return cubbyResource;
