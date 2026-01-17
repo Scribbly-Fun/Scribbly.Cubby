@@ -1,7 +1,14 @@
 <script lang="ts">
-    import type { PageProps } from './$types';
+	import ChartAreaInteractive from './components/reads-chart.svelte';
+	import DataTable from '$lib/components/tables/data-table.svelte';
+	import type { PageProps } from './$types';
+	import CubbyOptions from './components/option-cards.svelte';
 
-    let { data }: PageProps = $props();
+	let { data }: PageProps = $props();
 </script>
 
-<h1>Dashboard</h1>
+<CubbyOptions cubby_options={data.cubby_options} />
+
+<div class="px-4 lg:px-6">
+	<ChartAreaInteractive />
+</div>

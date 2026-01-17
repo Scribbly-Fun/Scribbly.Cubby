@@ -6,6 +6,7 @@ export type CubbyOptions = {
 	store: string;
 	capacity: number;
 	cores: number;
+	cleanup: CleanupOptions;
 };
 
 /**

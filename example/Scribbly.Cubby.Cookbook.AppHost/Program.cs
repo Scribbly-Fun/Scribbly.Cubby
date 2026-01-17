@@ -32,7 +32,13 @@ var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("
 var portal = builder.AddJavaScriptApp("portal-local", "../../portal")
     .WithPnpm()
     .WithExternalHttpEndpoints()
-    .WithReference(cubbyAot);
+    .WithReference(cubbyAot)
+    .WithHttpEndpoint(name: "ui", port: 5173, targetPort: 5173, isProxied: false)
+    .WithEnvironment(context =>
+    {
+        var url = cubbyAot.Resource.GetEndpoint("http").Url;
+        context.EnvironmentVariables.Add("CUBBY_HOST_URL", url);
+    });
 
 if (builder.ExecutionContext.IsRunMode)
 {

@@ -126,6 +126,7 @@ https://hub.docker.com/repository/docker/scribbly/cubby/general
 |--------------------------|------------------------------|
 | CUBBY__STORE             | Sharded                      |
 | CUBBY__CAPACITY          | 0 - None                     |
+| CUBBY__CORES             | 0 - Processor Max or Below   |
 | CUBBY__CLEANUP__STRATEGY | Random                       |
 | CUBBY__CLEANUP__DELAY    | 00:00:00 / NA                |
 | LOGGING__LOGLEVEL        | Scribbly.Cubby : Information |

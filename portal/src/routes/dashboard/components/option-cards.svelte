@@ -1,8 +1,17 @@
 <script lang="ts">
-	import TrendingDownIcon from "@tabler/icons-svelte/icons/trending-down";
-	import TrendingUpIcon from "@tabler/icons-svelte/icons/trending-up";
-	import { Badge } from "$lib/components/ui/badge/index.js";
+	// @ts-ignore
+	import StoreIcon from "@tabler/icons-svelte/icons/backpack";
+	// @ts-ignore
+	import CpuIcon from "@tabler/icons-svelte/icons/cpu";
+	// @ts-ignore
+	import CapacityIcon from "@tabler/icons-svelte/icons/shopping-cart";
+	// @ts-ignore
+	import StrategyIcon from "@tabler/icons-svelte/icons/chess-king";
+
 	import * as Card from "$lib/components/ui/card/index.js";
+	import type { CubbyOptions } from "$lib/api/CubbyOptions";
+
+	let { cubby_options }: { cubby_options: CubbyOptions | undefined } = $props()
 </script>
 
 <div
@@ -10,82 +19,72 @@
 >
 	<Card.Root class="@container/card">
 		<Card.Header>
-			<Card.Description>Total Revenue</Card.Description>
+			<Card.Description>CUBBY STORE</Card.Description>
 			<Card.Title class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-				$1,250.00
+				{cubby_options?.store || 'N/A'}
 			</Card.Title>
 			<Card.Action>
-				<Badge variant="outline">
-					<TrendingUpIcon />
-					+12.5%
-				</Badge>
+				<StoreIcon />
 			</Card.Action>
 		</Card.Header>
 		<Card.Footer class="flex-col items-start gap-1.5 text-sm">
 			<div class="line-clamp-1 flex gap-2 font-medium">
-				Trending up this month <TrendingUpIcon class="size-4" />
-			</div>
-			<div class="text-muted-foreground">Visitors for the last 6 months</div>
+				Using the {cubby_options?.store} storage</div>
+			<div class="text-muted-foreground">Set the CUBBY__STORE environment variable</div>
 		</Card.Footer>
 	</Card.Root>
+	
 	<Card.Root class="@container/card">
 		<Card.Header>
-			<Card.Description>New Customers</Card.Description>
+			<Card.Description>CPU CORES</Card.Description>
 			<Card.Title class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-				1,234
+				{cubby_options?.cores || 'N/A'}
 			</Card.Title>
 			<Card.Action>
-				<Badge variant="outline">
-					<TrendingDownIcon />
-					-20%
-				</Badge>
+				<CpuIcon />
 			</Card.Action>
 		</Card.Header>
 		<Card.Footer class="flex-col items-start gap-1.5 text-sm">
 			<div class="line-clamp-1 flex gap-2 font-medium">
-				Down 20% this period <TrendingDownIcon class="size-4" />
-			</div>
-			<div class="text-muted-foreground">Acquisition needs attention</div>
+				Currently configured with specific CPU cores</div>
+			<div class="text-muted-foreground">Set the CUBBY__CORES environment variable</div>
 		</Card.Footer>
 	</Card.Root>
+
 	<Card.Root class="@container/card">
 		<Card.Header>
-			<Card.Description>Active Accounts</Card.Description>
+			<Card.Description>Capactity</Card.Description>
 			<Card.Title class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-				45,678
+				{cubby_options?.capacity || 'N/A'}
 			</Card.Title>
 			<Card.Action>
-				<Badge variant="outline">
-					<TrendingUpIcon />
-					+12.5%
-				</Badge>
+				<CapacityIcon />
 			</Card.Action>
 		</Card.Header>
 		<Card.Footer class="flex-col items-start gap-1.5 text-sm">
 			<div class="line-clamp-1 flex gap-2 font-medium">
-				Strong user retention <TrendingUpIcon class="size-4" />
+				{cubby_options?.capacity || 'N/A'} total capacity
 			</div>
-			<div class="text-muted-foreground">Engagement exceed targets</div>
+			<div class="text-muted-foreground">set the CUBBY__CAPACITY environment variable
+			</div>
 		</Card.Footer>
 	</Card.Root>
+
 	<Card.Root class="@container/card">
 		<Card.Header>
-			<Card.Description>Growth Rate</Card.Description>
+			<Card.Description>Strategy</Card.Description>
 			<Card.Title class="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-				4.5%
+				{cubby_options?.cleanup?.strategy || 'N/A'}
 			</Card.Title>
 			<Card.Action>
-				<Badge variant="outline">
-					<TrendingUpIcon />
-					+4.5%
-				</Badge>
+				<StrategyIcon />
 			</Card.Action>
 		</Card.Header>
 		<Card.Footer class="flex-col items-start gap-1.5 text-sm">
 			<div class="line-clamp-1 flex gap-2 font-medium">
-				Steady performance increase <TrendingUpIcon class="size-4" />
+				Async cleanup strategy {cubby_options?.cleanup?.strategy || 'N/A'}
 			</div>
-			<div class="text-muted-foreground">Meets growth projections</div>
+			<div class="text-muted-foreground">Delay {cubby_options?.cleanup?.delay || 'N/A'}</div>
 		</Card.Footer>
 	</Card.Root>
 </div>

@@ -97,6 +97,14 @@ public static class CubbyResourceBuilderExtensions
                 .WithImage(CubbyContainerImageTags.PortalImage, CubbyContainerImageTags.PortalTag)
                 .WithImageRegistry(CubbyContainerImageTags.Registry)
                 .WithEndpoint(name: "http", targetPort: 3000, scheme: "http")
+                .WithEnvironment(context =>
+                {
+                    if (context.Resource is CubbyPortalResource portal)
+                    {
+                        var endpoint = portal.Parent.GetEndpoint("http");
+                        context.EnvironmentVariables.Add("CUBBY_HOST_URL", endpoint.Url);
+                    }
+                })
                 .WithHealthCheck(healthCheckKey)
                 .WithReference(cubbyResourceBuilder);
 

@@ -36,3 +36,11 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+
+## Environment Variables
+
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| `CUBBY_HOST_URL` | The cubby server host HTTP / HTTPs URL | Yes | `https://cubby:5001` |
+
