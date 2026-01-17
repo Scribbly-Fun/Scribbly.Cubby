@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ChartAreaInteractive from './components/reads-chart.svelte';
-	import DataTable from '$lib/components/tables/data-table.svelte';
 	import type { PageProps } from './$types';
 	import CubbyOptions from './components/option-cards.svelte';
 

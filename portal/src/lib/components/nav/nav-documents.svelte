@@ -1,8 +1,13 @@
 <script lang="ts">
+	// @ts-ignore
 	import DotsIcon from "@tabler/icons-svelte/icons/dots";
+	// @ts-ignore
 	import FolderIcon from "@tabler/icons-svelte/icons/folder";
+	// @ts-ignore
 	import Share3Icon from "@tabler/icons-svelte/icons/share-3";
+	// @ts-ignore
 	import TrashIcon from "@tabler/icons-svelte/icons/trash";
+	// @ts-ignore
 	import type { Icon } from "@tabler/icons-svelte";
 
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Host.Portal;
 using Scribbly.Cubby.Host.Setup;
 using Scribbly.Cubby.Server;
 using Scribbly.Cubby.Stores;
@@ -18,6 +19,8 @@ if (useHttps)
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, CubbyOptionsJsonContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseJsonContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseListJsonContext.Default);
 });
 
 builder.Services.AddOpenApi();
@@ -57,5 +60,15 @@ app.MapCubbyGrpc();
 app.MapCubbyHttp();
 
 app.MapGet("/", (IOptions<CubbyServerOptions> options) => options.Value);
+
+app.MapGet("/cubby-caches", IEnumerable<CacheResponse> (ICubbyStore store) => 
+{
+    if (store is not ICubbyStoreIterator storeIterator)
+    {
+        return [];
+    }
+
+    return storeIterator.Entries.Select(e => e.Response);
+});
 
 app.Run();

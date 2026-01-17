@@ -1,9 +1,13 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { toggleMode } from 'mode-watcher';
+	// @ts-ignore
 	import GithubIcon from '@tabler/icons-svelte/icons/brand-github';
+	// @ts-ignore
 	import DarkMode from '@tabler/icons-svelte/icons/brightness';
+	// @ts-ignore
 	import LightMode from '@tabler/icons-svelte/icons/brightness-up';
+	
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -25,7 +29,7 @@
 	<div class="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
 		<Sidebar.Trigger class="-ms-1" />
 		<Separator orientation="vertical" class="mx-2 data-[orientation=vertical]:h-4" />
-		<h1 class="text-base font-medium">{getTitleFromRoute($page.url.pathname)}</h1>
+		<h1 class="text-base font-medium">{getTitleFromRoute(page.url.pathname)}</h1>
 		<div class="ms-auto flex items-center gap-2">
 			<Button
 				onclick={toggleMode}

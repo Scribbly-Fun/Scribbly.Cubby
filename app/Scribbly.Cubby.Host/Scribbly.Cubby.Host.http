@@ -6,9 +6,19 @@
 GET {{debug}}/cubby/my_key3
 Accept: application/json
 
+### PUT 
+
+PUT {{debug}}/cubby?key=my_key1212
+Content-Type: application/json
+
+{
+  "key": "my_key",
+  "value": "my value"
+}
+
 ### PUT with Expiration
 
-PUT {{debug}}/cubby/my_key3
+PUT {{debug}}/cubby?key=my_key3
 Content-Type: application/json
 x-cubby-expiry: 00:00:10
 

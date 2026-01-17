@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	// @ts-ignore
 	import type { Icon } from "@tabler/icons-svelte";
 
 	let { items }: { items: { title: string; url: string; icon?: Icon }[] } = $props();
@@ -11,7 +13,10 @@
 		<Sidebar.Menu>
 			{#each items as item (item.title)}
 				<Sidebar.MenuItem >
-					<Sidebar.MenuButton tooltipContent={item.title} >
+					<Sidebar.MenuButton 
+						tooltipContent={item.title}
+						class={page.url.pathname === item.url ? 'bg-accent' : ''}
+					>
 						
 						{#snippet child({ props })}
 						<a href={item.url} {...props}>

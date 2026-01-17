@@ -1,9 +1,15 @@
 <script lang="ts">
+	// @ts-ignore
 	import ChartBarIcon from "@tabler/icons-svelte/icons/chart-bar";
+	// @ts-ignore
 	import DatabaseIcon from "@tabler/icons-svelte/icons/database";
+	// @ts-ignore
 	import FileAiIcon from "@tabler/icons-svelte/icons/file-ai";
+	// @ts-ignore
 	import CacheIcon from "@tabler/icons-svelte/icons/device-sd-card";
+	// @ts-ignore
 	import LocksIcon from "@tabler/icons-svelte/icons/lock-code";
+	// @ts-ignore
 	import SettingsIcon from "@tabler/icons-svelte/icons/settings";
 	import NavDocuments from "./nav-documents.svelte";
 	import NavMain from "./nav-main.svelte";
@@ -80,7 +86,8 @@
 		<NavDocuments items={data.documentation} />
 		<NavSecondary items={data.navSecondary} class="mt-auto" />
 	</Sidebar.Content>
+<!-- 	
 	<Sidebar.Footer>
 		<NavUser user={data.user} />
-	</Sidebar.Footer>
+	</Sidebar.Footer> -->
 </Sidebar.Root>

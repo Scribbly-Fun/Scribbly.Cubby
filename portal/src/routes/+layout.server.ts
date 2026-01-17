@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 import type { CubbyOptions } from '$lib/api/CubbyOptions';
 
 export const load = (async () => {
-     const cubbyUrl = env.CUBBY_HOST_URL;
+     const cubbyUrl = env.CUBBY_HOST_URL as string | undefined;
      
      if (!cubbyUrl) {
           error(500, 'CUBBY_HOST_URL environment variable is not configured');
