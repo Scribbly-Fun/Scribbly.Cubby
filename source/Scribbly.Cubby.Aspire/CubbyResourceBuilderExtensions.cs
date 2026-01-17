@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,6 +80,7 @@ public static class CubbyResourceBuilderExtensions
         /// </summary>
         /// <param name="name">A resource name</param>
         /// <returns>The portal builder</returns>
+        [Experimental("SCRB009")]
         public IResourceBuilder<CubbyContainerResource> WithCubbyPortal(
             [ResourceName] string name = "cubby-portal")
         {
@@ -102,7 +104,8 @@ public static class CubbyResourceBuilderExtensions
                     if (context.Resource is CubbyPortalResource portal)
                     {
                         var endpoint = portal.Parent.GetEndpoint("http");
-                        context.EnvironmentVariables.Add("CUBBY_HOST_URL", endpoint.Url);
+                        var url = $"{endpoint.Scheme}://{endpoint.Resource.Name}.dev.internal:{endpoint.TargetPort}";
+                        context.EnvironmentVariables.Add("CUBBY_HOST_URL", url);
                     }
                 })
                 .WithHealthCheck(healthCheckKey)

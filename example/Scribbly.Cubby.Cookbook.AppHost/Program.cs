@@ -18,9 +18,11 @@ var cubbyAdminPortal = builder
     .WithReference(cubbyAot);
 
 // Loads cubby's published docker images using the Aspire resource as a project reference
+#pragma warning disable SCRB009
 var cubbyContainer = builder
     .AddCubbyContainer("cubby-published")
     .WithCubbyPortal("cubby-portal-published");
+#pragma warning restore SCRB009
 
 // Starts a client side caching consumer as a project reference
 var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook")
