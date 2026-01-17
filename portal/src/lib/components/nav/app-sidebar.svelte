@@ -1,19 +1,10 @@
 <script lang="ts">
-	import GithubIcon from "@tabler/icons-svelte/icons/brand-github";
 	import ChartBarIcon from "@tabler/icons-svelte/icons/chart-bar";
-	import DashboardIcon from "@tabler/icons-svelte/icons/dashboard";
 	import DatabaseIcon from "@tabler/icons-svelte/icons/database";
 	import FileAiIcon from "@tabler/icons-svelte/icons/file-ai";
-	import FileDescriptionIcon from "@tabler/icons-svelte/icons/file-description";
-	import FileWordIcon from "@tabler/icons-svelte/icons/file-word";
-	import FolderIcon from "@tabler/icons-svelte/icons/folder";
-	import HelpIcon from "@tabler/icons-svelte/icons/help";
-	import InnerShadowTopIcon from "@tabler/icons-svelte/icons/inner-shadow-top";
-	import ListDetailsIcon from "@tabler/icons-svelte/icons/list-details";
-	import ReportIcon from "@tabler/icons-svelte/icons/report";
-	import SearchIcon from "@tabler/icons-svelte/icons/search";
+	import CacheIcon from "@tabler/icons-svelte/icons/device-sd-card";
+	import LocksIcon from "@tabler/icons-svelte/icons/lock-code";
 	import SettingsIcon from "@tabler/icons-svelte/icons/settings";
-	import UsersIcon from "@tabler/icons-svelte/icons/users";
 	import NavDocuments from "./nav-documents.svelte";
 	import NavMain from "./nav-main.svelte";
 	import NavSecondary from "./nav-secondary.svelte";
@@ -30,18 +21,18 @@
 		cubbyFeatures: [
 			{
 				title: "Dashboard",
-				url: "#",
+				url: "/dashboard",
 				icon: ChartBarIcon,
 			},
 			{
 				title: "Caches",
-				url: "#",
-				icon: ListDetailsIcon,
+				url: "/caches",
+				icon: CacheIcon,
 			},
 			{
 				title: "Locks",
-				url: "#",
-				icon: FolderIcon,
+				url: "/locks",
+				icon: LocksIcon,
 			}
 		],
 		documentation: [
@@ -66,6 +57,8 @@
 	};
 
 	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+
+	import logo from '$lib/assets/scribbly_banner.png';
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
@@ -75,8 +68,7 @@
 				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:p-1.5!">
 					{#snippet child({ props })}
 						<a href="##" {...props}>
-							<InnerShadowTopIcon class="size-5!" />
-							<span class="text-base font-semibold">Cubby</span>
+							<img alt="Scribbly" src={logo} width="100" />
 						</a>
 					{/snippet}
 				</Sidebar.MenuButton>

@@ -1,7 +1,4 @@
 <script lang="ts">
-	import CirclePlusFilledIcon from "@tabler/icons-svelte/icons/circle-plus-filled";
-	import MailIcon from "@tabler/icons-svelte/icons/mail";
-	import { Button } from "$lib/components/ui/button/index.js";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import type { Icon } from "@tabler/icons-svelte";
 
@@ -13,7 +10,7 @@
 		<Sidebar.Menu>
 			{#each items as item (item.title)}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton tooltipContent={item.title}>
+					<Sidebar.MenuButton tooltipContent={item.title} >
 						{#if item.icon}
 							<item.icon />
 						{/if}

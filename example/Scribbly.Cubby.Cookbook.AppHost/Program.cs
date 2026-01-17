@@ -29,6 +29,11 @@ var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("
     .WithReference(cubbyContainer)
     .WaitFor(cubbyContainer);
 
+var portal = builder.AddJavaScriptApp("portal-local", "../../portal")
+    .WithPnpm()
+    .WithExternalHttpEndpoints()
+    .WithReference(cubbyAot);
+
 if (builder.ExecutionContext.IsRunMode)
 {
     builder.AddLoadTesting("load-tester", "./scripts", options =>
