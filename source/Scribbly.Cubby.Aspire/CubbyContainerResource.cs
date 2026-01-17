@@ -8,7 +8,7 @@ namespace Scribbly.Cubby;
 /// </summary>
 public class CubbyContainerResource : ContainerResource, IResourceWithServiceDiscovery
 {
-    internal CubbyContainerResource(string name = "scrb-cubby") : base(name)
+    internal CubbyContainerResource([ResourceName] string name = "cubby") : base(name)
     {
         
     }
@@ -17,10 +17,15 @@ public class CubbyContainerResource : ContainerResource, IResourceWithServiceDis
 /// <summary>
 /// Aspire resource used to run cubby as a docker container.
 /// </summary>
-public class CubbyPortalResource : ContainerResource
+public class CubbyPortalResource : ContainerResource, IResourceWithParent<CubbyContainerResource>
 {
-    internal CubbyPortalResource(string name = "cubby-portal") : base(name)
+    /// <summary>
+    /// The cubby server the portal application will communicate with 
+    /// </summary>
+    public CubbyContainerResource Parent { get; }
+    
+    internal CubbyPortalResource(CubbyContainerResource parent, [ResourceName] string name = "cubby-portal") : base(name)
     {
-        
+        Parent = parent;
     }
 }

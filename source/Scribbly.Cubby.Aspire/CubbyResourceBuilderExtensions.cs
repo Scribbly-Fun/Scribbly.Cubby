@@ -35,7 +35,7 @@ public static class CubbyResourceBuilderExtensions
             var cubbyResource = builder
                 .AddResource(resource)
                 .WithIconName("money")
-                .WithImage(CubbyContainerImageTags.Image, CubbyContainerImageTags.Tag)
+                .WithImage(CubbyContainerImageTags.CubbyImage, CubbyContainerImageTags.CubbyTag)
                 .WithImageRegistry(CubbyContainerImageTags.Registry)
                 .WithEndpoint(name: "http", targetPort: 5000, scheme: "http")
                 .WithHealthCheck(healthCheckKey);
@@ -72,37 +72,36 @@ public static class CubbyResourceBuilderExtensions
         }
     }
 
-    extension(IResourceBuilder<CubbyContainerResource> builder)
+    extension(IResourceBuilder<CubbyContainerResource> cubbyResourceBuilder)
     {
-        public void WithCubbyPortal(
-            [ResourceName] string name = "cubby-portal",
-            string? workingDirectory = null)
+        /// <summary>
+        /// Adds the portal UI to the cubby cache server
+        /// </summary>
+        /// <param name="name">A resource name</param>
+        /// <returns>The portal builder</returns>
+        public IResourceBuilder<CubbyPortalResource> WithCubbyPortal(
+            [ResourceName] string name = "cubby-portal")
         {
-            ArgumentNullException.ThrowIfNull(builder);
+            ArgumentNullException.ThrowIfNull(cubbyResourceBuilder);
             ArgumentException.ThrowIfNullOrEmpty(name);
         
-            var resource = new CubbyPortalResource(name);
+            var resource = new CubbyPortalResource(cubbyResourceBuilder.Resource, name);
             
             var healthCheckKey = $"{name}_check";
         
-            builder.ApplicationBuilder.Services.AddHealthChecks().AddCheck(healthCheckKey, token => HealthCheckResult.Healthy());
+            cubbyResourceBuilder.ApplicationBuilder.Services.AddHealthChecks().AddCheck(healthCheckKey, token => HealthCheckResult.Healthy());
             
-#if DEBUG
-            var cubbyResource = builder.ApplicationBuilder
-                .AddDockerfile(name, "../../portal", "Dockerfile")
-                .WithEndpoint(3004, 3000, "http")
-                .WithReference(builder);
-            
-#else
-            //var cubbyResource = builder
-            //    .AddResource(resource)
-            //    .WithIconName("money")
-            //    .WithImage(CubbyContainerImageTags.Image, CubbyContainerImageTags.Tag)
-            //    .WithImageRegistry(CubbyContainerImageTags.Registry)
-            //    .WithEndpoint(name: "http", targetPort: 5000, scheme: "http")
-            //    .WithHealthCheck(healthCheckKey);
-#endif
-            // return cubbyResource;
+            var cubbyResource = cubbyResourceBuilder.ApplicationBuilder
+                .AddResource(resource)
+                .WithIconName("money")
+                .WithImage(CubbyContainerImageTags.PortalImage, CubbyContainerImageTags.PortalTag)
+                .WithImageRegistry(CubbyContainerImageTags.Registry)
+                .WithEndpoint(name: "http", targetPort: 3000, scheme: "http")
+                .WithHealthCheck(healthCheckKey)
+                .WaitFor(cubbyResourceBuilder)
+                .WithReference(cubbyResourceBuilder);
+
+            return cubbyResource;
         }
     }
 }
