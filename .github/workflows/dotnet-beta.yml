@@ -133,10 +133,11 @@ jobs:
 
       - name: Build Docker image
         run: |
+          cd ./portal
           docker build \
             --build-arg VERSION=${{ needs.build.outputs.Version }} \
             -t scribbly/cubby-portal:${{ needs.build.outputs.Version }} \
-            -f ./portal/Dockerfile .
+            -f Dockerfile .
 
       - name: Push Docker image
         run: |
