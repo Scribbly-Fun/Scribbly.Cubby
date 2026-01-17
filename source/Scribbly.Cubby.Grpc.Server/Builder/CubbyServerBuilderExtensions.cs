@@ -21,7 +21,7 @@ public static class CubbyServerBuilderExtensions
         /// <returns>The configured host.</returns>
         public ICubbyServerBuilder WithCubbyGrpcServer()
         {
-            cubbyBuilder.ServerOptions.Transports |= CubbyServerOptions.EnabledTransports.Grpc;
+            cubbyBuilder.ServerOptions.InternalTransports |= CubbyServerOptions.EnabledTransports.Grpc;
             
             cubbyBuilder.HostBuilder.Services.AddGrpc(ops =>
             {

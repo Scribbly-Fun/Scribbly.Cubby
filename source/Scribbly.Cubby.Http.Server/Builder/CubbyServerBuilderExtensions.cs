@@ -21,7 +21,7 @@ public static class CubbyServerBuilderExtensions
         /// <returns>The configured host.</returns>
         public ICubbyServerBuilder WithCubbyHttpServer()
         {
-            cubbyBuilder.ServerOptions.Transports |= CubbyServerOptions.EnabledTransports.Http;
+            cubbyBuilder.ServerOptions.InternalTransports |= CubbyServerOptions.EnabledTransports.Http;
             return cubbyBuilder;
         }
     }

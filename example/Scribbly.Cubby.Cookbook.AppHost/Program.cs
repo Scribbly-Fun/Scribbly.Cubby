@@ -4,20 +4,43 @@ using Scribbly.Cubby;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cubbyAot = builder.AddProject<Projects.Scribbly_Cubby_Host>("scrb-cubby")
+// Loads cubby as a direct project reference
+var cubbyAot = builder.AddProject<Projects.Scribbly_Cubby_Host>("cubby-project")
     .WithEnvironment("SCRB_CUBBY_HTTPS", "True");
 
+// Builds and loads the cubby docker images 
 var cubbyDockerFile = builder
-    .AddDockerfile("scrb-cubby-dockerfile", "../../", "Dockerfile");
+    .AddDockerfile("cubby-dockerfile", "../../", "Dockerfile");
 
+var cubbyAdminPortal = builder
+    .AddDockerfile("cubby-portal-dockerfile", "../../portal", "Dockerfile")
+    .WithEndpoint(3002, 3000, "http")
+    .WithReference(cubbyAot);
+
+// Loads cubby's published docker images using the Aspire resource as a project reference
+#pragma warning disable SCRB009
 var cubbyContainer = builder
-    .AddCubbyContainer("scrb-cubby-container");
+    .AddCubbyContainer("cubby-published")
+    .WithCubbyPortal("cubby-portal-published");
+#pragma warning restore SCRB009
 
+// Starts a client side caching consumer as a project reference
 var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook")
     .WithReference(cubbyAot)
     .WaitFor(cubbyAot)
     .WithReference(cubbyContainer)
     .WaitFor(cubbyContainer);
+
+var portal = builder.AddJavaScriptApp("portal-local", "../../portal")
+    .WithPnpm()
+    .WithExternalHttpEndpoints()
+    .WithReference(cubbyAot)
+    .WithHttpEndpoint(name: "ui", port: 5173, targetPort: 5173, isProxied: false)
+    .WithEnvironment(context =>
+    {
+        var url = cubbyAot.Resource.GetEndpoint("http").Url;
+        context.EnvironmentVariables.Add("CUBBY_HOST_URL", url);
+    });
 
 if (builder.ExecutionContext.IsRunMode)
 {

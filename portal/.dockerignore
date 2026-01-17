@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+.npmrc
+
+# Testing
+/tests
+
+# IDE
+.vscode
+
+# SvelteKit
+.svelte-kit
+build
+.env
+.env.local
+
+# Docker
+Dockerfile
+docker-compose*.yml

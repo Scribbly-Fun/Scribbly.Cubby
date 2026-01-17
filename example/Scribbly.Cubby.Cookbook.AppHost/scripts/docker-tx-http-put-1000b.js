@@ -1,6 +1,7 @@
 import http from 'k6/http';
 import { check } from 'k6';
 import { SharedArray } from 'k6/data';
+import exec from 'k6/execution';
 
 const ASPIRE_RESOURCE = __ENV.ASPIRE_RESOURCE || 'http://localhost:8080';
 
@@ -16,7 +17,10 @@ const payload = new SharedArray('1000-bytes', function () {
 });
 
 export default function () {
-  const url = `${ASPIRE_RESOURCE}/cubby/cachekey`;
+
+  const vuId = exec.vu.idInTest;
+  
+  const url = `${ASPIRE_RESOURCE}/cubby?key=cachekey_${vuId}`;
 
   const res = http.put(
     url,
