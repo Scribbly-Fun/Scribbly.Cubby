@@ -259,7 +259,32 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
 
     /// <inheritdoc />
     public EvictResult Evict(in BytesKey key) => GetShard(key).TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
-    
+
+    /// <inheritdoc />
+    public CacheEntryFlags Tombstone(in BytesKey key)
+    {
+        Interlocked.Increment(ref _activeWriters);
+
+        try
+        {
+            var shard = GetShard(key);
+            if (!shard.TryGetValue(key, out var entry))
+            {
+                return CacheEntryFlags.None;
+            }
+
+            var header = entry.GetHeader();
+            var flags = header.GetFlags();
+            
+            header.UpdateFlags(flags |= CacheEntryFlags.Tombstone);
+            return flags;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ConcurrentDictionary<BytesKey, byte[]> GetShard(BytesKey key)
         => _shards[(key[0] & int.MaxValue) % _shards.Length];

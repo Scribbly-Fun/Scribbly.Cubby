@@ -241,6 +241,30 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     public EvictResult Evict(in BytesKey key) => _store.TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
     
     /// <inheritdoc />
+    public CacheEntryFlags Tombstone(in BytesKey key)
+    {
+        Interlocked.Increment(ref _activeWriters);
+
+        try
+        {
+            if (!_store.TryGetValue(key, out var entry))
+            {
+                return CacheEntryFlags.None;
+            }
+
+            var header = entry.GetHeader();
+            var flags = header.GetFlags();
+            
+            header.UpdateFlags(flags |= CacheEntryFlags.Tombstone);
+            return flags;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
+    }
+    
+    /// <inheritdoc />
     public void Dispose()
     {
         foreach (var entry in _store)
