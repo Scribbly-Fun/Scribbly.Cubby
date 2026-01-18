@@ -9,5 +9,5 @@ export type CacheEntry = {
 	encoding: string;
 	size: number;
 	expiration: string | undefined;
-	sliding: string | undefined;
+	sliding_duration: string | undefined;
 };

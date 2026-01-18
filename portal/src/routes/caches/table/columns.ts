@@ -13,7 +13,7 @@ export const columns: ColumnDef<CacheEntry>[] = [
 	{
 		accessorKey: 'flags',
 		header: 'Flags',
-		cell: ({ row }) => renderComponent(FlagsBadge, { flags: { flags: row.original.flags } })
+		cell: ({ row }) => renderComponent(FlagsBadge, { flags: row.original.flags })
 	},
 	{
 		accessorKey: 'expiration',
@@ -36,17 +36,17 @@ export const columns: ColumnDef<CacheEntry>[] = [
 		accessorKey: 'sliding',
 		header: 'Sliding Duration',
 		cell: ({ row }) => {
-			const expirationCellSnippet = createRawSnippet<[{ expiration: string | undefined }]>(
-				(getExpiration) => {
+			const expirationCellSnippet = createRawSnippet<[{ sliding_duration: string | undefined }]>(
+				(getDuration) => {
 					return {
 						render: () =>
-							`<div class="font-medium">${getExpiration().expiration ?? '00:00:00'}</div>`
+							`<div class="font-medium">${getDuration().sliding_duration ?? '00:00:00'}</div>`
 					};
 				}
 			);
 
 			return renderSnippet(expirationCellSnippet, {
-				expiration: row.original.expiration
+				sliding_duration: row.original.sliding_duration
 			});
 		}
 	},
