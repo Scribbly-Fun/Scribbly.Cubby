@@ -5,6 +5,12 @@
 	import type { CacheEntry } from '$lib/api/types';
 	import { invalidateAll } from '$app/navigation';
 
+	// @ts-ignore
+	import TrashIcon from '@tabler/icons-svelte/icons/trash';
+
+	// @ts-ignore
+	import CoffinIcon from '@tabler/icons-svelte/icons/coffin';
+
 	let { entry }: { entry: CacheEntry } = $props();
 
 	async function handleEvict() {
@@ -42,20 +48,26 @@
 	}
 </script>
 
-<DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-		{#snippet child({ props })}
-			<Button {...props} variant="ghost" size="icon" class="relative size-8 p-0">
-				<span class="sr-only">Open menu</span>
-				<EllipsisIcon />
-			</Button>
-		{/snippet}
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content>
-		<DropdownMenu.Group>
-			<DropdownMenu.Label>Actions</DropdownMenu.Label>
-			<DropdownMenu.Item onclick={handleEvict}>Evict Entry</DropdownMenu.Item>
-			<DropdownMenu.Item onclick={handleTombstone}>Tombstone Entry</DropdownMenu.Item>
-		</DropdownMenu.Group>
-	</DropdownMenu.Content>
-</DropdownMenu.Root>
+<div class="flex flex-row justify-end">
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger>
+			{#snippet child({ props })}
+				<Button {...props} variant="ghost" size="icon" class="relative size-8 p-0">
+					<span class="sr-only">Open menu</span>
+					<EllipsisIcon />
+				</Button>
+			{/snippet}
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content>
+			<DropdownMenu.Group>
+				<DropdownMenu.Label>Actions</DropdownMenu.Label>
+				<DropdownMenu.Item variant="destructive" onclick={handleEvict}
+					><TrashIcon />Evict</DropdownMenu.Item
+				>
+				<DropdownMenu.Item variant="destructive" onclick={handleTombstone}
+					><CoffinIcon /> Tombstone</DropdownMenu.Item
+				>
+			</DropdownMenu.Group>
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
+</div>

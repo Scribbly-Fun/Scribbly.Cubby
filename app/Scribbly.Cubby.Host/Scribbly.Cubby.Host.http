@@ -55,7 +55,7 @@ x-cubby-flags: Compressed
 
 ### Portal Endpoints - Tombstone
 
-DELETE {{debug}}/cubby/portal/caches/tombstone?key=my_key3
+DELETE {{debug}}/cubby/portal/caches/tombstone?key=cachekey_3
 Accept: application/json
 
 
