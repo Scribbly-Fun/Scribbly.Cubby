@@ -22,7 +22,7 @@
 <div class="flex w-full flex-wrap gap-2">
 	{#each activeFlagNames as flagName (flagName)}
 		{#if flagName === 'None'}
-			<Badge variant="secondary">{flagName}</Badge>
+			<Badge variant="outline" class="opacity-50">{flagName}</Badge>
 		{:else if flagName === 'Tombstone'}
 			<Badge variant="destructive">
 				<CoffinIcon /> {flagName}</Badge

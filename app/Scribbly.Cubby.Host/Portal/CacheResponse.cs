@@ -35,7 +35,7 @@ public static class CacheResponseMapping
                 var expiration = header.GetExpiration();
                 var duration = header.GetSlidingDuration();
                 
-                return new CacheResponse(entry.Key, flags, encoding.ToEncodingString(), new DateTime(expiration), TimeSpan.FromTicks(duration),  length);
+                return new CacheResponse(entry.Key, flags, encoding.ToEncodingString(), expiration > 0 ? new DateTime(expiration) : null, TimeSpan.FromTicks(duration),  length);
             }
         }
     }

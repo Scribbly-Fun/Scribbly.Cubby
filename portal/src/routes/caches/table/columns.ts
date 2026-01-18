@@ -4,6 +4,9 @@ import { renderComponent, renderSnippet } from '$lib/components/ui/data-table/re
 import FlagsBadge from '$lib/components/ui/flags/flags-badge.svelte';
 import CacheTableActions from './cache-table-actions.svelte';
 import { createRawSnippet } from 'svelte';
+import SlidingBadge from '$lib/components/ui/flags/sliding-badge.svelte';
+import ExpirationBadge from '$lib/components/ui/flags/expiration-badge.svelte';
+import EncodingBadge from '$lib/components/ui/flags/encoding-badge.svelte';
 
 export const columns: ColumnDef<CacheEntry>[] = [
 	{
@@ -19,16 +22,8 @@ export const columns: ColumnDef<CacheEntry>[] = [
 		accessorKey: 'expiration',
 		header: 'Expiration',
 		cell: ({ row }) => {
-			const expirationCellSnippet = createRawSnippet<[{ expiration: string | undefined }]>(
-				(getExpiration) => {
-					return {
-						render: () => `<div class=" font-medium">${getExpiration().expiration ?? 'Never'}</div>`
-					};
-				}
-			);
-
-			return renderSnippet(expirationCellSnippet, {
-				expiration: row.original.expiration
+			return renderComponent(ExpirationBadge, {
+				date: row.original.expiration ? new Date(row.original.expiration) : undefined
 			});
 		}
 	},
@@ -36,23 +31,17 @@ export const columns: ColumnDef<CacheEntry>[] = [
 		accessorKey: 'sliding',
 		header: 'Sliding Duration',
 		cell: ({ row }) => {
-			const expirationCellSnippet = createRawSnippet<[{ sliding_duration: string | undefined }]>(
-				(getDuration) => {
-					return {
-						render: () =>
-							`<div class="font-medium">${getDuration().sliding_duration ?? '00:00:00'}</div>`
-					};
-				}
-			);
-
-			return renderSnippet(expirationCellSnippet, {
-				sliding_duration: row.original.sliding_duration
-			});
+			return renderComponent(SlidingBadge, { duration: row.original.sliding_duration });
 		}
 	},
 	{
 		accessorKey: 'encoding',
-		header: 'Encoding'
+		header: 'Encoding',
+		cell: ({ row }) => {
+			return renderComponent(EncodingBadge, {
+				encoding: row.original.encoding
+			});
+		}
 	},
 	{
 		accessorKey: 'size',

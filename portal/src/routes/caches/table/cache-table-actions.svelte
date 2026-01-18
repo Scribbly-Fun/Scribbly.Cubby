@@ -9,6 +9,9 @@
 	import TrashIcon from '@tabler/icons-svelte/icons/trash';
 
 	// @ts-ignore
+	import EditIcon from '@tabler/icons-svelte/icons/edit';
+
+	// @ts-ignore
 	import CoffinIcon from '@tabler/icons-svelte/icons/coffin';
 
 	let { entry }: { entry: CacheEntry } = $props();
@@ -60,7 +63,11 @@
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
-				<DropdownMenu.Label>Actions</DropdownMenu.Label>
+				<DropdownMenu.Label>Modify</DropdownMenu.Label>
+				<DropdownMenu.Item><TrashIcon />Edit</DropdownMenu.Item>
+			</DropdownMenu.Group>
+			<DropdownMenu.Group>
+				<DropdownMenu.Label>Danger</DropdownMenu.Label>
 				<DropdownMenu.Item variant="destructive" onclick={handleEvict}
 					><TrashIcon />Evict</DropdownMenu.Item
 				>

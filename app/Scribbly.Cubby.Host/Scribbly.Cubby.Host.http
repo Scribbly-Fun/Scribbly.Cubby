@@ -18,7 +18,7 @@ Content-Type: application/json
 
 ### PUT with Expiration
 
-PUT {{debug}}/cubby?key=my_key3
+PUT {{debug}}/cubby?key=my_key4
 Content-Type: application/json
 x-cubby-expiry: 00:10:10
 

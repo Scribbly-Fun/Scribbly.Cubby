@@ -12,6 +12,8 @@
 	// @ts-ignore
 	import PauseIcon from '@tabler/icons-svelte/icons/player-pause';
 
+	import CreateCacheDialog from './create-cache-dialog.svelte';
+
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
 		data: TData[];
@@ -41,7 +43,8 @@
 	}
 </script>
 
-<div class="mb-4 flex flex-row items-center justify-end">
+<div class="mb-4 flex flex-row items-center justify-between gap-4">
+	<CreateCacheDialog />
 	<div class="flex flex-row gap-2 rounded-md border bg-card p-2 shadow-sm">
 		<Button
 			onclick={refresh}
