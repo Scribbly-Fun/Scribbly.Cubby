@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
-import type { CacheEntry } from '$lib/api/CacheEntry';
+import type { CacheEntry } from '$lib/api/types/CacheEntry';
 
 export const load = (async () => {
 

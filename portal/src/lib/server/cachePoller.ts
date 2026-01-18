@@ -1,4 +1,4 @@
-import type { CacheEntry } from '$lib/api/CacheEntry';
+import type { CacheEntry } from '$lib/api/types/CacheEntry';
 import { env } from '$env/dynamic/private';
 
 let cachedEntries: CacheEntry[] = [];

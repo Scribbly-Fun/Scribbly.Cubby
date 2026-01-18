@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
-        <CubbyContainerImageTag>0.1.0-portal.2</CubbyContainerImageTag>
-        <PortalContainerImageTag>0.1.0-portal.2</PortalContainerImageTag>
+        <CubbyContainerImageTag>0.1.0-rc.4</CubbyContainerImageTag>
+        <PortalContainerImageTag>0.1.0-rc.4</PortalContainerImageTag>
     </PropertyGroup>
 
     <ItemGroup>

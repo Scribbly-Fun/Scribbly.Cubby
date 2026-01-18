@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
-import type { CubbyOptions } from '$lib/api/CubbyOptions';
+import type { CubbyOptions } from '$lib/api/types/CubbyOptions';
 
 export const load = (async () => {
      const cubbyUrl = env.CUBBY_HOST_URL as string | undefined;

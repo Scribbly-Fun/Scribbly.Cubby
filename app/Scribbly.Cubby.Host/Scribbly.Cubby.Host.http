@@ -8,7 +8,7 @@ Accept: application/json
 
 ### PUT 
 
-PUT {{debug}}/cubby?key=my_key1212
+PUT {{debug}}/cubby?key=sfghsdfhghgfsdhs
 Content-Type: application/json
 
 {
