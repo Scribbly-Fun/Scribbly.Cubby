@@ -29,10 +29,10 @@ x-cubby-expiry: 00:10:10
 
 ### PUT with Sliding
 
-PUT {{debug}}/cubby?key=my_key65qwer
+PUT {{debug}}/cubby?key=gdj7ft7jkf
 Content-Type: application/json
 x-cubby-expiry: 00:10:10
-x-cubby-flags: Sliding,Compressed
+x-cubby-flags: Sliding
 
 {
   "key": "my_key",

@@ -16,7 +16,7 @@ Cubby is a 'choose your own adventure' cross platform native AOT .net distribute
 > [!Note]
 > Still in initial development, there may be several incorrect statements in the readme
 
-![cubby.png](./docs/cubby.png)
+![cubby.png](./docs/portal/dashboard.png)
 
 ![Static Badge](https://img.shields.io/badge/CACHE-blue)
 
@@ -607,6 +607,38 @@ The below diagram describes Cubby's eviction logic.
 > The async background process can be configured and will exit each query when locking contention is detected.
 
 ![Eviction Strategy](./docs/eviction.PNG)
+
+# Portal
+
+Cubby has a BBF, no not a best friend forever.  A backend for front-end.  Located inside the ./portal project is a sveltkit 
+application using to monitor and control Cubby. All portal client operation communicate with the SvelteKit node server then to cubby.
+This keeps all sensitive information on the servers and aligns best with some of cubby's long term goals. 
+
+> Note information is coming soon as this is still very rough is just getting started.  
+> Currently the simplest way to use the cubby portal will be using the Aspire app host or docker compose.
+
+*using aspire, note the `WithCubbyPortal` method is marked experimental*
+
+```csharp
+var builder = DistributedApplication.CreateBuilder(args);
+
+#pragma warning disable SCRB009
+var cubbyContainer = builder
+    .AddCubbyContainer("cubby-published")
+    .WithCubbyPortal("cubby-portal-published");
+    
+builder.Build().Run();
+#pragma warning restore SCRB009
+```
+
+This will pull the latest cubby and cubby-portal images and startup the containers.  Aspire will also ensure the portal is communicating with the correct server.
+
+> The cubby portal container requires a ``CUBBY_HOST_URL`` environment variable be assigned to the cubby server.
+> Aspire takes care of this for you, note when running portal directly you will need to assign this value.
+
+![cubby.png](./docs/portal/dashboard.png)
+
+![cubby.png](./docs/portal/caches.png)
 
 # Benchmarks
 
