@@ -12,7 +12,10 @@
 	// @ts-ignore
 	import PauseIcon from '@tabler/icons-svelte/icons/player-pause';
 
-	import CreateCacheDialog from './create-cache-dialog.svelte';
+	import CreateCacheDialog from '../components/cache-entry-dialog.svelte';
+	import TableFooter from '$lib/components/ui/table/table-footer.svelte';
+
+	const POLL_INTERVAL_MS = 2000;
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -20,7 +23,23 @@
 	};
 
 	let { data, columns }: DataTableProps<TData, TValue> = $props();
+
 	let playing = $state(false);
+
+	$effect(() => {
+		if (!playing) return;
+
+		console.log('Starting polling');
+
+		const id = setInterval(() => {
+			invalidateAll();
+		}, POLL_INTERVAL_MS);
+
+		return () => {
+			console.log('Stopping polling');
+			clearInterval(id);
+		};
+	});
 
 	const table = createSvelteTable({
 		get data() {
@@ -58,18 +77,18 @@
 		</Button>
 		<Button
 			onclick={toggleAutopolling}
-			variant="ghost"
+			variant={playing ? 'destructive' : 'ghost'}
 			size="sm"
 			class="hidden sm:flex dark:text-foreground"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<PlayIcon
+			<PauseIcon
 				class={`h-[1.2rem] w-[1.2rem] transition-all! ${
 					playing ? 'scale-0 rotate-90' : 'scale-100 rotate-0'
 				} dark:${playing ? 'scale-100 dark:rotate-0' : 'scale-0 dark:-rotate-90'}`}
 			/>
-			<PauseIcon
+			<PlayIcon
 				class={`absolute h-[1.2rem] w-[1.2rem] transition-all! ${
 					playing ? 'scale-100 rotate-0' : 'scale-0 -rotate-90'
 				} dark:${playing ? 'scale-0 dark:rotate-90' : 'scale-100 dark:rotate-0'}`}

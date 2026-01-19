@@ -10,10 +10,9 @@
 	<Dialog.Trigger><Button variant="outline"><AddIcon /> Create Entry</Button></Dialog.Trigger>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>Are you sure absolutely sure?</Dialog.Title>
+			<Dialog.Title>Create New Cache Entry</Dialog.Title>
 			<Dialog.Description>
-				This action cannot be undone. This will permanently delete your account and remove your data
-				from our servers.
+				Complete the required fields to create a new cache entry.
 			</Dialog.Description>
 		</Dialog.Header>
 	</Dialog.Content>

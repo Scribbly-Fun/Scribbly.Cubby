@@ -29,10 +29,10 @@ x-cubby-expiry: 00:10:10
 
 ### PUT with Sliding
 
-PUT {{debug}}/cubby?key=my_key65
+PUT {{debug}}/cubby?key=my_key65qwer
 Content-Type: application/json
 x-cubby-expiry: 00:10:10
-x-cubby-flags: Sliding 
+x-cubby-flags: Sliding,Compressed
 
 {
   "key": "my_key",
@@ -42,7 +42,7 @@ x-cubby-flags: Sliding
 
 ### PUT with Compression (we would need to compress the value here since it's assumed the client does the compression before crossing the wire)
 
-PUT {{debug}}/cubby?key=my_key3
+PUT {{debug}}/cubby?key=my_key1231
 Content-Type: application/json
 x-cubby-flags: Compressed
 

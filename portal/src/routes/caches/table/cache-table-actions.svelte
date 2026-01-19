@@ -64,15 +64,15 @@
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
 				<DropdownMenu.Label>Modify</DropdownMenu.Label>
-				<DropdownMenu.Item><TrashIcon />Edit</DropdownMenu.Item>
+				<DropdownMenu.Item><EditIcon />Edit Entry</DropdownMenu.Item>
 			</DropdownMenu.Group>
 			<DropdownMenu.Group>
 				<DropdownMenu.Label>Danger</DropdownMenu.Label>
-				<DropdownMenu.Item variant="destructive" onclick={handleEvict}
-					><TrashIcon />Evict</DropdownMenu.Item
-				>
 				<DropdownMenu.Item variant="destructive" onclick={handleTombstone}
 					><CoffinIcon /> Tombstone</DropdownMenu.Item
+				>
+				<DropdownMenu.Item variant="destructive" onclick={handleEvict}
+					><TrashIcon />Evict Entry</DropdownMenu.Item
 				>
 			</DropdownMenu.Group>
 		</DropdownMenu.Content>

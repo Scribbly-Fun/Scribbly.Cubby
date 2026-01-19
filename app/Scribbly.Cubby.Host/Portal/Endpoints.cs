@@ -21,6 +21,16 @@ public static class Endpoints
                     : storeIterator.Entries.Select(e => e.Response);
             });
 
+            portalGroup.MapGet("/caches/value", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
+            {
+                if (!store.TryGet(key, out var entry))
+                {
+                    return  Results.NotFound();
+                }   
+                
+                return Results.Bytes(entry.GetValue().ToArray());
+            });
+
             portalGroup.MapDelete("/caches/tombstone", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
             {
                 if (!store.Exists(key))

@@ -49,3 +49,33 @@ export async function tombstoneEntry(key: string): Promise<boolean> {
 		return false;
 	}
 }
+
+/**
+ * Reads the raw value of a cache entry
+ * @param key The key of the entry to evict
+ * @returns The data in the buffer or undefined if not found
+ */
+export async function readCacheValue(key: string): Promise<ArrayBuffer | undefined> {
+	const cubbyUrl = env.CUBBY_HOST_URL;
+
+	if (!cubbyUrl) {
+		console.error('CUBBY_HOST_URL is not configured');
+		return undefined;
+	}
+
+	try {
+		const response = await fetch(`${cubbyUrl}/cubby/portal/caches/value?key=${key}`, {
+			method: 'GET'
+		});
+
+		if (response.status === 200) {
+			return await response.arrayBuffer();
+		}
+
+		return undefined;
+	} catch (error) {
+		console.error(`Error tombstoning entry: ${key}`, error);
+
+		return undefined;
+	}
+}

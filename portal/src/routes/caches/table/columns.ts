@@ -7,20 +7,27 @@ import { createRawSnippet } from 'svelte';
 import SlidingBadge from '$lib/components/ui/flags/sliding-badge.svelte';
 import ExpirationBadge from '$lib/components/ui/flags/expiration-badge.svelte';
 import EncodingBadge from '$lib/components/ui/flags/encoding-badge.svelte';
+import CacheEntryDisplay from '../components/cache-entry-display.svelte';
 
+function renderHeader(title: string) {
+	const amountHeaderSnippet = createRawSnippet(() => ({
+		render: () => `<div class="text-muted-foreground text-xs ">Flags</div>`
+	}));
+	return renderSnippet(amountHeaderSnippet);
+}
 export const columns: ColumnDef<CacheEntry>[] = [
 	{
 		accessorKey: 'key',
-		header: 'Key'
+		header: () => renderHeader('Key')
 	},
 	{
 		accessorKey: 'flags',
-		header: 'Flags',
+		header: () => renderHeader('Flags'),
 		cell: ({ row }) => renderComponent(FlagsBadge, { flags: row.original.flags })
 	},
 	{
 		accessorKey: 'expiration',
-		header: 'Expiration',
+		header: () => renderHeader('Expiration'),
 		cell: ({ row }) => {
 			return renderComponent(ExpirationBadge, {
 				date: row.original.expiration ? new Date(row.original.expiration) : undefined
@@ -29,14 +36,14 @@ export const columns: ColumnDef<CacheEntry>[] = [
 	},
 	{
 		accessorKey: 'sliding',
-		header: 'Sliding Duration',
+		header: () => renderHeader('Sliding Duration'),
 		cell: ({ row }) => {
 			return renderComponent(SlidingBadge, { duration: row.original.sliding_duration });
 		}
 	},
 	{
 		accessorKey: 'encoding',
-		header: 'Encoding',
+		header: () => renderHeader('Encoding'),
 		cell: ({ row }) => {
 			return renderComponent(EncodingBadge, {
 				encoding: row.original.encoding
@@ -45,11 +52,13 @@ export const columns: ColumnDef<CacheEntry>[] = [
 	},
 	{
 		accessorKey: 'size',
-		header: 'Size'
+		header: () => renderHeader('Size'),
+		cell: ({ row }) => {
+			return renderComponent(CacheEntryDisplay, { entry: row.original });
+		}
 	},
 	{
 		id: 'actions',
-
 		cell: ({ row }) => {
 			return renderComponent(CacheTableActions, { entry: row.original });
 		}
