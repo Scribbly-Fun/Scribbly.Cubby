@@ -59,16 +59,6 @@ if (app.Environment.IsDevelopment())
 app.MapCubbyGrpc();
 app.MapCubbyHttp();
 
-app.MapGet("/", (IOptions<CubbyServerOptions> options) => options.Value);
-
-app.MapGet("/cubby-caches", IEnumerable<CacheResponse> (ICubbyStore store) => 
-{
-    if (store is not ICubbyStoreIterator storeIterator)
-    {
-        return [];
-    }
-
-    return storeIterator.Entries.Select(e => e.Response);
-});
+app.MapCubbyPortal();
 
 app.Run();

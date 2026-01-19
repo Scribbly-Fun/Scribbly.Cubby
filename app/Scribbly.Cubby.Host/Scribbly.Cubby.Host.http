@@ -3,12 +3,12 @@
 
 ###
 
-GET {{debug}}/cubby/my_key3
+GET {{debug}}/cubby?key=my_key65
 Accept: application/json
 
 ### PUT 
 
-PUT {{debug}}/cubby?key=my_key1212
+PUT {{debug}}/cubby?key=sfghsdfhghgfsdhs
 Content-Type: application/json
 
 {
@@ -18,9 +18,21 @@ Content-Type: application/json
 
 ### PUT with Expiration
 
-PUT {{debug}}/cubby?key=my_key3
+PUT {{debug}}/cubby?key=my_key4
 Content-Type: application/json
-x-cubby-expiry: 00:00:10
+x-cubby-expiry: 00:10:10
+
+{
+  "key": "my_key",
+  "value": "my value"
+}
+
+### PUT with Sliding
+
+PUT {{debug}}/cubby?key=gdj7ft7jkf
+Content-Type: application/json
+x-cubby-expiry: 00:10:10
+x-cubby-flags: Sliding
 
 {
   "key": "my_key",
@@ -30,7 +42,7 @@ x-cubby-expiry: 00:00:10
 
 ### PUT with Compression (we would need to compress the value here since it's assumed the client does the compression before crossing the wire)
 
-PUT {{debug}}/cubby/my_key3
+PUT {{debug}}/cubby?key=my_key1231
 Content-Type: application/json
 x-cubby-flags: Compressed
 
@@ -38,4 +50,17 @@ x-cubby-flags: Compressed
   "key": "my_key",
   "value": "my value"
 }
+
+
+
+### Portal Endpoints - Tombstone
+
+DELETE {{debug}}/cubby/portal/caches/tombstone?key=cachekey_3
+Accept: application/json
+
+
+### Portal Endpoints - Evict
+
+DELETE {{debug}}/cubby/portal/caches/evict?key=my_key65
+Accept: application/json
 

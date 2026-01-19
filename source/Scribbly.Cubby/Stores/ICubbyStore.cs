@@ -54,6 +54,14 @@ public interface ICubbyStoreEviction
     /// </summary>
     /// <param name="key">The key</param>
     EvictResult Evict(in BytesKey key);
+    
+    /// <summary>
+    /// Marks the cache for revoke
+    /// A tombstoned cache will be removed the next time it's queried.
+    /// </summary>
+    /// <param name="key">The key</param>
+    /// <returns>The current flags</returns>
+    CacheEntryFlags Tombstone(in BytesKey key);
 }
 
 /// <summary>
