@@ -98,11 +98,12 @@ jobs:
           docker build \
             --build-arg VERSION=${{ needs.build.outputs.Version }} \
             -t scribbly/cubby:${{ needs.build.outputs.Version }} \
+            -t scribbly/cubby:latest \
             -f Dockerfile .
   
       - name: Push Docker image
         run: |
-          docker push scribbly/cubby:${{ needs.build.outputs.Version }}
+          docker push scribbly/cubby --all-tags
           
   portal-docker:
     needs: build
@@ -124,8 +125,9 @@ jobs:
           docker build \
             --build-arg VERSION=${{ needs.build.outputs.Version }} \
             -t scribbly/cubby-portal:${{ needs.build.outputs.Version }} \
+            -t scribbly/cubby-portal:latest \
             -f Dockerfile .
 
       - name: Push Docker image
         run: |
-          docker push scribbly/cubby-portal:${{ needs.build.outputs.Version }}
+          docker push scribbly/cubby-portal --all-tags
