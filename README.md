@@ -98,6 +98,13 @@ dotnet publish ./Scribbly.Cubby.Host.csproj -r win-x64 -c Release -o ../../artif
 
 ## Docker
 
+Cubby includes two containers.  
+
+1. scribbly/cubby an AOT compiled linux cache server
+2. scribbly/cubby-portal a SvelteKit UI
+
+### Cubby Server Container
+
 Simply pull our container using docker pull.  By default the container will run with the Cubby HTTP and gPRC transports.
 
 https://hub.docker.com/repository/docker/scribbly/cubby/general
@@ -138,6 +145,26 @@ By default the Cubby container will expose port `5000` HTTP.
 
 > [Note]
 > We will probably be adding HTTPs support inside the container to better support gRPC transports
+
+### Cubby Portal Container
+
+Simply pull our container using docker pull.  Note the Poral requires a running instance or Cubby
+
+https://hub.docker.com/repository/docker/scribbly/cubby-portal/general
+``docker pull scribbly/cubby-portal:***``
+
+### Environment Variable
+
+> [!Note]
+> A single environment variable tells the portal's backend node server when the cubby cache server is located.
+
+| Name                     | Purpose                                                         | Values     | 
+|--------------------------|-----------------------------------------------------------------|------------|
+| CUBBY_HOST_URL           | Changes the address of the Cubby server used to store the cache | http://xxx |
+
+### Ports
+
+By default the Cubby container will expose port `5173` HTTP.
 
 ## Library
 
