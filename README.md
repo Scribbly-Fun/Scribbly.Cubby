@@ -110,7 +110,7 @@ Simply pull our container using docker pull.  By default the container will run 
 https://hub.docker.com/repository/docker/scribbly/cubby/general
 ``docker pull scribbly/cubby:***``
 
-### Environment Variable
+#### Environment Variable
 
 > [!Note]
 > Long term you will be able to start the container with the transport(s) specified using an environment variable
@@ -139,7 +139,7 @@ https://hub.docker.com/repository/docker/scribbly/cubby/general
 | LOGGING__LOGLEVEL        | Scribbly.Cubby : Information |
 | ASPNETCORE_URLS          | "http://+:5000;"             |
 
-### Ports
+#### Ports
 
 By default the Cubby container will expose port `5000` HTTP.
 
@@ -153,7 +153,7 @@ Simply pull our container using docker pull.  Note the Poral requires a running 
 https://hub.docker.com/repository/docker/scribbly/cubby-portal/general
 ``docker pull scribbly/cubby-portal:***``
 
-### Environment Variable
+#### Environment Variable
 
 > [!Note]
 > A single environment variable tells the portal's backend node server when the cubby cache server is located.
@@ -162,9 +162,35 @@ https://hub.docker.com/repository/docker/scribbly/cubby-portal/general
 |--------------------------|-----------------------------------------------------------------|------------|
 | CUBBY_HOST_URL           | Changes the address of the Cubby server used to store the cache | http://xxx |
 
-### Ports
+#### Ports
 
-By default the Cubby container will expose port `5173` HTTP.
+The internal node server will listen on Port `3000`
+
+### Compose
+
+A ``compose.yml`` file located in the root directory of the repository demonstrates these two services wired up.
+
+```dockerfile
+services:
+  
+  cubby:
+    image: scribbly/cubby:latest
+    container_name: Scribbly-Cubby
+    ports:
+      - "5000:5000"
+  
+  cubby-portal:
+    image: scribbly/cubby-portal:latest
+    container_name: Scribbly-Portal
+    ports:
+      - "5173:3000"
+    environment:
+      - CUBBY_HOST_URL=http://Scribbly-Cubby:5000
+```
+
+```shell
+docker-compose up
+```
 
 ## Library
 
