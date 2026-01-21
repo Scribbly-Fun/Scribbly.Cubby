@@ -1,13 +1,15 @@
 ﻿services:
-  scribbly.cubby.hosted:
-    image: scribbly.cubby.hosted
-    build:
-      context: .
-      dockerfile: Scribbly.Cubby.Hosted/Dockerfile
-
-  scribbly.cubby.host:
-    image: scribbly.cubby.host
-    build:
-      context: .
-      dockerfile: source/Scribbly.Cubby.Host/Dockerfile
-
+  
+  cubby:
+    image: scribbly/cubby:latest
+    container_name: Scribbly-Cubby
+    ports:
+      - "5000:5000"
+  
+  cubby-portal:
+    image: scribbly/cubby-portal:latest
+    container_name: Scribbly-Portal
+    ports:
+      - "5173:3000"
+    environment:
+      - CUBBY_HOST_URL=http://Scribbly-Cubby:5000

@@ -82,6 +82,12 @@ public static class CacheHeaderSpanExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void UpdateFlags(CacheEntryFlags flags)
+        {
+            BinaryPrimitives.WriteInt16LittleEndian(cacheSpan[EntryLayout.FlagsPosition..], (short)flags);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool IsTombstoneOrExpired(long nowUtcTicks)
         {
             var flags = cacheSpan.GetFlags();

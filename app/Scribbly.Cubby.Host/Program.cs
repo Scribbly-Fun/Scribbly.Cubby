@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Builder;
+using Scribbly.Cubby.Host.Portal;
 using Scribbly.Cubby.Host.Setup;
 using Scribbly.Cubby.Server;
 using Scribbly.Cubby.Stores;
@@ -17,7 +18,9 @@ if (useHttps)
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
-  // TODO: add all JSON context for admin APIs;
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CubbyOptionsJsonContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseJsonContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseListJsonContext.Default);
 });
 
 builder.Services.AddOpenApi();
@@ -55,5 +58,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapCubbyGrpc();
 app.MapCubbyHttp();
+
+app.MapCubbyPortal();
 
 app.Run();

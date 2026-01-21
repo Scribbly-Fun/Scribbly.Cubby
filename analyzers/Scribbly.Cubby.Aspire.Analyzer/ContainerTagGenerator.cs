@@ -11,34 +11,41 @@ public sealed class ContainerTagGenerator : IIncrementalGenerator
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValueProvider<string?> property = context
+        IncrementalValueProvider<(string?, string?)> property = context
             .AnalyzerConfigOptionsProvider
             .Select((options, _) =>
             {
                 options.GlobalOptions.TryGetValue(
                     "build_property.CubbyContainerImageTag",
-                    out var value);
+                    out var cubbyContainer);
 
-                return value;
+                options.GlobalOptions.TryGetValue(
+                    "build_property.PortalContainerImageTag",
+                    out var portalContainer);
+
+                return (cubbyContainer, portalContainer);
             });
 
         context.RegisterSourceOutput(property, (spc, value) =>
         {
-            if (string.IsNullOrWhiteSpace(value))
+            var (cubby, portal) = value;
+            
+            if (string.IsNullOrWhiteSpace(cubby))
                 return;
 
             var source = $$"""
-                           namespace Scribbly.Cubby
+                           namespace Scribbly.Cubby;
+                           
+                           internal static class CubbyResources
                            {
-                               internal static class BuildConstants
-                               {
-                                   public const string ContainerImageTag = "{{value}}";
-                               }
+                               public const string CubbyContainerImageTag = "{{cubby}}";
+                               public const string PortalContainerImageTag = "{{portal ?? cubby}}";
                            }
+                           
                            """;
 
             spc.AddSource(
-                "BuildConstants.g.cs",
+                "CubbyResourceConstants.g.cs",
                 SourceText.From(source, Encoding.UTF8));
         });
     }

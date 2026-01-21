@@ -260,7 +260,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
             Interlocked.Decrement(ref _activeWriters);
         }
     }
-
+    
     /// <inheritdoc />
     public RefreshResult Refresh(in BytesKey key)
     {
@@ -301,6 +301,36 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
         var idx = GetShardIndex(key);
         return GetShard(idx).TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
     }
+    
+    /// <inheritdoc />
+    public CacheEntryFlags Tombstone(in BytesKey key)
+    {
+        Interlocked.Increment(ref _activeWriters);
+        var shardIndex = GetShardIndex(key);
+        var shard = _shards[shardIndex];
+        try
+        {
+            lock (_locks[shardIndex])
+            {
+                ref var buffer = ref CollectionsMarshal.GetValueRefOrNullRef(shard, key);
+                if (Unsafe.IsNullRef(ref buffer))
+                {
+                    return CacheEntryFlags.None;
+                }
+                
+                var header = buffer.GetHeader();
+                var flags = header.GetFlags();
+            
+                header.UpdateFlags(flags |= CacheEntryFlags.Tombstone);
+                return flags;
+            }
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeWriters);
+        }
+    }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int GetShardIndex(BytesKey key)

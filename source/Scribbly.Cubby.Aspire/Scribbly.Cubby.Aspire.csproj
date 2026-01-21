@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
-        <CubbyContainerImageTag>0.1.0-rc.2</CubbyContainerImageTag>
+        <CubbyContainerImageTag>0.1.0-rc.4</CubbyContainerImageTag>
+        <PortalContainerImageTag>0.1.0-rc.4</PortalContainerImageTag>
     </PropertyGroup>
 
     <ItemGroup>
         <CompilerVisibleProperty Include="CubbyContainerImageTag" />
+        <CompilerVisibleProperty Include="PortalContainerImageTag" />
     </ItemGroup>
     
     <ItemGroup>

@@ -1,4 +1,4 @@
-﻿name: 🚢 Publish Beta 🚢
+name: 🚢 Publish Beta 🚢
 
 on:
   workflow_dispatch:
@@ -92,7 +92,7 @@ jobs:
           dotnet nuget push $file --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
         done
     
-  docker:
+  cubby-docker:
     needs: build
     runs-on: ubuntu-latest
     
@@ -116,3 +116,31 @@ jobs:
       - name: Push Docker image
         run: |
           docker push scribbly/cubby:${{ needs.build.outputs.Version }}
+
+  portal-docker:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          cd ./portal
+          docker build \
+            --build-arg VERSION=${{ needs.build.outputs.Version }} \
+            -t scribbly/cubby-portal:${{ needs.build.outputs.Version }} \
+            -f Dockerfile .
+
+      - name: Push Docker image
+        run: |
+          docker push scribbly/cubby-portal:${{ needs.build.outputs.Version }}
+          
+          

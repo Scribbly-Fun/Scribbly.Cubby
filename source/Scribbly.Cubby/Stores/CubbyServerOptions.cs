@@ -50,7 +50,7 @@ public class CubbyServerOptions
     ///     Flags indicating what transports have been enabled.
     /// </summary>
     [Flags]
-    internal enum EnabledTransports : byte
+    public enum EnabledTransports : byte
     {
         None =    0,
         Http =    1 << 0,
@@ -61,9 +61,15 @@ public class CubbyServerOptions
     }
 
     /// <summary>
+    /// Public view on the enabled transports
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<EnabledTransports>))]
+    public EnabledTransports Transports => InternalTransports; 
+
+    /// <summary>
     ///     The enabled transports.
     /// </summary>
-    internal EnabledTransports Transports { get; set; } = EnabledTransports.None;
+    internal EnabledTransports InternalTransports { get; set; } = EnabledTransports.None;
     
     /// <summary>
     ///     Defines the type of store to use.
@@ -72,6 +78,7 @@ public class CubbyServerOptions
     ///     For the time being this is being used to help benchmark and do regression testing.
     ///     Long term it may be beneficial
     /// </remarks>
+    [JsonConverter(typeof(JsonStringEnumConverter<StoreType>))]
     public StoreType Store { get; set; } = StoreType.Sharded;
 
     /// <summary>
@@ -142,6 +149,7 @@ public sealed class CacheCleanupOptions
     /// <remarks>
     ///     Defaults to a randomness strategy
     /// </remarks>
+    [JsonConverter(typeof(JsonStringEnumConverter<AsyncStrategy>))]
     public AsyncStrategy Strategy { get; set; } = AsyncStrategy.Random;
 
     /// <summary>

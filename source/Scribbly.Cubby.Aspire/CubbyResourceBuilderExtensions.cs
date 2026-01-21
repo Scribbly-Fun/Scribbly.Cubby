@@ -1,4 +1,5 @@
-﻿using Aspire.Hosting;
+using System.Diagnostics.CodeAnalysis;
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -21,7 +22,7 @@ public static class CubbyResourceBuilderExtensions
         /// </summary>
         /// <param name="name">An optional name used for the resource.</param>
         /// <returns>A cubby container resource with service discovery</returns>
-        public IResourceBuilder<CubbyContainerResource> AddCubbyContainer([ResourceName] string name = "scrb-cubby")
+        public IResourceBuilder<CubbyContainerResource> AddCubbyContainer([ResourceName] string name = "cubby")
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentException.ThrowIfNullOrEmpty(name);
@@ -35,7 +36,7 @@ public static class CubbyResourceBuilderExtensions
             var cubbyResource = builder
                 .AddResource(resource)
                 .WithIconName("money")
-                .WithImage(CubbyContainerImageTags.Image, CubbyContainerImageTags.Tag)
+                .WithImage(CubbyContainerImageTags.CubbyImage, CubbyContainerImageTags.CubbyTag)
                 .WithImageRegistry(CubbyContainerImageTags.Registry)
                 .WithEndpoint(name: "http", targetPort: 5000, scheme: "http")
                 .WithHealthCheck(healthCheckKey);
@@ -50,7 +51,7 @@ public static class CubbyResourceBuilderExtensions
         /// <param name="workingDirectory">The working directory for the executable</param>
         /// <returns>A cubby container resource with service discovery</returns>
         public IResourceBuilder<CubbyExecutableResource> AddCubbyExecutable(
-            [ResourceName] string name = "scrb-cubby", 
+            [ResourceName] string name = "cubby", 
             string? workingDirectory = null)
         {
             ArgumentNullException.ThrowIfNull(builder);
@@ -69,6 +70,48 @@ public static class CubbyResourceBuilderExtensions
                 .WithHealthCheck(healthCheckKey);
             
             return cubbyResource;
+        }
+    }
+
+    extension(IResourceBuilder<CubbyContainerResource> cubbyResourceBuilder)
+    {
+        /// <summary>
+        /// Adds the portal UI to the cubby cache server
+        /// </summary>
+        /// <param name="name">A resource name</param>
+        /// <returns>The portal builder</returns>
+        [Experimental("SCRB009")]
+        public IResourceBuilder<CubbyContainerResource> WithCubbyPortal(
+            [ResourceName] string name = "cubby-portal")
+        {
+            ArgumentNullException.ThrowIfNull(cubbyResourceBuilder);
+            ArgumentException.ThrowIfNullOrEmpty(name);
+        
+            var resource = new CubbyPortalResource(cubbyResourceBuilder.Resource, name);
+            
+            var healthCheckKey = $"{name}_check";
+        
+            cubbyResourceBuilder.ApplicationBuilder.Services.AddHealthChecks().AddCheck(healthCheckKey, token => HealthCheckResult.Healthy());
+            
+            cubbyResourceBuilder.ApplicationBuilder
+                .AddResource(resource)
+                .WithIconName("money")
+                .WithImage(CubbyContainerImageTags.PortalImage, CubbyContainerImageTags.PortalTag)
+                .WithImageRegistry(CubbyContainerImageTags.Registry)
+                .WithEndpoint(name: "http", targetPort: 3000, scheme: "http")
+                .WithEnvironment(context =>
+                {
+                    if (context.Resource is CubbyPortalResource portal)
+                    {
+                        var endpoint = portal.Parent.GetEndpoint("http");
+                        var url = $"{endpoint.Scheme}://{endpoint.Resource.Name}.dev.internal:{endpoint.TargetPort}";
+                        context.EnvironmentVariables.Add("CUBBY_HOST_URL", url);
+                    }
+                })
+                .WithHealthCheck(healthCheckKey)
+                .WithReference(cubbyResourceBuilder);
+
+            return cubbyResourceBuilder;
         }
     }
 }
