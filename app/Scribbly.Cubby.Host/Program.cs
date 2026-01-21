@@ -46,7 +46,7 @@ if (logger.IsEnabled(LogLevel.Information))
     var options = app.Services.GetRequiredService<CubbyServerOptions>();
     app.Services.GetRequiredService<ILogger<Program>>().LogApplicationStartup(
         options.Store,
-        options.InternalTransports,
+        options.Transports,
         options.Cores,
         options.Capacity);
 }

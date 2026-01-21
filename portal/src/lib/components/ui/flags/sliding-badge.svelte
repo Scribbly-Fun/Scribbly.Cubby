@@ -9,6 +9,6 @@
 	{#if duration === undefined || duration === '00:00:00'}
 		<Badge variant="outline" class="opacity-50">N/A</Badge>
 	{:else}
-		<Badge class="bg-blue-500 text-white dark:bg-blue-600">{duration}</Badge>
+		<Badge class="bg-(--warning) text-white dark:bg-(--warning)">{duration}</Badge>
 	{/if}
 </div>

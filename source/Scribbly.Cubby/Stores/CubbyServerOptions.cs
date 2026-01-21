@@ -149,6 +149,7 @@ public sealed class CacheCleanupOptions
     /// <remarks>
     ///     Defaults to a randomness strategy
     /// </remarks>
+    [JsonConverter(typeof(JsonStringEnumConverter<AsyncStrategy>))]
     public AsyncStrategy Strategy { get; set; } = AsyncStrategy.Random;
 
     /// <summary>

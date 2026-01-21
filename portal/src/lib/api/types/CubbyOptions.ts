@@ -1,3 +1,5 @@
+import type { SlidingDuration } from './SlidingDuration';
+
 /**
  * The options used when starting Cubby
  */
@@ -13,6 +15,11 @@ export type CubbyOptions = {
  * Async cleanup options
  */
 export type CleanupOptions = {
-    strategy: number;
-    delay: string;
-}
+	strategy: AsyncStrategy;
+	delay: SlidingDuration;
+};
+
+/**
+ * The available async cleanup strategies
+ */
+export type AsyncStrategy = 'Disabled' | 'Hourly' | 'Random' | 'Aggressive' | 'Duration' | 'Manual';

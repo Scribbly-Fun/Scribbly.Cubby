@@ -28,7 +28,9 @@
 				<CoffinIcon /> {flagName}</Badge
 			>
 		{:else if flagName === 'Sliding'}
-			<Badge variant="outline" class="bg-blue-500 text-white dark:bg-blue-600">{flagName}</Badge>
+			<Badge variant="outline" class="bg-(--warning) text-white dark:bg-(--warning)"
+				>{flagName}</Badge
+			>
 		{:else}
 			<Badge>{flagName}</Badge>
 		{/if}

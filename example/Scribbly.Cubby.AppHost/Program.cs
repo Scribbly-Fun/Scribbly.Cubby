@@ -1,3 +1,4 @@
+// ReSharper disable file UnusedVariable
 using Scribbly.Aspire;
 using Scribbly.Aspire.K6;
 using Scribbly.Cubby;
@@ -25,7 +26,7 @@ var cubbyContainer = builder
 #pragma warning restore SCRB009
 
 // Starts a client side caching consumer as a project reference
-var cookbook = builder.AddProject<Projects.Scribbly_Cubby_Cookbook_ApiService>("scrb-cookbook")
+var cookbook = builder.AddProject<Projects.Scribbly_Cubby_ClientDemo>("scrb-cookbook")
     .WithReference(cubbyAot)
     .WaitFor(cubbyAot)
     .WithReference(cubbyContainer)

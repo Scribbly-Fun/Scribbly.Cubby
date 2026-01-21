@@ -11,7 +11,7 @@ import CacheEntryDisplay from '../components/cache-entry-display.svelte';
 
 function renderHeader(title: string) {
 	const amountHeaderSnippet = createRawSnippet(() => ({
-		render: () => `<div class="text-muted-foreground text-xs ">Flags</div>`
+		render: () => `<div class="text-muted-foreground text-xs ">${title}</div>`
 	}));
 	return renderSnippet(amountHeaderSnippet);
 }

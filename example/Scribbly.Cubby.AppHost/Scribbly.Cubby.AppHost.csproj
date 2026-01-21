@@ -9,12 +9,13 @@
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>8ad8bcb3-ea9e-4248-98a6-a34a831cda06</UserSecretsId>
+    <RootNamespace>Scribbly.Cubby.Cookbook.AppHost</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\app\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
     <ProjectReference Include="..\..\source\Scribbly.Cubby.Aspire\Scribbly.Cubby.Aspire.csproj"  IsAspireProjectResource="false"/>
-    <ProjectReference Include="..\Scribbly.Cubby.Cookbook.ApiService\Scribbly.Cubby.Cookbook.ApiService.csproj" />
+    <ProjectReference Include="..\Scribbly.Cubby.ClientDemo\Scribbly.Cubby.ClientDemo.csproj" />
   </ItemGroup>
 
   <ItemGroup>

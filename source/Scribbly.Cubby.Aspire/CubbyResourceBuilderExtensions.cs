@@ -93,7 +93,7 @@ public static class CubbyResourceBuilderExtensions
         
             cubbyResourceBuilder.ApplicationBuilder.Services.AddHealthChecks().AddCheck(healthCheckKey, token => HealthCheckResult.Healthy());
             
-            var portalResource = cubbyResourceBuilder.ApplicationBuilder
+            cubbyResourceBuilder.ApplicationBuilder
                 .AddResource(resource)
                 .WithIconName("money")
                 .WithImage(CubbyContainerImageTags.PortalImage, CubbyContainerImageTags.PortalTag)

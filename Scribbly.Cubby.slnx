@@ -19,8 +19,8 @@
   </Folder>
   <Folder Name="/example/">
     <File Path="example/Directory.Build.props" />
-    <Project Path="example/Scribbly.Cubby.Cookbook.ApiService/Scribbly.Cubby.Cookbook.ApiService.csproj" />
-    <Project Path="example/Scribbly.Cubby.Cookbook.AppHost/Scribbly.Cubby.Cookbook.AppHost.csproj" />
+    <Project Path="example/Scribbly.Cubby.AppHost/Scribbly.Cubby.AppHost.csproj" />
+    <Project Path="example/Scribbly.Cubby.ClientDemo/Scribbly.Cubby.ClientDemo.csproj" />
     <Project Path="example/Scribbly.Cubby.Cookbook.ServiceDefaults/Scribbly.Cubby.Cookbook.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/lib/">
