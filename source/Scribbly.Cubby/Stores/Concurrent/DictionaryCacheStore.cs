@@ -19,6 +19,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
         => new(serverOptions, provider);
     
     private int _activeWriters;
+    private int _totalCount;
     
     private readonly ConcurrentDictionary<BytesKey, byte[]> _store;
 
@@ -35,6 +36,10 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     /// <inheritdoc />
     int ICubbyStoreEvictionInteraction.ActiveWriters
         => Volatile.Read(ref _activeWriters);
+
+    /// <inheritdoc />
+    int ICubbyStoreEvictionInteraction.TotalCount
+        => Volatile.Read(ref _totalCount);
 
     /// <inheritdoc />
     IEnumerable<KeyValuePair<BytesKey, byte[]>> ICubbyStoreIterator.Entries
@@ -63,7 +68,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             var header = buffer.GetHeader();
             var flags = header.GetFlags();
 
-            if (flags.IsTombstone() && _store.TryRemoveRentedArray(key))
+            if (flags.IsTombstone() && TryRemoveEntry(key))
             {
                 return false;
             }
@@ -74,7 +79,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             }
 
             var now = _provider.GetUtcNow().UtcTicks;
-            return !expirationTicks.IsExpired(now) || !_store.TryRemoveRentedArray(key);
+            return !expirationTicks.IsExpired(now) || !TryRemoveEntry(key);
         }
         finally
         {
@@ -94,7 +99,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             var header = entry.GetHeader();
             var flags = header.GetFlags();
 
-            if (flags.IsTombstone() && _store.TryRemoveRentedArray(key))
+            if (flags.IsTombstone() && TryRemoveEntry(key))
             {
                 return null;
             }
@@ -105,7 +110,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             }
 
             var now = _provider.GetUtcNow().UtcTicks;
-            if (expirationTicks.IsExpired(now) && _store.TryRemoveRentedArray(key))
+            if (expirationTicks.IsExpired(now) && TryRemoveEntry(key))
             {
                 return null;
             }
@@ -140,7 +145,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             var header = entry.GetHeader();
             var flags = header.GetFlags();
 
-            if (flags.IsTombstone() && _store.TryRemoveRentedArray(key))
+            if (flags.IsTombstone() && TryRemoveEntry(key))
             {
                 value = null;
                 return false;
@@ -153,7 +158,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             }
 
             var now = _provider.GetUtcNow().UtcTicks;
-            if (expirationTicks.IsExpired(now) && _store.TryRemoveRentedArray(key))
+            if (expirationTicks.IsExpired(now) && TryRemoveEntry(key))
             {
                 value = null;
                 return false;
@@ -184,7 +189,13 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
 
             if (!_store.TryGetValue(key, out var existing))
             {
-                return _store.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
+                if (!_store.TryAdd(key, buffer))
+                {
+                    return PutResult.Undefined;
+                }
+
+                Interlocked.Increment(ref _totalCount);
+                return PutResult.Created;
             }
             
             var header = existing.GetHeader();
@@ -238,7 +249,7 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
     }
 
     /// <inheritdoc />
-    public EvictResult Evict(in BytesKey key) => _store.TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
+    public EvictResult Evict(in BytesKey key) => TryRemoveEntry(key) ? EvictResult.Removed : EvictResult.Unknown;
     
     /// <inheritdoc />
     public CacheEntryFlags Tombstone(in BytesKey key)
@@ -263,6 +274,17 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             Interlocked.Decrement(ref _activeWriters);
         }
     }
+
+    private bool TryRemoveEntry(BytesKey key)
+    {
+        if (!_store.TryRemoveRentedArray(key))
+        {
+            return false;
+        }
+
+        Interlocked.Decrement(ref _totalCount);
+        return true;
+    }
     
     /// <inheritdoc />
     public void Dispose()
@@ -272,5 +294,6 @@ internal sealed class ConcurrentStore : ICubbyStore, ICubbyStoreEvictionInteract
             ArrayPool<byte>.Shared.Return(entry.Value, clearArray: false);
         }
         _store.Clear();
+        Volatile.Write(ref _totalCount, 0);
     }
 }

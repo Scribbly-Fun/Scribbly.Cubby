@@ -19,6 +19,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
         => new(serverOptions, provider);
     
     private int _activeWriters;
+    private int _totalCount;
     
     private readonly ConcurrentDictionary<BytesKey, byte[]>[] _shards;
 
@@ -40,6 +41,10 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
     /// <inheritdoc />
     int ICubbyStoreEvictionInteraction.ActiveWriters
         => Volatile.Read(ref _activeWriters);
+
+    /// <inheritdoc />
+    int ICubbyStoreEvictionInteraction.TotalCount
+        => Volatile.Read(ref _totalCount);
 
     /// <inheritdoc />
     IEnumerable<KeyValuePair<BytesKey, byte[]>> ICubbyStoreIterator.Entries
@@ -72,7 +77,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
             var header = buffer.GetHeader();
             var flags = header.GetFlags();
 
-            if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+            if (flags.IsTombstone() && TryRemoveEntry(shard, key))
             {
                 return false;
             }
@@ -84,7 +89,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
 
             var now = _provider.GetUtcNow().UtcTicks;
             
-            if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+            if (expirationTicks.IsExpired(now) && TryRemoveEntry(shard, key))
             {
                 return false;
             }
@@ -111,7 +116,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
             var header = entry.GetHeader();
             var flags = header.GetFlags();
 
-            if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+            if (flags.IsTombstone() && TryRemoveEntry(shard, key))
             {
                 return null;
             }
@@ -122,7 +127,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
             }
 
             var now = _provider.GetUtcNow().UtcTicks;
-            if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+            if (expirationTicks.IsExpired(now) && TryRemoveEntry(shard, key))
             {
                 return null;
             }
@@ -158,7 +163,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
             var header = entry.GetHeader();
             var flags = header.GetFlags();
 
-            if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+            if (flags.IsTombstone() && TryRemoveEntry(shard, key))
             {
                 value = null;
                 return false;
@@ -171,7 +176,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
             }
 
             var now = _provider.GetUtcNow().UtcTicks;
-            if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+            if (expirationTicks.IsExpired(now) && TryRemoveEntry(shard, key))
             {
                 value = null;
                 return false;
@@ -203,7 +208,13 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
 
             if (!shard.TryGetValue(key, out var existing))
             {
-                return shard.TryAdd(key, buffer) ? PutResult.Created : PutResult.Undefined;
+                if (!shard.TryAdd(key, buffer))
+                {
+                    return PutResult.Undefined;
+                }
+
+                Interlocked.Increment(ref _totalCount);
+                return PutResult.Created;
             }
             
             var header = existing.GetHeader();
@@ -258,7 +269,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
     }
 
     /// <inheritdoc />
-    public EvictResult Evict(in BytesKey key) => GetShard(key).TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
+    public EvictResult Evict(in BytesKey key) => TryRemoveEntry(GetShard(key), key) ? EvictResult.Removed : EvictResult.Unknown;
 
     /// <inheritdoc />
     public CacheEntryFlags Tombstone(in BytesKey key)
@@ -289,6 +300,18 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
     private ConcurrentDictionary<BytesKey, byte[]> GetShard(BytesKey key)
         => _shards[(key[0] & int.MaxValue) % _shards.Length];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool TryRemoveEntry(ConcurrentDictionary<BytesKey, byte[]> shard, BytesKey key)
+    {
+        if (!shard.TryRemoveRentedArray(key))
+        {
+            return false;
+        }
+
+        Interlocked.Decrement(ref _totalCount);
+        return true;
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
@@ -301,5 +324,7 @@ internal sealed class ShardedConcurrentStore : ICubbyStore, ICubbyStoreEvictionI
 
             shard.Clear();
         }
+
+        Volatile.Write(ref _totalCount, 0);
     }
 }

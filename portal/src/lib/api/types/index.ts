@@ -5,6 +5,7 @@ import type { CubbyOptions } from './CubbyOptions';
 import type { SlidingDuration } from './SlidingDuration';
 import type { EntryEncoding } from './EntryEncoding';
 import type { CacheEntryOptions, ExpirationMode } from './CacheEntryOptions';
+import type { CleanupMetrics, CleanupMetricPoint } from './CleanupMetrics';
 
 export type {
 	CacheEntry,
@@ -14,6 +15,8 @@ export type {
 	ExpirationMode,
 	CubbyOptions,
 	SlidingDuration,
+	CleanupMetrics,
+	CleanupMetricPoint,
 	//
 	CacheEntry as Entry,
 	EntryFlags as Flags,

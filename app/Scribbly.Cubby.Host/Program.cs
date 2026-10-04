@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Builder;
 using Scribbly.Cubby.Host.Portal;
+using Scribbly.Cubby.Host.Portal.Metrics;
 using Scribbly.Cubby.Host.Setup;
 using Scribbly.Cubby.Server;
 using Scribbly.Cubby.Stores;
@@ -20,6 +21,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, CubbyOptionsJsonContext.Default);
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseJsonContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CleanupMetricsJsonContext.Default);
 });
 
 builder.Services.AddOpenApi();
@@ -31,10 +33,14 @@ builder
         ops.Capacity = 2000;
         ops.Cores = Environment.ProcessorCount;
 
-        ops.Cleanup.Strategy = CacheCleanupOptions.AsyncStrategy.Random;
+        // Duration strategy keeps portal cleanup charts continuously sampling.
+        ops.Cleanup.Strategy = CacheCleanupOptions.AsyncStrategy.Duration;
+        ops.Cleanup.Delay = TimeSpan.FromMinutes(1);
     })
     .WithCubbyGrpcServer()
     .WithCubbyHttpServer();
+
+builder.Services.AddCubbyCleanupMetrics();
 
 var app = builder.Build();
 

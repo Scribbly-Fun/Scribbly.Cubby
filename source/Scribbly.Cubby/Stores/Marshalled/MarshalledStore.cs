@@ -20,6 +20,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
         => new(serverOptions, provider);
     
     private int _activeWriters;
+    private int _totalCount;
     
     private readonly Dictionary<BytesKey, byte[]>[] _shards;
     private readonly Lock[] _locks;
@@ -43,6 +44,10 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
     /// <inheritdoc />
     int ICubbyStoreEvictionInteraction.ActiveWriters
         => Volatile.Read(ref _activeWriters);
+
+    /// <inheritdoc />
+    int ICubbyStoreEvictionInteraction.TotalCount
+        => Volatile.Read(ref _totalCount);
 
     /// <inheritdoc />
     IEnumerable<KeyValuePair<BytesKey, byte[]>> ICubbyStoreIterator.Entries
@@ -88,7 +93,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 var header = entry.GetHeader();
                 var flags = header.GetFlags();
 
-                if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+                if (flags.IsTombstone() && TryRemoveEntry(shard, key))
                 {
                     return null;
                 }
@@ -99,7 +104,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 }
 
                 var now = _provider.GetUtcNow().UtcTicks;
-                if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+                if (expirationTicks.IsExpired(now) && TryRemoveEntry(shard, key))
                 {
                     return null;
                 }
@@ -141,7 +146,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 var header = entry.GetHeader();
                 var flags = header.GetFlags();
 
-                if (flags.IsTombstone() && shard.TryRemoveRentedArray(key))
+                if (flags.IsTombstone() && TryRemoveEntry(shard, key))
                 {
                     value = default;
                     return false;
@@ -154,7 +159,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 }
 
                 var now = _provider.GetUtcNow().UtcTicks;
-                if (expirationTicks.IsExpired(now) && shard.TryRemoveRentedArray(key))
+                if (expirationTicks.IsExpired(now) && TryRemoveEntry(shard, key))
                 {
                     value = default;
                     return false;
@@ -202,7 +207,13 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                     header.UpdateSlidingTime(now);
                 }
 
-                return exists ? PutResult.Updated : PutResult.Created;
+                if (!exists)
+                {
+                    Interlocked.Increment(ref _totalCount);
+                    return PutResult.Created;
+                }
+
+                return PutResult.Updated;
             }
         }
         finally
@@ -234,7 +245,10 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 if (flags.IsTombstone())
                 {
                     ArrayPool<byte>.Shared.Return(buffer, false);
-                    shard.Remove(key);
+                    if (shard.Remove(key))
+                    {
+                        Interlocked.Decrement(ref _totalCount);
+                    }
                     return false;
                 }
 
@@ -248,7 +262,10 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 if (expirationTicks.IsExpired(now))
                 {
                     ArrayPool<byte>.Shared.Return(buffer, false);
-                    shard.Remove(key);
+                    if (shard.Remove(key))
+                    {
+                        Interlocked.Decrement(ref _totalCount);
+                    }
                     return false;
                 }
 
@@ -299,7 +316,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
     public EvictResult Evict(in BytesKey key)
     {
         var idx = GetShardIndex(key);
-        return GetShard(idx).TryRemoveRentedArray(key) ? EvictResult.Removed : EvictResult.Unknown;
+        return TryRemoveEntry(GetShard(idx), key) ? EvictResult.Removed : EvictResult.Unknown;
     }
     
     /// <inheritdoc />
@@ -340,6 +357,18 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
     private Dictionary<BytesKey, byte[]> GetShard(int index)
         => _shards[index];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool TryRemoveEntry(Dictionary<BytesKey, byte[]> shard, BytesKey key)
+    {
+        if (!shard.TryRemoveRentedArray(key))
+        {
+            return false;
+        }
+
+        Interlocked.Decrement(ref _totalCount);
+        return true;
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
@@ -356,5 +385,7 @@ internal sealed class MarshalledStore : ICubbyStore, ICubbyStoreEvictionInteract
                 shard.Clear();
             }
         }
+
+        Volatile.Write(ref _totalCount, 0);
     }
 }

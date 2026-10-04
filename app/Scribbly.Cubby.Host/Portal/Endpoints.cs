@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Scribbly.Cubby.Host.Portal.Metrics;
 using Scribbly.Cubby.Stores;
 
 namespace Scribbly.Cubby.Host.Portal;
@@ -13,6 +14,14 @@ public static class Endpoints
             var portalGroup = builder.MapGroup("cubby/portal");
             
             portalGroup.MapGet("/options", (IOptions<CubbyServerOptions> options) => options.Value);
+
+            portalGroup.MapGet("/metrics", CleanupMetricsResponse (
+                CleanupMetricsStore store,
+                IOptions<CubbyServerOptions> options) =>
+            {
+                var fallback = CleanupMetricsMapping.ResolveFallbackDelay(options.Value.Cleanup);
+                return CleanupMetricsMapping.ToResponse(store, fallback);
+            });
 
             portalGroup.MapGet("/caches", IEnumerable<CacheResponse> (ICubbyStore store) =>
             {
