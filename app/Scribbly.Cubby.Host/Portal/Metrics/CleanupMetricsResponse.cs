@@ -86,12 +86,5 @@ internal static class CleanupMetricsMapping
     }
 
     public static TimeSpan ResolveFallbackDelay(CacheCleanupOptions cleanup) =>
-        cleanup.Strategy switch
-        {
-            CacheCleanupOptions.AsyncStrategy.Hourly => TimeSpan.FromHours(1),
-            CacheCleanupOptions.AsyncStrategy.Aggressive => TimeSpan.FromMilliseconds(250),
-            CacheCleanupOptions.AsyncStrategy.Duration => cleanup.Delay,
-            CacheCleanupOptions.AsyncStrategy.Random => TimeSpan.FromMinutes(20),
-            _ => TimeSpan.Zero,
-        };
+        CleanupMetricsCapacity.ResolveMinimumSampleInterval(cleanup);
 }
