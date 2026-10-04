@@ -134,13 +134,19 @@
 							motion: "tween"
 						},
 						xAxis: {
-							ticks: timeRange === "3h" ? 6 : undefined,
-							format: (v) => {
-								return v.toLocaleString("en-US", {
+							ticks: timeRange === "3h" ? 6 : timeRange === "24h" ? 8 : 6,
+							format: (v: Date) => {
+								if (timeRange === "3h") {
+									return v.toLocaleTimeString("en-US", {
+										hour: "numeric",
+										minute: "2-digit"
+									});
+								}
+
+								return v.toLocaleDateString("en-US", {
 									month: "short",
 									day: "numeric",
-									hour: "numeric",
-									minute: "2-digit"
+									hour: "numeric"
 								});
 							}
 						},
