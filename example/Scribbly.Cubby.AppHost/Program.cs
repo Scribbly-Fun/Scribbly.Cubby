@@ -11,12 +11,17 @@ var cubbyAot = builder.AddProject<Projects.Scribbly_Cubby_Host>("cubby-project")
 
 // Builds and loads the cubby docker images 
 var cubbyDockerFile = builder
-    .AddDockerfile("cubby-dockerfile", "../../", "Dockerfile");
+    .AddDockerfile("cubby-dockerfile", "../../", "Dockerfile")
+    .WithEndpoint(5002, 5000, "http");
 
 var cubbyAdminPortal = builder
     .AddDockerfile("cubby-portal-dockerfile", "../../portal", "Dockerfile")
     .WithEndpoint(3002, 3000, "http")
-    .WithReference(cubbyAot);
+    .WithEnvironment(context =>
+    {
+        var containerEndpointRef = cubbyDockerFile.Resource.GetEndpoint("http");
+        context.EnvironmentVariables["CUBBY_HOST_URL"] = containerEndpointRef;
+    });
 
 // Loads cubby's published docker images using the Aspire resource as a project reference
 #pragma warning disable SCRB009
