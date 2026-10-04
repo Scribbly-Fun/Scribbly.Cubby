@@ -1,8 +1,14 @@
 <script lang="ts" generics="TData, TValue">
-	import { type ColumnDef, getCoreRowModel } from '@tanstack/table-core';
+	import {
+		type ColumnDef,
+		getCoreRowModel,
+		getFilteredRowModel,
+		getSortedRowModel
+	} from '@tanstack/table-core';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import { Input } from '$lib/components/ui/input';
 	import { invalidateAll } from '$app/navigation';
 
 	// @ts-ignore
@@ -11,9 +17,10 @@
 	import PlayIcon from '@tabler/icons-svelte/icons/player-play';
 	// @ts-ignore
 	import PauseIcon from '@tabler/icons-svelte/icons/player-pause';
+	// @ts-ignore
+	import SearchIcon from '@tabler/icons-svelte/icons/search';
 
 	import CreateCacheDialog from '../components/cache-entry-dialog.svelte';
-	import TableFooter from '$lib/components/ui/table/table-footer.svelte';
 
 	const POLL_INTERVAL_MS = 2000;
 
@@ -25,6 +32,7 @@
 	let { data, columns }: DataTableProps<TData, TValue> = $props();
 
 	let playing = $state(false);
+	let keyFilter = $state('');
 
 	$effect(() => {
 		if (!playing) return;
@@ -48,8 +56,16 @@
 		get columns() {
 			return columns;
 		},
-		getCoreRowModel: getCoreRowModel()
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel()
 	});
+
+	function onKeyFilterInput(event: Event) {
+		const value = (event.currentTarget as HTMLInputElement).value;
+		keyFilter = value;
+		table.getColumn('key')?.setFilterValue(value);
+	}
 
 	function toggleAutopolling() {
 		console.log('Toggling autopolling...');
@@ -63,7 +79,23 @@
 </script>
 
 <div class="mb-4 flex flex-row items-center justify-between gap-4">
-	<CreateCacheDialog />
+	<div class="flex min-w-0 flex-row items-center gap-2">
+		<CreateCacheDialog />
+		<div class="relative">
+			<SearchIcon
+				class="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
+			/>
+			<Input
+				id="cache-key-filter"
+				type="search"
+				placeholder="Filter by key"
+				aria-label="Filter by key"
+				class="h-9 w-56 ps-8"
+				bind:value={keyFilter}
+				oninput={onKeyFilterInput}
+			/>
+		</div>
+	</div>
 	<div class="flex flex-row gap-2 rounded-md border bg-card p-2 shadow-sm">
 		<Button
 			onclick={refresh}
