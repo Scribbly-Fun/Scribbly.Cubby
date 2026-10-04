@@ -38,9 +38,8 @@ builder
         ops.Cleanup.Delay = TimeSpan.FromMinutes(1);
     })
     .WithCubbyGrpcServer()
-    .WithCubbyHttpServer();
-
-builder.Services.AddCubbyCleanupMetrics();
+    .WithCubbyHttpServer()
+    .AddCubbyCleanupMetrics();
 
 var app = builder.Build();
 

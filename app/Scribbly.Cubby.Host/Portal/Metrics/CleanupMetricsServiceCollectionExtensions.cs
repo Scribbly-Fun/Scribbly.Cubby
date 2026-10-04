@@ -1,12 +1,13 @@
 using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Scribbly.Cubby.Server;
 using Scribbly.Cubby.Server.Background;
 
 namespace Scribbly.Cubby.Host.Portal.Metrics;
 
 internal static class CleanupMetricsServiceCollectionExtensions
 {
-    public static IServiceCollection AddCubbyCleanupMetrics(this IServiceCollection services)
+    public static ICubbyServerBuilder AddCubbyCleanupMetrics(this ICubbyServerBuilder builder)
     {
         var channel = Channel.CreateBounded<CleanupPassMetric>(new BoundedChannelOptions(CleanupMetricsStore.DefaultCapacity)
         {
@@ -16,12 +17,15 @@ internal static class CleanupMetricsServiceCollectionExtensions
             AllowSynchronousContinuations = false,
         });
 
-        services.AddSingleton(channel);
-        services.AddSingleton(channel.Reader);
-        services.AddSingleton(channel.Writer);
-        services.AddSingleton<CleanupMetricsStore>();
-        services.Replace(ServiceDescriptor.Singleton<ICleanupMetricsPublisher, ChannelCleanupMetricsPublisher>());
-        services.AddHostedService<CleanupMetricsChannelProcessor>();
-        return services;
+        builder.HostBuilder.Services.AddSingleton(channel);
+        builder.HostBuilder.Services.AddSingleton(channel.Reader);
+        builder.HostBuilder.Services.AddSingleton(channel.Writer);
+        
+        builder.HostBuilder.Services.AddSingleton<CleanupMetricsStore>();
+        builder.HostBuilder.Services.Replace(ServiceDescriptor.Singleton<ICleanupMetricsPublisher, ChannelCleanupMetricsPublisher>());
+        
+        builder.HostBuilder.Services.AddHostedService<CleanupMetricsChannelProcessor>();
+        
+        return builder;
     }
 }
