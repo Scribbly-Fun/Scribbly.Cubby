@@ -52,11 +52,26 @@ public class CubbyServerOptions
     [Flags]
     public enum EnabledTransports : byte
     {
+        /// <summary>
+        /// Not specified
+        /// </summary>
         None =    0,
+        /// <summary>
+        /// Communication over HTTP
+        /// </summary>
         Http =    1 << 0,
+        /// <summary>
+        /// Communication over gRPC and HTTP2
+        /// </summary>
         Grpc =    1 << 1,
+        /// <summary>
+        /// Communication over TCP
+        /// </summary>
         [Experimental("SCRB004", Message = "Not yet implemented")]
         Tcp =     1 << 2,
+        /// <summary>
+        /// A custom cubby transport
+        /// </summary>
         Custom =  1 << 3
     }
 

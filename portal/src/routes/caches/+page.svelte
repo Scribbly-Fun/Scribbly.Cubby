@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { columns } from './table/columns';
 	import CacheTable from './table/cache-table.svelte';
 	import type { PageData } from './$types';
 
@@ -11,5 +10,5 @@
 </script>
 
 <div class="px-4 lg:px-6">
-	<CacheTable data={data.entries} {columns} />
+	<CacheTable data={data.entries} />
 </div>

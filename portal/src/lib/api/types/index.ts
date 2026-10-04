@@ -1,13 +1,17 @@
 import type { CacheEntry } from './CacheEntry';
+import { isEntryExpired } from './CacheEntry';
 import type { EntryFlags } from './EntryFlags';
 import type { CubbyOptions } from './CubbyOptions';
 import type { SlidingDuration } from './SlidingDuration';
 import type { EntryEncoding } from './EntryEncoding';
+import type { CacheEntryOptions, ExpirationMode } from './CacheEntryOptions';
 
 export type {
 	CacheEntry,
 	EntryFlags,
 	EntryEncoding,
+	CacheEntryOptions,
+	ExpirationMode,
 	CubbyOptions,
 	SlidingDuration,
 	//
@@ -17,3 +21,5 @@ export type {
 	CubbyOptions as Options,
 	SlidingDuration as Duration
 };
+
+export { isEntryExpired };

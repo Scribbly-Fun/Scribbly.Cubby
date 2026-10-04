@@ -2,10 +2,8 @@
 
 namespace Scribbly.Cubby.Host.Portal;
 
-[JsonSerializable(typeof(IEnumerable<CacheResponse>))]
-internal partial class CacheResponseListJsonContext : JsonSerializerContext;
-
 [JsonSerializable(typeof(CacheResponse))]
+[JsonSerializable(typeof(IEnumerable<CacheResponse>))]
 internal partial class CacheResponseJsonContext : JsonSerializerContext;
 
 public record CacheResponse(
@@ -43,7 +41,7 @@ public static class CacheResponseMapping
                 var expiration = header.GetExpiration();
                 var duration = header.GetSlidingDuration();
                 
-                return new CacheResponse(entry.Key, flags, encoding.ToEncodingString(), expiration > 0 ? new DateTime(expiration) : null, TimeSpan.FromTicks(duration),  length);
+                return new CacheResponse(entry.Key, flags, encoding.ToEncodingString(), expiration > 0 ? new DateTimeOffset(expiration, TimeSpan.Zero) : null, TimeSpan.FromTicks(duration),  length);
             }
         }
 
@@ -62,7 +60,7 @@ public static class CacheResponseMapping
                 var expiration = header.GetExpiration();
                 var duration = header.GetSlidingDuration();
                 
-                return new CacheValueResponse(entry.Key, flags, encoding.ToEncodingString(), expiration > 0 ? new DateTime(expiration) : null, TimeSpan.FromTicks(duration),  span.Slice(24, length).ToArray());
+                return new CacheValueResponse(entry.Key, flags, encoding.ToEncodingString(), expiration > 0 ? new DateTimeOffset(expiration, TimeSpan.Zero) : null, TimeSpan.FromTicks(duration),  span.Slice(24, length).ToArray());
             }
         }
     }
