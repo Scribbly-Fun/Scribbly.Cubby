@@ -1,8 +1,8 @@
 <script lang="ts" generics="TData, TValue">
 	import {
 		type ColumnDef,
+		type SortingState,
 		getCoreRowModel,
-		getFilteredRowModel,
 		getSortedRowModel
 	} from '@tanstack/table-core';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
@@ -33,6 +33,24 @@
 
 	let playing = $state(false);
 	let keyFilter = $state('');
+	let sorting = $state<SortingState>([]);
+
+	const filteredData = $derived.by(() => {
+		const query = keyFilter.trim().toLowerCase();
+		if (!query) {
+			return data;
+		}
+
+		return data.filter((row) => {
+			if (!row || typeof row !== 'object' || !('key' in row)) {
+				return false;
+			}
+
+			return String(row.key ?? '')
+				.toLowerCase()
+				.includes(query);
+		});
+	});
 
 	$effect(() => {
 		if (!playing) return;
@@ -51,21 +69,22 @@
 
 	const table = createSvelteTable({
 		get data() {
-			return data;
+			return filteredData;
 		},
 		get columns() {
 			return columns;
 		},
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel()
+		get state() {
+			return {
+				sorting
+			};
+		},
+		onSortingChange: (updater) => {
+			sorting = typeof updater === 'function' ? updater(sorting) : updater;
+		}
 	});
-
-	function onKeyFilterInput(event: Event) {
-		const value = (event.currentTarget as HTMLInputElement).value;
-		keyFilter = value;
-		table.getColumn('key')?.setFilterValue(value);
-	}
 
 	function toggleAutopolling() {
 		console.log('Toggling autopolling...');
@@ -92,7 +111,6 @@
 				aria-label="Filter by key"
 				class="h-9 w-56 ps-8"
 				bind:value={keyFilter}
-				oninput={onKeyFilterInput}
 			/>
 		</div>
 	</div>

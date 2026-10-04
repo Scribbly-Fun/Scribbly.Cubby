@@ -47,8 +47,7 @@ function slidingSortValue(duration: SlidingDuration | undefined): number {
 export const columns: ColumnDef<CacheEntry>[] = [
 	{
 		accessorKey: 'key',
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Key' }),
-		filterFn: 'includesString'
+		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Key' })
 	},
 	{
 		accessorKey: 'flags',
