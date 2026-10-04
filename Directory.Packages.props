@@ -5,8 +5,8 @@
   <ItemGroup>
     <!-- ASPIRE -->
     <PackageVersion Include="Aspire.Hosting" Version="13.6.0" />
-    <!-- ASP.NET EXTENSIONS AND FRAMEWORK -->
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.0" />
+    <!-- ASP.NET EXTENSIONS AND FRAMEWORK -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Google.Protobuf" Version="3.36.2" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.84.0" />
