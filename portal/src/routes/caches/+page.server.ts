@@ -2,7 +2,13 @@ import type { PageServerLoad, Actions } from './$types';
 import { env } from '$env/dynamic/private';
 import { error, fail } from '@sveltejs/kit';
 import type { CacheEntry } from '$lib/api/types/CacheEntry';
-import { evictEntry, tombstoneEntry } from '$lib/server/cacheEntryActions';
+import {
+	createEntry,
+	encodeTextValue,
+	evictEntry,
+	isEntryEncoding,
+	tombstoneEntry
+} from '$lib/server/cacheEntryActions';
 
 export const load = (async () => {
 	const cubbyUrl = env.CUBBY_HOST_URL;
@@ -57,5 +63,60 @@ export const actions = {
 		}
 
 		return { success: true, message: `Entry ${key} tombstoned` };
+	},
+
+	create: async ({ request }) => {
+		const data = await request.formData();
+		const key = (data.get('key') as string | null)?.trim() ?? '';
+		const encodingValue = (data.get('encoding') as string | null) ?? 'None';
+		const source = (data.get('source') as string | null) ?? 'text';
+		const compressed =
+			data.get('compressed') === 'true' ||
+			data.get('compressed') === 'on' ||
+			data.get('compressed') === '1';
+
+		if (!key) {
+			return fail(400, { message: 'Key is required' });
+		}
+
+		if (!isEntryEncoding(encodingValue)) {
+			return fail(400, { message: 'A valid encoding is required' });
+		}
+
+		let value: Uint8Array;
+
+		if (source === 'file') {
+			const file = data.get('file');
+			if (!(file instanceof File)) {
+				return fail(400, { message: 'A file is required' });
+			}
+
+			value = new Uint8Array(await file.arrayBuffer());
+		} else {
+			const text = (data.get('value') as string | null) ?? '';
+
+			if (source === 'json') {
+				try {
+					JSON.parse(text);
+				} catch {
+					return fail(400, { message: 'Value must be valid JSON' });
+				}
+			}
+
+			value = encodeTextValue(text, encodingValue);
+		}
+
+		const success = await createEntry({
+			key,
+			encoding: encodingValue,
+			compressed,
+			value
+		});
+
+		if (!success) {
+			return fail(500, { message: `Failed to create entry: ${key}` });
+		}
+
+		return { success: true, message: `Entry ${key} created` };
 	}
 } satisfies Actions;

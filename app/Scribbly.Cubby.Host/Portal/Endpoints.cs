@@ -55,6 +55,8 @@ public static class Endpoints
                 };
             });
 
+            portalGroup.MapPut("/caches", CachePutEndpoint.Put);
+
             return portalGroup;
         }
     }

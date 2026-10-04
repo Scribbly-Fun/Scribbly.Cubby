@@ -1,4 +1,31 @@
 import { env } from '$env/dynamic/private';
+import type { EntryEncoding } from '$lib/api/types/EntryEncoding';
+
+const ENCODINGS: readonly EntryEncoding[] = [
+	'None',
+	'Utf8String',
+	'Utf16String',
+	'Json',
+	'MessagePack'
+];
+
+export function isEntryEncoding(value: string): value is EntryEncoding {
+	return (ENCODINGS as readonly string[]).includes(value);
+}
+
+export function encodeTextValue(text: string, encoding: EntryEncoding): Uint8Array {
+	if (encoding === 'Utf16String') {
+		const bytes = new Uint8Array(text.length * 2);
+		for (let i = 0; i < text.length; i++) {
+			const code = text.charCodeAt(i);
+			bytes[i * 2] = code & 0xff;
+			bytes[i * 2 + 1] = code >> 8;
+		}
+		return bytes;
+	}
+
+	return new TextEncoder().encode(text);
+}
 
 /**
  * Evicts a cache entry from the cache
@@ -77,5 +104,50 @@ export async function readCacheValue(key: string): Promise<ArrayBuffer | undefin
 		console.error(`Error tombstoning entry: ${key}`, error);
 
 		return undefined;
+	}
+}
+
+export type CreateCacheEntryInput = {
+	key: string;
+	encoding: EntryEncoding;
+	compressed: boolean;
+	value: Uint8Array;
+};
+
+/**
+ * Inserts or updates a cache entry with the provided raw bytes, encoding, and compression flag.
+ * @returns True when the host created or updated the entry
+ */
+export async function createEntry(input: CreateCacheEntryInput): Promise<boolean> {
+	const cubbyUrl = env.CUBBY_HOST_URL;
+
+	if (!cubbyUrl) {
+		console.error('CUBBY_HOST_URL is not configured');
+		return false;
+	}
+
+	const params = new URLSearchParams({
+		key: input.key,
+		encoding: input.encoding,
+		compressed: String(input.compressed)
+	});
+
+	const body = new ArrayBuffer(input.value.byteLength);
+	new Uint8Array(body).set(input.value);
+
+	try {
+		const response = await fetch(`${cubbyUrl}/cubby/portal/caches?${params.toString()}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/octet-stream'
+			},
+			body
+		});
+
+		console.warn('Executed Create Entry', response.status);
+		return response.ok;
+	} catch (error) {
+		console.error(`Error creating entry: ${input.key}`, error);
+		return false;
 	}
 }
