@@ -3,12 +3,13 @@
 ## --------------------------------
 FROM node:20-alpine AS builder
 
-# Enable Corepack to use pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin pnpm; @latest tracks breaking majors (ERR_PNPM_IGNORED_BUILDS).
+RUN corepack enable && corepack prepare pnpm@10.33.3 --activate
 
 WORKDIR /app
 
-COPY pnpm-lock.yaml package.json ./
+# Workspace config must exist before install so esbuild's build is allowed.
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 
 RUN pnpm install --frozen-lockfile
 
