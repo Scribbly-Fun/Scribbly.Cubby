@@ -688,6 +688,8 @@ This will pull the latest cubby and cubby-portal images and startup the containe
 
 > The cubby portal container requires a ``CUBBY_HOST_URL`` environment variable be assigned to the cubby server.
 > Aspire takes care of this for you, note when running portal directly you will need to assign this value.
+>
+> Production Node builds also reconstruct request URLs as HTTPS unless the process sees `ORIGIN` or forwarded proto/host headers. When the portal is published over HTTP (Aspire proxy or Docker port mapping), set `PROTOCOL_HEADER=x-forwarded-proto` and `HOST_HEADER=x-forwarded-host`, or form POSTs such as create-entry return `403 Cross-site POST form submissions are forbidden`.
 
 ![cubby.png](./docs/portal/dashboard.png)
 

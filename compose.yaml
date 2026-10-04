@@ -13,3 +13,5 @@
       - "5173:3000"
     environment:
       - CUBBY_HOST_URL=http://Scribbly-Cubby:5000
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
