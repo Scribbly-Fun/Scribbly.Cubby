@@ -1,6 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.1" />
+<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,12 +12,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\app\Scribbly.Cubby.Host\Scribbly.Cubby.Host.csproj" />
-    <ProjectReference Include="..\..\source\Scribbly.Cubby.Aspire\Scribbly.Cubby.Aspire.csproj"  IsAspireProjectResource="false"/>
+    <ProjectReference Include="..\..\source\Scribbly.Cubby.Aspire\Scribbly.Cubby.Aspire.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\Scribbly.Cubby.ClientDemo\Scribbly.Cubby.ClientDemo.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.JavaScript" />
     <PackageReference Include="Scribbly.Aspire.Hosting.LoadTesting" />
   </ItemGroup>
