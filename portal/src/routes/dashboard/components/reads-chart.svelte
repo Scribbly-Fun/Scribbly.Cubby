@@ -7,7 +7,11 @@
 	import { scaleUtc } from "d3-scale";
 	import { Area, AreaChart } from "layerchart";
 	import { curveNatural } from "d3-shape";
-	import type { CleanupMetrics, CleanupMetricsRange } from "$lib/api/types";
+	import {
+		isCleanupMetricsRange,
+		type CleanupMetrics,
+		type CleanupMetricsRange
+	} from "$lib/api/types";
 
 	let {
 		metrics,
@@ -16,6 +20,13 @@
 		metrics: CleanupMetrics;
 		range: CleanupMetricsRange;
 	} = $props();
+
+	let selectedRange = $state<CleanupMetricsRange>(range);
+	let navigating = $state(false);
+
+	$effect(() => {
+		selectedRange = range;
+	});
 
 	const chartData = $derived(
 		metrics.points.map((point) => ({
@@ -30,7 +41,7 @@
 	const xDomain = $derived<[Date, Date]>([new Date(metrics.from), new Date(metrics.to)]);
 
 	const selectedLabel = $derived.by(() => {
-		switch (range) {
+		switch (selectedRange) {
 			case "1h":
 				return "Last Hour";
 			case "3h":
@@ -45,17 +56,24 @@
 	});
 
 	async function selectRange(nextRange: string | undefined) {
-		if (!nextRange || nextRange === range) {
+		if (!isCleanupMetricsRange(nextRange) || nextRange === range || navigating) {
+			selectedRange = range;
 			return;
 		}
 
-		const url = new URL(window.location.href);
-		url.searchParams.set("range", nextRange);
-		await goto(`${url.pathname}${url.search}`, {
-			keepFocus: true,
-			noScroll: true,
-			invalidateAll: true
-		});
+		navigating = true;
+		selectedRange = nextRange;
+
+		try {
+			await goto(`?range=${nextRange}`, {
+				keepFocus: true,
+				noScroll: true,
+				invalidateAll: true,
+				replaceState: true
+			});
+		} finally {
+			navigating = false;
+		}
 	}
 
 	const chartConfig = {
@@ -77,7 +95,7 @@
 		<Card.Action>
 			<ToggleGroup.Root
 				type="single"
-				value={range}
+				bind:value={selectedRange}
 				onValueChange={selectRange}
 				variant="outline"
 				class="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
@@ -87,11 +105,7 @@
 				<ToggleGroup.Item value="24h">Last 24 Hours</ToggleGroup.Item>
 				<ToggleGroup.Item value="3d">Last 3 Days</ToggleGroup.Item>
 			</ToggleGroup.Root>
-			<Select.Root
-				type="single"
-				value={range}
-				onValueChange={selectRange}
-			>
+			<Select.Root type="single" bind:value={selectedRange} onValueChange={selectRange}>
 				<Select.Trigger
 					size="sm"
 					class="flex w-44 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
@@ -150,16 +164,16 @@
 							motion: "tween"
 						},
 						xAxis: {
-							ticks: range === "1h" || range === "3h" ? 6 : range === "24h" ? 8 : 6,
+							ticks: selectedRange === "1h" || selectedRange === "3h" ? 6 : selectedRange === "24h" ? 8 : 6,
 							format: (v: Date) => {
-								if (range === "1h" || range === "3h") {
+								if (selectedRange === "1h" || selectedRange === "3h") {
 									return v.toLocaleTimeString("en-US", {
 										hour: "numeric",
 										minute: "2-digit"
 									});
 								}
 
-								if (range === "24h") {
+								if (selectedRange === "24h") {
 									return v.toLocaleString("en-US", {
 										month: "short",
 										day: "numeric",

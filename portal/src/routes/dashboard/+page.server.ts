@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import {
 	isCleanupMetricsRange,
 	resolveCleanupMetricsWindow,
@@ -18,7 +18,13 @@ export const load = (async ({ url }) => {
 	}
 
 	const requestedRange = url.searchParams.get('range');
-	const range = isCleanupMetricsRange(requestedRange) ? requestedRange : DEFAULT_RANGE;
+	if (!isCleanupMetricsRange(requestedRange)) {
+		const next = new URL(url);
+		next.searchParams.set('range', DEFAULT_RANGE);
+		redirect(303, `${next.pathname}${next.search}`);
+	}
+
+	const range = requestedRange;
 	const { from, to } = resolveCleanupMetricsWindow(range);
 
 	const metricsUrl = new URL(`${cubbyUrl}/cubby/portal/metrics`);
