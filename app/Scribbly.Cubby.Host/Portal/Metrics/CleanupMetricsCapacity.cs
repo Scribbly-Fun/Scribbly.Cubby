@@ -8,17 +8,18 @@ namespace Scribbly.Cubby.Host.Portal.Metrics;
 /// </summary>
 internal static class CleanupMetricsCapacity
 {
-    /// <summary>
-    /// Widest portal chart range (Last 3 Days).
-    /// </summary>
-    public static readonly TimeSpan RetentionWindow = TimeSpan.FromDays(3);
-
-    public const int MinCapacity = 64;
-
+    private const int MinCapacity = 64;
+    
     /// <summary>
     /// Upper bound so aggressive sampling cannot allocate unbounded memory.
     /// </summary>
-    public const int MaxCapacity = 100_000;
+    private const int MaxCapacity = 100_000;
+    
+    /// <summary>
+    /// Widest portal chart range (Last 3 Days).
+    /// </summary>
+    private static readonly TimeSpan RetentionWindow = TimeSpan.FromDays(3);
+    
 
     public static int Compute(CacheCleanupOptions cleanup)
     {

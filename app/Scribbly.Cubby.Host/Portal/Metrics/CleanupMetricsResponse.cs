@@ -68,7 +68,7 @@ internal static class CleanupMetricsMapping
             points);
     }
 
-    public static string FormatResolution(TimeSpan sampleDelay)
+    private static string FormatResolution(TimeSpan sampleDelay)
     {
         if (sampleDelay <= TimeSpan.Zero)
         {

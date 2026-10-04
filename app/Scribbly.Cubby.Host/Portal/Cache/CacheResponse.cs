@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Scribbly.Cubby.Host.Portal;
+namespace Scribbly.Cubby.Host.Portal.Cache;
 
 [JsonSerializable(typeof(CacheResponse))]
 [JsonSerializable(typeof(IEnumerable<CacheResponse>))]

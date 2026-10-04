@@ -5,6 +5,7 @@ using Scribbly.Cubby.Host.Portal.Metrics;
 using Scribbly.Cubby.Host.Setup;
 using Scribbly.Cubby.Server;
 using Scribbly.Cubby.Stores;
+using CacheResponseJsonContext = Scribbly.Cubby.Host.Portal.Cache.CacheResponseJsonContext;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
