@@ -1,2 +1,6 @@
+# pnpm 10 reads onlyBuiltDependencies; pnpm 11+ reads allowBuilds.
+# Keep both so Docker and local installs stay compatible across majors.
 onlyBuiltDependencies:
   - esbuild
+allowBuilds:
+  esbuild: true
