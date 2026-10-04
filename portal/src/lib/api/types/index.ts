@@ -3,11 +3,14 @@ import type { EntryFlags } from './EntryFlags';
 import type { CubbyOptions } from './CubbyOptions';
 import type { SlidingDuration } from './SlidingDuration';
 import type { EntryEncoding } from './EntryEncoding';
+import type { CacheEntryOptions, ExpirationMode } from './CacheEntryOptions';
 
 export type {
 	CacheEntry,
 	EntryFlags,
 	EntryEncoding,
+	CacheEntryOptions,
+	ExpirationMode,
 	CubbyOptions,
 	SlidingDuration,
 	//

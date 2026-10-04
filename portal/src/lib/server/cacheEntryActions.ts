@@ -1,4 +1,6 @@
 import { env } from '$env/dynamic/private';
+import type { CacheEntryOptions } from '$lib/api/types/CacheEntryOptions';
+import { toCubbyExpiry, toCubbyFlags } from '$lib/api/types/CacheEntryOptions';
 import type { EntryEncoding } from '$lib/api/types/EntryEncoding';
 
 const ENCODINGS: readonly EntryEncoding[] = [
@@ -109,14 +111,13 @@ export async function readCacheValue(key: string): Promise<ArrayBuffer | undefin
 
 export type CreateCacheEntryInput = {
 	key: string;
-	encoding: EntryEncoding;
-	compressed: boolean;
+	options: CacheEntryOptions;
 	value: Uint8Array;
 };
 
 /**
  * Inserts or updates a cache entry through the existing HTTP Put endpoint.
- * Encoding and compression are assigned as cache metadata; the value is sent as raw bytes.
+ * Entry options are sent as the headers Put already maps to CacheEntryOptions.
  * @returns True when the host created or updated the entry
  */
 export async function createEntry(input: CreateCacheEntryInput): Promise<boolean> {
@@ -134,14 +135,21 @@ export async function createEntry(input: CreateCacheEntryInput): Promise<boolean
 	const body = new ArrayBuffer(input.value.byteLength);
 	new Uint8Array(body).set(input.value);
 
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/octet-stream',
+		'x-cubby-encoding': input.options.encoding,
+		'x-cubby-flags': toCubbyFlags(input.options)
+	};
+
+	const expiry = toCubbyExpiry(input.options);
+	if (expiry) {
+		headers['x-cubby-expiry'] = expiry;
+	}
+
 	try {
 		const response = await fetch(`${cubbyUrl}/cubby?${params.toString()}`, {
 			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/octet-stream',
-				'x-cubby-encoding': input.encoding,
-				'x-cubby-flags': input.compressed ? 'Compressed' : 'None'
-			},
+			headers,
 			body
 		});
 

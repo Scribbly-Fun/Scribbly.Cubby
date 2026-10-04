@@ -9,6 +9,7 @@ import {
 	isEntryEncoding,
 	tombstoneEntry
 } from '$lib/server/cacheEntryActions';
+import { isExpirationMode, isPositiveTimeSpan } from '$lib/api/types/CacheEntryOptions';
 
 export const load = (async () => {
 	const cubbyUrl = env.CUBBY_HOST_URL;
@@ -70,6 +71,8 @@ export const actions = {
 		const key = (data.get('key') as string | null)?.trim() ?? '';
 		const encodingValue = (data.get('encoding') as string | null) ?? 'None';
 		const source = (data.get('source') as string | null) ?? 'text';
+		const expirationValue = (data.get('expiration') as string | null) ?? 'Never';
+		const duration = ((data.get('duration') as string | null) ?? '').trim();
 		const compressed =
 			data.get('compressed') === 'true' ||
 			data.get('compressed') === 'on' ||
@@ -81,6 +84,16 @@ export const actions = {
 
 		if (!isEntryEncoding(encodingValue)) {
 			return fail(400, { message: 'A valid encoding is required' });
+		}
+
+		if (!isExpirationMode(expirationValue)) {
+			return fail(400, { message: 'A valid expiration is required' });
+		}
+
+		if (expirationValue !== 'Never' && !isPositiveTimeSpan(duration)) {
+			return fail(400, {
+				message: 'Expiration duration must be a TimeSpan greater than zero, such as 00:05:00'
+			});
 		}
 
 		let value: Uint8Array;
@@ -108,8 +121,12 @@ export const actions = {
 
 		const success = await createEntry({
 			key,
-			encoding: encodingValue,
-			compressed,
+			options: {
+				encoding: encodingValue,
+				compressed,
+				expiration: expirationValue,
+				duration: expirationValue === 'Never' ? undefined : duration
+			},
 			value
 		});
 

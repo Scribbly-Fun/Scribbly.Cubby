@@ -12,6 +12,12 @@
 		ENCODING_LABELS,
 		type EntryEncoding
 	} from '$lib/api/types/EntryEncoding';
+	import {
+		EXPIRATION_MODES,
+		EXPIRATION_LABELS,
+		isPositiveTimeSpan,
+		type ExpirationMode
+	} from '$lib/api/types/CacheEntryOptions';
 	import { invalidateAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
 
@@ -25,6 +31,8 @@
 	let encoding = $state<EntryEncoding>('Utf8String');
 	let encodingTouched = $state(false);
 	let compressed = $state(false);
+	let expiration = $state<ExpirationMode>('Never');
+	let duration = $state('00:05:00');
 	let source = $state<ValueSource>('text');
 	let textValue = $state('');
 	let jsonValue = $state('');
@@ -34,6 +42,8 @@
 
 	const selectedFile = $derived(files?.[0]);
 	const encodingLabel = $derived(ENCODING_LABELS[encoding]);
+	const expirationLabel = $derived(EXPIRATION_LABELS[expiration]);
+	const showDuration = $derived(expiration !== 'Never');
 
 	$effect(() => {
 		if (encodingTouched) return;
@@ -52,6 +62,8 @@
 		encoding = 'Utf8String';
 		encodingTouched = false;
 		compressed = false;
+		expiration = 'Never';
+		duration = '00:05:00';
 		source = 'text';
 		textValue = '';
 		jsonValue = '';
@@ -76,10 +88,17 @@
 			return;
 		}
 
+		if (expiration !== 'Never' && !isPositiveTimeSpan(duration)) {
+			errorMessage = 'Expiration duration must be a TimeSpan greater than zero, such as 00:05:00.';
+			return;
+		}
+
 		const formData = new FormData();
 		formData.append('key', key.trim());
 		formData.append('encoding', encoding);
 		formData.append('compressed', String(compressed));
+		formData.append('expiration', expiration);
+		formData.append('duration', duration);
 		formData.append('source', source);
 
 		if (source === 'file') {
@@ -136,12 +155,12 @@
 	<Dialog.Trigger>
 		<Button variant="outline" type="button"><AddIcon /> Create Entry</Button>
 	</Dialog.Trigger>
-	<Dialog.Content class="sm:max-w-xl">
+	<Dialog.Content class="max-h-[90vh] overflow-y-auto sm:max-w-xl">
 		<form class="grid gap-4" onsubmit={handleSubmit}>
 			<Dialog.Header>
 				<Dialog.Title>Create New Cache Entry</Dialog.Title>
 				<Dialog.Description>
-					Set a key, choose encoding and compression, then provide a value as a file, JSON, or text.
+					Configure cache entry options, then provide a value as a file, JSON, or text.
 				</Dialog.Description>
 			</Dialog.Header>
 
@@ -178,6 +197,47 @@
 					</Select.Content>
 				</Select.Root>
 			</div>
+
+			<div class="grid gap-2">
+				<Label for="cache-entry-expiration">Expiration</Label>
+				<Select.Root
+					type="single"
+					value={expiration}
+					onValueChange={(value) => {
+						if (!value) return;
+						expiration = value as ExpirationMode;
+						if (expiration !== 'Never' && !duration) {
+							duration = '00:05:00';
+						}
+					}}
+				>
+					<Select.Trigger id="cache-entry-expiration" class="w-full" aria-label="Select expiration">
+						<span data-slot="select-value">{expirationLabel}</span>
+					</Select.Trigger>
+					<Select.Content>
+						{#each EXPIRATION_MODES as option (option)}
+							<Select.Item value={option}>{EXPIRATION_LABELS[option]}</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+				<p class="text-xs text-muted-foreground">
+					Absolute expires after the duration. Sliding refreshes that duration on each read.
+				</p>
+			</div>
+
+			{#if showDuration}
+				<div class="grid gap-2">
+					<Label for="cache-entry-duration">Duration</Label>
+					<Input
+						id="cache-entry-duration"
+						name="duration"
+						placeholder="00:05:00"
+						autocomplete="off"
+						bind:value={duration}
+					/>
+					<p class="text-xs text-muted-foreground">TimeSpan format, for example 00:05:00.</p>
+				</div>
+			{/if}
 
 			<div class="flex items-center gap-2">
 				<Checkbox id="cache-entry-compressed" bind:checked={compressed} />
