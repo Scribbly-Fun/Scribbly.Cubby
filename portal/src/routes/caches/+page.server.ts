@@ -7,6 +7,7 @@ import {
 	encodeTextValue,
 	evictEntry,
 	isEntryEncoding,
+	readCacheValue,
 	tombstoneEntry
 } from '$lib/server/cacheEntryActions';
 import { isExpirationMode, isPositiveTimeSpan } from '$lib/api/types/CacheEntryOptions';
@@ -77,6 +78,7 @@ export const actions = {
 			data.get('compressed') === 'true' ||
 			data.get('compressed') === 'on' ||
 			data.get('compressed') === '1';
+		const keepValue = data.get('keepValue') === 'true';
 
 		if (!key) {
 			return fail(400, { message: 'Key is required' });
@@ -100,11 +102,17 @@ export const actions = {
 
 		if (source === 'file') {
 			const file = data.get('file');
-			if (!(file instanceof File)) {
+			if (file instanceof File && file.size > 0) {
+				value = new Uint8Array(await file.arrayBuffer());
+			} else if (keepValue) {
+				const existing = await readCacheValue(key);
+				if (!existing) {
+					return fail(404, { message: `Existing value was not found for ${key}` });
+				}
+				value = new Uint8Array(existing);
+			} else {
 				return fail(400, { message: 'A file is required' });
 			}
-
-			value = new Uint8Array(await file.arrayBuffer());
 		} else {
 			const text = (data.get('value') as string | null) ?? '';
 
@@ -131,9 +139,9 @@ export const actions = {
 		});
 
 		if (!success) {
-			return fail(500, { message: `Failed to create entry: ${key}` });
+			return fail(500, { message: `Failed to save entry: ${key}` });
 		}
 
-		return { success: true, message: `Entry ${key} created` };
+		return { success: true, message: `Entry ${key} saved` };
 	}
 } satisfies Actions;

@@ -1,4 +1,6 @@
 import type { EntryEncoding } from './EntryEncoding';
+import type { CacheEntry } from './CacheEntry';
+import { EntryFlags, hasFlag, isSliding } from './EntryFlags';
 
 /**
  * How a cache entry expires when inserted through Put.
@@ -25,7 +27,7 @@ export type CacheEntryOptions = {
 	duration?: string;
 };
 
-const TIMESPAN_PATTERN = /^(?:(\d+)\.)?(\d+):(\d{2}):(\d{2})$/;
+const TIMESPAN_PATTERN = /^(?:(\d+)\.)?(\d+):(\d{2}):(\d{2})(?:\.\d+)?$/;
 
 export function isExpirationMode(value: string): value is ExpirationMode {
 	return (EXPIRATION_MODES as readonly string[]).includes(value);
@@ -80,4 +82,84 @@ export function toCubbyExpiry(options: CacheEntryOptions): string | undefined {
 
 	const duration = options.duration?.trim();
 	return duration || undefined;
+}
+
+export function normalizeTimeSpan(value: string | undefined): string | undefined {
+	if (!value) {
+		return undefined;
+	}
+
+	const match = TIMESPAN_PATTERN.exec(value.trim());
+	if (!match) {
+		return undefined;
+	}
+
+	const days = match[1];
+	const hours = match[2].padStart(2, '0');
+	const minutes = match[3];
+	const seconds = match[4];
+
+	return days ? `${days}.${hours}:${minutes}:${seconds}` : `${hours}:${minutes}:${seconds}`;
+}
+
+export function durationUntil(expirationIso: string, now = Date.now()): string | undefined {
+	const end = Date.parse(expirationIso);
+	if (Number.isNaN(end) || end <= now) {
+		return undefined;
+	}
+
+	let totalSeconds = Math.floor((end - now) / 1000);
+	const days = Math.floor(totalSeconds / 86400);
+	totalSeconds %= 86400;
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const seconds = totalSeconds % 60;
+	const hms = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+	return days > 0 ? `${days}.${hms}` : hms;
+}
+
+export function optionsFromEntry(entry: CacheEntry): CacheEntryOptions {
+	const compressed = hasFlag(entry.flags, EntryFlags.Comppressed);
+	const slidingDuration = normalizeTimeSpan(entry.sliding_duration);
+
+	if (isSliding(entry.flags)) {
+		return {
+			encoding: entry.encoding,
+			compressed,
+			expiration: 'Sliding',
+			duration:
+				slidingDuration && isPositiveTimeSpan(slidingDuration) ? slidingDuration : '00:05:00'
+		};
+	}
+
+	if (entry.expiration) {
+		const remaining = durationUntil(entry.expiration);
+		if (remaining) {
+			return {
+				encoding: entry.encoding,
+				compressed,
+				expiration: 'Absolute',
+				duration: remaining
+			};
+		}
+	}
+
+	return {
+		encoding: entry.encoding,
+		compressed,
+		expiration: 'Never'
+	};
+}
+
+export function valueSourceFromEncoding(encoding: EntryEncoding): 'file' | 'json' | 'text' {
+	if (encoding === 'Json') {
+		return 'json';
+	}
+
+	if (encoding === 'Utf8String' || encoding === 'Utf16String') {
+		return 'text';
+	}
+
+	return 'file';
 }

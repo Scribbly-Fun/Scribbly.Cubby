@@ -4,6 +4,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import type { CacheEntry } from '$lib/api/types';
 	import { invalidateAll } from '$app/navigation';
+	import CacheEntryDialog from '../components/cache-entry-dialog.svelte';
 
 	// @ts-ignore
 	import TrashIcon from '@tabler/icons-svelte/icons/trash';
@@ -15,6 +16,7 @@
 	import CoffinIcon from '@tabler/icons-svelte/icons/coffin';
 
 	let { entry }: { entry: CacheEntry } = $props();
+	let editOpen = $state(false);
 
 	async function handleEvict() {
 		const formData = new FormData();
@@ -52,6 +54,7 @@
 </script>
 
 <div class="flex flex-row justify-end">
+	<CacheEntryDialog {entry} bind:open={editOpen} showTrigger={false} />
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
@@ -64,7 +67,9 @@
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
 				<DropdownMenu.Label>Modify</DropdownMenu.Label>
-				<DropdownMenu.Item><EditIcon />Edit Entry</DropdownMenu.Item>
+				<DropdownMenu.Item onclick={() => (editOpen = true)}
+					><EditIcon />Edit Entry</DropdownMenu.Item
+				>
 			</DropdownMenu.Group>
 			<DropdownMenu.Group>
 				<DropdownMenu.Label>Danger</DropdownMenu.Label>
