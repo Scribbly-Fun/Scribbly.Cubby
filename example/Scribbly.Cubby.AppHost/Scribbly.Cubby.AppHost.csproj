@@ -8,6 +8,7 @@
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>8ad8bcb3-ea9e-4248-98a6-a34a831cda06</UserSecretsId>
     <RootNamespace>Scribbly.Cubby.Cookbook.AppHost</RootNamespace>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
   </PropertyGroup>
 
   <ItemGroup>
