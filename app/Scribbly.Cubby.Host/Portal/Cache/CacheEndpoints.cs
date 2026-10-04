@@ -1,27 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Scribbly.Cubby.Stores;
 
-namespace Scribbly.Cubby.Host.Portal;
+namespace Scribbly.Cubby.Host.Portal.Cache;
 
-public static class Endpoints
+internal static class CacheEndpoints
 {
-    extension(IEndpointRouteBuilder builder)
+    extension(IEndpointRouteBuilder endpointGroup)
     {
-        public IEndpointRouteBuilder MapCubbyPortal()
+        internal IEndpointRouteBuilder MapCubbyPortalCacheEndpoints()
         {
-            var portalGroup = builder.MapGroup("cubby/portal");
-            
-            portalGroup.MapGet("/options", (IOptions<CubbyServerOptions> options) => options.Value);
-
-            portalGroup.MapGet("/caches", IEnumerable<CacheResponse> (ICubbyStore store) =>
+            endpointGroup.MapGet("/caches", IEnumerable<CacheResponse> (ICubbyStore store) =>
             {
                 return store is not ICubbyStoreIterator storeIterator 
                     ? [] 
-                    : storeIterator.Entries.Select(e => e.Response);
+                    : storeIterator.Entries.Select<KeyValuePair<BytesKey, byte[]>, CacheResponse>(e => e.Response);
             });
 
-            portalGroup.MapGet("/caches/value", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
+            endpointGroup.MapGet("/caches/value", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
             {
                 if (!store.TryGet(key, out var entry))
                 {
@@ -31,7 +26,7 @@ public static class Endpoints
                 return Results.Bytes(entry.GetValue().ToArray());
             });
 
-            portalGroup.MapDelete("/caches/tombstone", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
+            endpointGroup.MapDelete("/caches/tombstone", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
             {
                 if (!store.Exists(key))
                 {
@@ -42,7 +37,7 @@ public static class Endpoints
                 return flags.HasFlag(CacheEntryFlags.Tombstone) ? Results.Ok() : Results.BadRequest();
             });
 
-            portalGroup.MapDelete("/caches/evict", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
+            endpointGroup.MapDelete("/caches/evict", (ICubbyStore store, [FromQuery(Name = "key")] BytesKey key) =>
             {
                 var result = store.Evict(key);
 
@@ -55,7 +50,7 @@ public static class Endpoints
                 };
             });
 
-            return portalGroup;
+            return endpointGroup;
         }
     }
 }

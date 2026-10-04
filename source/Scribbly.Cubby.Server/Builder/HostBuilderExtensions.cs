@@ -54,6 +54,7 @@ public static class HostApplicationBuilderExtensions
             
             if (cubbyBuilder.ServerOptions.Cleanup.Strategy is not CacheCleanupOptions.AsyncStrategy.Disabled and not CacheCleanupOptions.AsyncStrategy.Manual)
             {
+                cubbyBuilder.HostBuilder.Services.TryAddSingleton<ICleanupMetricsPublisher>(NullCleanupMetricsPublisher.Instance);
                 cubbyBuilder.HostBuilder.Services.AddHostedService<CacheCleanupAsyncProcessor>();
             }
             

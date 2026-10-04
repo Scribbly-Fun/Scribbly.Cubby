@@ -53,6 +53,16 @@ x-cubby-flags: Compressed
 
 
 
+### Portal Endpoints - Metrics
+
+GET {{debug}}/cubby/portal/metrics
+Accept: application/json
+
+### Portal Endpoints - Metrics (time window)
+
+GET {{debug}}/cubby/portal/metrics?from=2026-10-04T21:00:00Z&to=2026-10-04T22:00:00Z
+Accept: application/json
+
 ### Portal Endpoints - Tombstone
 
 DELETE {{debug}}/cubby/portal/caches/tombstone?key=cachekey_3

@@ -15,6 +15,7 @@ namespace Scribbly.Cubby.Server.Background;
 /// <param name="provider">A time provider used to generate time queries.</param>
 /// <param name="evictionService">A class responsible for clearing and querying the cache</param>
 /// <param name="optionsMonitor">Options that can be updated at runtime.</param>
+/// <param name="metricsPublisher">Publishes cleanup pass metrics for portal aggregation.</param>
 /// <remarks>
 ///     The cubby options are utilized to create several different strategies for cache revoking and memory cleanup.
 ///     Each configuration should be tested for your specific use case.
@@ -24,7 +25,8 @@ internal class CacheCleanupAsyncProcessor(
     ILogger<CacheCleanupAsyncProcessor> logger, 
     TimeProvider provider, 
     IExpirationEvictionService evictionService, 
-    IOptionsMonitor<CubbyServerOptions> optionsMonitor) : BackgroundService
+    IOptionsMonitor<CubbyServerOptions> optionsMonitor,
+    ICleanupMetricsPublisher metricsPublisher) : BackgroundService
 {
     private TimeSpan _delay;
     
@@ -64,12 +66,14 @@ internal class CacheCleanupAsyncProcessor(
         while (!stoppingToken.IsCancellationRequested)
         {
             CancellationToken delayToken;
+            TimeSpan sampleDelay;
             
             lock (_lock)
             {
                 if (_delayCts is null)
                     return;
 
+                sampleDelay = _delay;
                 delayToken = CancellationTokenSource
                     .CreateLinkedTokenSource(stoppingToken, _delayCts.Token)
                     .Token;
@@ -77,7 +81,7 @@ internal class CacheCleanupAsyncProcessor(
             
             try
             {
-                await Task.Delay(_delay, delayToken);
+                await Task.Delay(sampleDelay, delayToken);
                 
                 if (delayToken.IsCancellationRequested)
                 {
@@ -86,11 +90,11 @@ internal class CacheCleanupAsyncProcessor(
 
                 if (logger.IsEnabled(LogLevel.Trace))
                 {
-                    ClearExpiredCacheAndTrace();
+                    ClearExpiredCacheAndTrace(sampleDelay);
                     continue;
                 }
 
-                ClearExpiredCache();
+                ClearExpiredCache(sampleDelay);
             }
             catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
             {
@@ -109,22 +113,39 @@ internal class CacheCleanupAsyncProcessor(
         }
     }
 
-    private void ClearExpiredCacheAndTrace()
+    private void ClearExpiredCacheAndTrace(TimeSpan sampleDelay)
     {
         var watch = Stopwatch.StartNew();
         var now = provider.GetUtcNow();
                 
-        evictionService.CleanCacheStorage(now.UtcTicks);
+        var result = evictionService.CleanCacheStorage(now.UtcTicks);
+        PublishMetric(result, sampleDelay);
         
         watch.Stop();
         
-        logger.LogIterationMessage(_delay, watch.Elapsed);
+        logger.LogIterationMessage(sampleDelay, watch.Elapsed);
     }
     
-    private void ClearExpiredCache()
+    private void ClearExpiredCache(TimeSpan sampleDelay)
     {
         var now = provider.GetUtcNow();
-        evictionService.CleanCacheStorage(now.UtcTicks);
+        var result = evictionService.CleanCacheStorage(now.UtcTicks);
+        PublishMetric(result, sampleDelay);
+    }
+
+    private void PublishMetric(in CleanupPassResult result, TimeSpan sampleDelay)
+    {
+        metricsPublisher.Publish(new CleanupPassMetric(
+            result.Timestamp,
+            sampleDelay,
+            result.ItemsTotal,
+            result.ItemsServiced,
+            result.RemovedTombstone,
+            result.RemovedExpired,
+            result.RemovedSliding,
+            result.SkippedDueToWriters,
+            result.HitDeadline,
+            result.Duration));
     }
     
     private static TimeSpan CalculateDelay(CacheCleanupOptions cleanupOptions) =>
