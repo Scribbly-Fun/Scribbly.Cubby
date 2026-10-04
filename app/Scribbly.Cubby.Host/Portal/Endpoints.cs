@@ -17,10 +17,12 @@ public static class Endpoints
 
             portalGroup.MapGet("/metrics", CleanupMetricsResponse (
                 CleanupMetricsStore store,
-                IOptions<CubbyServerOptions> options) =>
+                IOptions<CubbyServerOptions> options,
+                [FromQuery(Name = "from")] DateTimeOffset? from,
+                [FromQuery(Name = "to")] DateTimeOffset? to) =>
             {
                 var fallback = CleanupMetricsMapping.ResolveFallbackDelay(options.Value.Cleanup);
-                return CleanupMetricsMapping.ToResponse(store, fallback);
+                return CleanupMetricsMapping.ToResponse(store, fallback, from, to);
             });
 
             portalGroup.MapGet("/caches", IEnumerable<CacheResponse> (ICubbyStore store) =>

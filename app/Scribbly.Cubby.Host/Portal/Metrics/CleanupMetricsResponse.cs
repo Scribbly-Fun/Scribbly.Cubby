@@ -13,6 +13,8 @@ public sealed record CleanupMetricsResponse(
     [property: JsonPropertyName("resolution")] string Resolution,
     [property: JsonPropertyName("sample_delay")] TimeSpan SampleDelay,
     [property: JsonPropertyName("capacity")] int Capacity,
+    [property: JsonPropertyName("from")] DateTimeOffset From,
+    [property: JsonPropertyName("to")] DateTimeOffset To,
     [property: JsonPropertyName("points")] ImmutableArray<CleanupMetricPoint> Points);
 
 public sealed record CleanupMetricPoint(
@@ -28,9 +30,21 @@ public sealed record CleanupMetricPoint(
 
 internal static class CleanupMetricsMapping
 {
-    public static CleanupMetricsResponse ToResponse(CleanupMetricsStore store, TimeSpan fallbackDelay)
+    public static CleanupMetricsResponse ToResponse(
+        CleanupMetricsStore store,
+        TimeSpan fallbackDelay,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null)
     {
-        var snapshot = store.Snapshot();
+        var windowTo = to ?? DateTimeOffset.UtcNow;
+        var windowFrom = from ?? windowTo - TimeSpan.FromHours(1);
+
+        if (windowFrom > windowTo)
+        {
+            (windowFrom, windowTo) = (windowTo, windowFrom);
+        }
+
+        var snapshot = store.Snapshot(windowFrom, windowTo);
         var sampleDelay = store.LatestSampleDelay ?? fallbackDelay;
         var points = snapshot.IsDefaultOrEmpty
             ? ImmutableArray<CleanupMetricPoint>.Empty
@@ -49,6 +63,8 @@ internal static class CleanupMetricsMapping
             FormatResolution(sampleDelay),
             sampleDelay,
             store.Capacity,
+            windowFrom,
+            windowTo,
             points);
     }
 

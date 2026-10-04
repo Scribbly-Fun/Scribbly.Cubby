@@ -1,16 +1,31 @@
 import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
-import type { CleanupMetrics } from '$lib/api/types';
+import {
+	isCleanupMetricsRange,
+	resolveCleanupMetricsWindow,
+	type CleanupMetrics,
+	type CleanupMetricsRange
+} from '$lib/api/types';
 
-export const load = (async () => {
+const DEFAULT_RANGE: CleanupMetricsRange = '1h';
+
+export const load = (async ({ url }) => {
 	const cubbyUrl = env.CUBBY_HOST_URL as string | undefined;
 
 	if (!cubbyUrl) {
 		error(500, 'CUBBY_HOST_URL environment variable is not configured');
 	}
 
-	const response = await fetch(`${cubbyUrl}/cubby/portal/metrics`);
+	const requestedRange = url.searchParams.get('range');
+	const range = isCleanupMetricsRange(requestedRange) ? requestedRange : DEFAULT_RANGE;
+	const { from, to } = resolveCleanupMetricsWindow(range);
+
+	const metricsUrl = new URL(`${cubbyUrl}/cubby/portal/metrics`);
+	metricsUrl.searchParams.set('from', from.toISOString());
+	metricsUrl.searchParams.set('to', to.toISOString());
+
+	const response = await fetch(metricsUrl);
 
 	if (response.status !== 200) {
 		error(response.status, `Failed to load cleanup metrics from Cubby at ${cubbyUrl}`);
@@ -19,6 +34,7 @@ export const load = (async () => {
 	const metrics = (await response.json()) as CleanupMetrics;
 
 	return {
-		cleanup_metrics: metrics
+		cleanup_metrics: metrics,
+		metrics_range: range
 	};
 }) satisfies PageServerLoad;

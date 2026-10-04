@@ -8,7 +8,10 @@ namespace Scribbly.Cubby.Host.Portal.Metrics;
 /// </summary>
 internal sealed class CleanupMetricsStore
 {
-    public const int DefaultCapacity = 1_440;
+    /// <summary>
+    /// Holds three days of one-minute samples for the widest dashboard range.
+    /// </summary>
+    public const int DefaultCapacity = 4_320;
 
     private readonly Lock _lock = new();
     private readonly CleanupPassMetric[] _buffer;
@@ -47,7 +50,7 @@ internal sealed class CleanupMetricsStore
         }
     }
 
-    public ImmutableArray<CleanupPassMetric> Snapshot()
+    public ImmutableArray<CleanupPassMetric> Snapshot(DateTimeOffset? from = null, DateTimeOffset? to = null)
     {
         lock (_lock)
         {
@@ -61,10 +64,22 @@ internal sealed class CleanupMetricsStore
 
             for (var i = 0; i < _count; i++)
             {
-                builder.Add(_buffer[(start + i) % _buffer.Length]);
+                var metric = _buffer[(start + i) % _buffer.Length];
+
+                if (from is { } fromValue && metric.Timestamp < fromValue)
+                {
+                    continue;
+                }
+
+                if (to is { } toValue && metric.Timestamp > toValue)
+                {
+                    continue;
+                }
+
+                builder.Add(metric);
             }
 
-            return builder.MoveToImmutable();
+            return builder.Count == 0 ? [] : builder.ToImmutable();
         }
     }
 

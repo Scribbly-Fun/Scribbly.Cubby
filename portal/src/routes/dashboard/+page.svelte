@@ -9,5 +9,5 @@
 <CubbyOptions cubby_options={data.cubby_options} />
 
 <div class="px-4 lg:px-6">
-	<ChartAreaInteractive metrics={data.cleanup_metrics} />
+	<ChartAreaInteractive metrics={data.cleanup_metrics} range={data.metrics_range} />
 </div>

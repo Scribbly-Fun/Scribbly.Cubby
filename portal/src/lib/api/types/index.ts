@@ -5,7 +5,11 @@ import type { CubbyOptions } from './CubbyOptions';
 import type { SlidingDuration } from './SlidingDuration';
 import type { EntryEncoding } from './EntryEncoding';
 import type { CacheEntryOptions, ExpirationMode } from './CacheEntryOptions';
-import type { CleanupMetrics, CleanupMetricPoint } from './CleanupMetrics';
+import type { CleanupMetrics, CleanupMetricPoint, CleanupMetricsRange } from './CleanupMetrics';
+import {
+	isCleanupMetricsRange,
+	resolveCleanupMetricsWindow
+} from './CleanupMetrics';
 
 export type {
 	CacheEntry,
@@ -17,6 +21,7 @@ export type {
 	SlidingDuration,
 	CleanupMetrics,
 	CleanupMetricPoint,
+	CleanupMetricsRange,
 	//
 	CacheEntry as Entry,
 	EntryFlags as Flags,
@@ -25,4 +30,4 @@ export type {
 	SlidingDuration as Duration
 };
 
-export { isEntryExpired };
+export { isEntryExpired, isCleanupMetricsRange, resolveCleanupMetricsWindow };

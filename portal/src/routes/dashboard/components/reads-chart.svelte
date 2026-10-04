@@ -3,12 +3,19 @@
 	import * as Card from "$lib/components/ui/card/index.js";
 	import * as Select from "$lib/components/ui/select/index.js";
 	import * as ToggleGroup from "$lib/components/ui/toggle-group/index.js";
+	import { goto } from "$app/navigation";
 	import { scaleUtc } from "d3-scale";
 	import { Area, AreaChart } from "layerchart";
 	import { curveNatural } from "d3-shape";
-	import type { CleanupMetrics } from "$lib/api/types";
+	import type { CleanupMetrics, CleanupMetricsRange } from "$lib/api/types";
 
-	let { metrics }: { metrics: CleanupMetrics } = $props();
+	let {
+		metrics,
+		range
+	}: {
+		metrics: CleanupMetrics;
+		range: CleanupMetricsRange;
+	} = $props();
 
 	const chartData = $derived(
 		metrics.points.map((point) => ({
@@ -20,35 +27,36 @@
 		}))
 	);
 
-	let timeRange = $state("3h");
+	const xDomain = $derived<[Date, Date]>([new Date(metrics.from), new Date(metrics.to)]);
 
 	const selectedLabel = $derived.by(() => {
-		switch (timeRange) {
-			case "3d":
-				return "Last 3 Days";
-			case "24h":
-				return "Last 24 hours";
+		switch (range) {
+			case "1h":
+				return "Last Hour";
 			case "3h":
 				return "Last 3 Hours";
+			case "24h":
+				return "Last 24 Hours";
+			case "3d":
+				return "Last 3 Days";
 			default:
-				return "Last 3 Hours";
+				return "Last Hour";
 		}
 	});
 
-	const filteredData = $derived(
-		chartData.filter((item) => {
-			const referenceDate = new Date();
-			let hoursToSubtract = 3;
-			if (timeRange === "24h") {
-				hoursToSubtract = 24;
-			} else if (timeRange === "3d") {
-				hoursToSubtract = 72;
-			}
+	async function selectRange(nextRange: string | undefined) {
+		if (!nextRange || nextRange === range) {
+			return;
+		}
 
-			referenceDate.setHours(referenceDate.getHours() - hoursToSubtract);
-			return item.date >= referenceDate;
-		})
-	);
+		const url = new URL(window.location.href);
+		url.searchParams.set("range", nextRange);
+		await goto(`${url.pathname}${url.search}`, {
+			keepFocus: true,
+			noScroll: true,
+			invalidateAll: true
+		});
+	}
 
 	const chartConfig = {
 		items: { label: "Items", color: "var(--primary)" },
@@ -69,18 +77,24 @@
 		<Card.Action>
 			<ToggleGroup.Root
 				type="single"
-				bind:value={timeRange}
+				value={range}
+				onValueChange={selectRange}
 				variant="outline"
 				class="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
 			>
+				<ToggleGroup.Item value="1h">Last Hour</ToggleGroup.Item>
 				<ToggleGroup.Item value="3h">Last 3 Hours</ToggleGroup.Item>
-				<ToggleGroup.Item value="24h">Last 24 hours</ToggleGroup.Item>
-				<ToggleGroup.Item value="3d">Last 3 days</ToggleGroup.Item>
+				<ToggleGroup.Item value="24h">Last 24 Hours</ToggleGroup.Item>
+				<ToggleGroup.Item value="3d">Last 3 Days</ToggleGroup.Item>
 			</ToggleGroup.Root>
-			<Select.Root type="single" bind:value={timeRange}>
+			<Select.Root
+				type="single"
+				value={range}
+				onValueChange={selectRange}
+			>
 				<Select.Trigger
 					size="sm"
-					class="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
+					class="flex w-44 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
 					aria-label="Select a value"
 				>
 					<span data-slot="select-value">
@@ -88,15 +102,16 @@
 					</span>
 				</Select.Trigger>
 				<Select.Content class="rounded-xl">
+					<Select.Item value="1h" class="rounded-lg">Last Hour</Select.Item>
 					<Select.Item value="3h" class="rounded-lg">Last 3 Hours</Select.Item>
-					<Select.Item value="24h" class="rounded-lg">Last 24 hours</Select.Item>
-					<Select.Item value="3d" class="rounded-lg">Last 3 days</Select.Item>
+					<Select.Item value="24h" class="rounded-lg">Last 24 Hours</Select.Item>
+					<Select.Item value="3d" class="rounded-lg">Last 3 Days</Select.Item>
 				</Select.Content>
 			</Select.Root>
 		</Card.Action>
 	</Card.Header>
 	<Card.Content class="px-2 pt-4 sm:px-6 sm:pt-6">
-		{#if filteredData.length === 0}
+		{#if chartData.length === 0}
 			<div
 				class="text-muted-foreground flex h-62.5 items-center justify-center text-sm"
 			>
@@ -106,9 +121,10 @@
 			<Chart.Container config={chartConfig} class="aspect-auto h-62.5 w-full">
 				<AreaChart
 					legend
-					data={filteredData}
+					data={chartData}
 					x="date"
 					xScale={scaleUtc()}
+					xDomain={xDomain}
 					series={[
 						{
 							key: "items",
@@ -134,19 +150,26 @@
 							motion: "tween"
 						},
 						xAxis: {
-							ticks: timeRange === "3h" ? 6 : timeRange === "24h" ? 8 : 6,
+							ticks: range === "1h" || range === "3h" ? 6 : range === "24h" ? 8 : 6,
 							format: (v: Date) => {
-								if (timeRange === "3h") {
+								if (range === "1h" || range === "3h") {
 									return v.toLocaleTimeString("en-US", {
 										hour: "numeric",
 										minute: "2-digit"
 									});
 								}
 
+								if (range === "24h") {
+									return v.toLocaleString("en-US", {
+										month: "short",
+										day: "numeric",
+										hour: "numeric"
+									});
+								}
+
 								return v.toLocaleDateString("en-US", {
 									month: "short",
-									day: "numeric",
-									hour: "numeric"
+									day: "numeric"
 								});
 							}
 						},
