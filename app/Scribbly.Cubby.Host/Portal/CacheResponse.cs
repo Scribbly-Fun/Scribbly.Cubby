@@ -2,10 +2,8 @@
 
 namespace Scribbly.Cubby.Host.Portal;
 
-[JsonSerializable(typeof(IEnumerable<CacheResponse>))]
-internal partial class CacheResponseListJsonContext : JsonSerializerContext;
-
 [JsonSerializable(typeof(CacheResponse))]
+[JsonSerializable(typeof(IEnumerable<CacheResponse>))]
 internal partial class CacheResponseJsonContext : JsonSerializerContext;
 
 public record CacheResponse(

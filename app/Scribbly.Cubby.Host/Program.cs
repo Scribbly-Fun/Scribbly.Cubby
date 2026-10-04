@@ -20,7 +20,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, CubbyOptionsJsonContext.Default);
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseJsonContext.Default);
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, CacheResponseListJsonContext.Default);
 });
 
 builder.Services.AddOpenApi();
