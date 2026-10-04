@@ -18,14 +18,6 @@ public static class CacheHeaderTimeExtensions
         { 
             return expiration != 0 && expiration <= nowUtcTicks;
         }
-
-        /// <summary>
-        /// Stored expiration ticks are UTC. Mapping with <see cref="DateTime"/> is Unspecified
-        /// and converting to <see cref="DateTimeOffset"/> applies the host timezone.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal DateTimeOffset? ToUtcDateTimeOffset()
-            => expiration > 0 ? new DateTimeOffset(expiration, TimeSpan.Zero) : null;
     }
 
     /// <summary>

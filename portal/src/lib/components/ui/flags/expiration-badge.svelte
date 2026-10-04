@@ -10,14 +10,6 @@
 
 	const hasExpiration = $derived(!!date && !Number.isNaN(date.getTime()));
 	const expired = $derived(hasExpiration && isEntryExpired(date, currentTime()));
-	const display = $derived(
-		hasExpiration
-			? date?.toLocaleString(undefined, {
-					dateStyle: 'medium',
-					timeStyle: 'short'
-				})
-			: undefined
-	);
 </script>
 
 <div class="flex w-full flex-wrap gap-2">
@@ -26,9 +18,9 @@
 	{:else if expired}
 		<Badge variant="destructive">
 			<ClockIcon />
-			{display}
+			{date?.toUTCString()}
 		</Badge>
 	{:else}
-		<Badge variant="secondary">{display}</Badge>
+		<Badge variant="secondary">{date?.toUTCString()}</Badge>
 	{/if}
 </div>

@@ -15,17 +15,18 @@ export type CacheEntry = {
 };
 
 /**
- * True when the entry has an expiration timestamp that is at or before now.
+ * True when the entry's expiration instant is at or before the current UTC time.
  * Expired entries can remain in the table until the next query or async cleanup.
  */
 export function isEntryExpired(
 	expiration: string | Date | undefined | null,
-	now = Date.now()
+	nowUtcMs = Date.now()
 ): boolean {
 	if (!expiration) {
 		return false;
 	}
 
-	const time = expiration instanceof Date ? expiration.getTime() : Date.parse(expiration);
-	return !Number.isNaN(time) && time <= now;
+	const expirationUtcMs =
+		expiration instanceof Date ? expiration.getTime() : Date.parse(expiration);
+	return !Number.isNaN(expirationUtcMs) && expirationUtcMs <= nowUtcMs;
 }

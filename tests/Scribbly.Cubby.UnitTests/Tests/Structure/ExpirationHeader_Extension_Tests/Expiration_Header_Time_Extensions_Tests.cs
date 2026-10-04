@@ -43,25 +43,4 @@ public class Expiration_Header_Time_Extensions_Tests
         
         expiration.IsExpired(201).Should().BeTrue();
     }
-
-    [Fact]
-    public void Given_Zero_ToUtcDateTimeOffset_Should_Return_Null()
-    {
-        long expiration = 0;
-
-        expiration.ToUtcDateTimeOffset().Should().BeNull();
-    }
-
-    [Fact]
-    public void Given_UtcTicks_ToUtcDateTimeOffset_Should_Keep_Zero_Offset()
-    {
-        var utc = new DateTimeOffset(2026, 10, 4, 13, 52, 43, TimeSpan.Zero);
-        var mapped = utc.UtcTicks.ToUtcDateTimeOffset();
-
-        mapped.Should().NotBeNull();
-        mapped!.Value.Offset.Should().Be(TimeSpan.Zero);
-        mapped.Value.UtcTicks.Should().Be(utc.UtcTicks);
-        mapped.Value.ToString("o").Should().EndWith("+00:00");
-    }
-
 }
