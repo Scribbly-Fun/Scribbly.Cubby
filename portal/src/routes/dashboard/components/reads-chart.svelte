@@ -12,6 +12,7 @@
 		type CleanupMetrics,
 		type CleanupMetricsRange
 	} from "$lib/api/types";
+	import CleanupMetricsTooltip from "./cleanup-metrics-tooltip.svelte";
 
 	let {
 		metrics,
@@ -34,7 +35,8 @@
 			items: point.items_total,
 			serviced: point.items_serviced,
 			removed:
-				point.removed_tombstone + point.removed_expired + point.removed_sliding
+				point.removed_tombstone + point.removed_expired + point.removed_sliding,
+			durationMs: point.duration_ms
 		}))
 	);
 
@@ -242,7 +244,7 @@
 						{/each}
 					{/snippet}
 					{#snippet tooltip()}
-						<Chart.Tooltip
+						<CleanupMetricsTooltip
 							labelFormatter={(v: Date) => {
 								return v.toLocaleString("en-US", {
 									month: "short",
@@ -251,7 +253,6 @@
 									minute: "2-digit"
 								});
 							}}
-							indicator="line"
 						/>
 					{/snippet}
 				</AreaChart>
