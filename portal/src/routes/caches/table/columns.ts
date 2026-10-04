@@ -44,20 +44,58 @@ function slidingSortValue(duration: SlidingDuration | undefined): number {
 	return days * 86400 + hours * 3600 + minutes * 60 + seconds;
 }
 
+function getSortValue(row: CacheEntry, columnId: string): string | number {
+	switch (columnId) {
+		case 'key':
+			return row.key;
+		case 'flags':
+			return row.flags;
+		case 'expiration':
+			return expirationSortValue(row.expiration);
+		case 'sliding':
+			return slidingSortValue(row.sliding_duration);
+		case 'encoding':
+			return row.encoding;
+		case 'size':
+			return row.size;
+		default:
+			return '';
+	}
+}
+
+export function compareCacheEntries(a: CacheEntry, b: CacheEntry, columnId: string): number {
+	const left = getSortValue(a, columnId);
+	const right = getSortValue(b, columnId);
+
+	if (typeof left === 'number' && typeof right === 'number') {
+		return left - right;
+	}
+
+	return String(left).localeCompare(String(right));
+}
+
+export type CacheTableMeta = {
+	sorting: import('@tanstack/table-core').SortingState;
+	toggleSort: (columnId: string) => void;
+};
+
 export const columns: ColumnDef<CacheEntry>[] = [
 	{
 		accessorKey: 'key',
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Key' })
+		header: ({ column, table }) =>
+			renderComponent(SortableHeader, { column, table, title: 'Key' })
 	},
 	{
 		accessorKey: 'flags',
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Flags' }),
+		header: ({ column, table }) =>
+			renderComponent(SortableHeader, { column, table, title: 'Flags' }),
 		cell: ({ row }) => renderComponent(FlagsBadge, { flags: row.original.flags })
 	},
 	{
 		id: 'expiration',
 		accessorFn: (row) => expirationSortValue(row.expiration),
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Expiration' }),
+		header: ({ column, table }) =>
+			renderComponent(SortableHeader, { column, table, title: 'Expiration' }),
 		cell: ({ row }) => {
 			return renderComponent(ExpirationBadge, {
 				date: row.original.expiration ? new Date(row.original.expiration) : undefined
@@ -67,14 +105,16 @@ export const columns: ColumnDef<CacheEntry>[] = [
 	{
 		id: 'sliding',
 		accessorFn: (row) => slidingSortValue(row.sliding_duration),
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Sliding Duration' }),
+		header: ({ column, table }) =>
+			renderComponent(SortableHeader, { column, table, title: 'Sliding Duration' }),
 		cell: ({ row }) => {
 			return renderComponent(SlidingBadge, { duration: row.original.sliding_duration });
 		}
 	},
 	{
 		accessorKey: 'encoding',
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Encoding' }),
+		header: ({ column, table }) =>
+			renderComponent(SortableHeader, { column, table, title: 'Encoding' }),
 		cell: ({ row }) => {
 			return renderComponent(EncodingBadge, {
 				encoding: row.original.encoding
@@ -83,7 +123,8 @@ export const columns: ColumnDef<CacheEntry>[] = [
 	},
 	{
 		accessorKey: 'size',
-		header: ({ column }) => renderComponent(SortableHeader, { column, title: 'Size' }),
+		header: ({ column, table }) =>
+			renderComponent(SortableHeader, { column, table, title: 'Size' }),
 		cell: ({ row }) => {
 			return renderComponent(CacheEntryDisplay, { entry: row.original });
 		}

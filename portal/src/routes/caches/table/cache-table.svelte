@@ -2,14 +2,15 @@
 	import {
 		type ColumnDef,
 		type SortingState,
-		getCoreRowModel,
-		getSortedRowModel
+		getCoreRowModel
 	} from '@tanstack/table-core';
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { invalidateAll } from '$app/navigation';
+	import type { CacheEntry } from '$lib/api/types/CacheEntry';
+	import { compareCacheEntries } from './columns';
 
 	// @ts-ignore
 	import RefreshIcon from '@tabler/icons-svelte/icons/refresh';
@@ -52,6 +53,37 @@
 		});
 	});
 
+	const displayData = $derived.by(() => {
+		const current = sorting[0];
+		if (!current) {
+			return filteredData;
+		}
+
+		return [...filteredData].sort((left, right) => {
+			const result = compareCacheEntries(
+				left as CacheEntry,
+				right as CacheEntry,
+				current.id
+			);
+			return current.desc ? -result : result;
+		});
+	});
+
+	function toggleSort(columnId: string) {
+		const current = sorting[0];
+		if (current?.id === columnId && !current.desc) {
+			sorting = [{ id: columnId, desc: true }];
+			return;
+		}
+
+		if (current?.id === columnId && current.desc) {
+			sorting = [];
+			return;
+		}
+
+		sorting = [{ id: columnId, desc: false }];
+	}
+
 	$effect(() => {
 		if (!playing) return;
 
@@ -69,21 +101,31 @@
 
 	const table = createSvelteTable({
 		get data() {
-			return filteredData;
+			return displayData;
 		},
 		get columns() {
 			return columns;
 		},
 		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		get state() {
+		get meta() {
 			return {
-				sorting
+				sorting,
+				toggleSort
 			};
-		},
-		onSortingChange: (updater) => {
-			sorting = typeof updater === 'function' ? updater(sorting) : updater;
 		}
+	});
+
+	$effect.pre(() => {
+		void displayData;
+		void sorting;
+		table.setOptions((previous) => ({
+			...previous,
+			data: displayData,
+			meta: {
+				sorting,
+				toggleSort
+			}
+		}));
 	});
 
 	function toggleAutopolling() {
