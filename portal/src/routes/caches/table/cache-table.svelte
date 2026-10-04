@@ -1,16 +1,19 @@
-<script lang="ts" generics="TData, TValue">
-	import {
-		type ColumnDef,
-		type SortingState,
-		getCoreRowModel
-	} from '@tanstack/table-core';
-	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
+<script lang="ts">
+	import type { SortingState } from '@tanstack/table-core';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { invalidateAll } from '$app/navigation';
 	import type { CacheEntry } from '$lib/api/types/CacheEntry';
 	import { compareCacheEntries } from './columns';
+	import SortableHeader from './sortable-header.svelte';
+	import FlagsBadge from '$lib/components/ui/flags/flags-badge.svelte';
+	import ExpirationBadge from '$lib/components/ui/flags/expiration-badge.svelte';
+	import SlidingBadge from '$lib/components/ui/flags/sliding-badge.svelte';
+	import EncodingBadge from '$lib/components/ui/flags/encoding-badge.svelte';
+	import CacheEntryDisplay from '../components/cache-entry-display.svelte';
+	import CacheTableActions from './cache-table-actions.svelte';
+	import CreateCacheDialog from '../components/cache-entry-dialog.svelte';
 
 	// @ts-ignore
 	import RefreshIcon from '@tabler/icons-svelte/icons/refresh';
@@ -21,50 +24,27 @@
 	// @ts-ignore
 	import SearchIcon from '@tabler/icons-svelte/icons/search';
 
-	import CreateCacheDialog from '../components/cache-entry-dialog.svelte';
-
 	const POLL_INTERVAL_MS = 2000;
 
-	type DataTableProps<TData, TValue> = {
-		columns: ColumnDef<TData, TValue>[];
-		data: TData[];
-	};
-
-	let { data, columns }: DataTableProps<TData, TValue> = $props();
+	let { data }: { data: CacheEntry[] } = $props();
 
 	let playing = $state(false);
 	let keyFilter = $state('');
 	let sorting = $state<SortingState>([]);
 
-	const filteredData = $derived.by(() => {
-		const query = keyFilter.trim().toLowerCase();
-		if (!query) {
-			return data;
-		}
-
-		return data.filter((row) => {
-			if (!row || typeof row !== 'object' || !('key' in row)) {
-				return false;
-			}
-
-			return String(row.key ?? '')
-				.toLowerCase()
-				.includes(query);
-		});
-	});
-
 	const displayData = $derived.by(() => {
+		const query = keyFilter.trim().toLowerCase();
+		const rows = query
+			? data.filter((entry) => entry.key.toLowerCase().includes(query))
+			: data;
+
 		const current = sorting[0];
 		if (!current) {
-			return filteredData;
+			return rows;
 		}
 
-		return [...filteredData].sort((left, right) => {
-			const result = compareCacheEntries(
-				left as CacheEntry,
-				right as CacheEntry,
-				current.id
-			);
+		return [...rows].sort((left, right) => {
+			const result = compareCacheEntries(left, right, current.id);
 			return current.desc ? -result : result;
 		});
 	});
@@ -97,35 +77,6 @@
 			console.log('Stopping polling');
 			clearInterval(id);
 		};
-	});
-
-	const table = createSvelteTable({
-		get data() {
-			return displayData;
-		},
-		get columns() {
-			return columns;
-		},
-		getCoreRowModel: getCoreRowModel(),
-		get meta() {
-			return {
-				sorting,
-				toggleSort
-			};
-		}
-	});
-
-	$effect.pre(() => {
-		void displayData;
-		void sorting;
-		table.setOptions((previous) => ({
-			...previous,
-			data: displayData,
-			meta: {
-				sorting,
-				toggleSort
-			}
-		}));
 	});
 
 	function toggleAutopolling() {
@@ -192,33 +143,61 @@
 <div class="rounded-md border bg-card shadow-sm">
 	<Table.Root>
 		<Table.Header>
-			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-				<Table.Row>
-					{#each headerGroup.headers as header (header.id)}
-						<Table.Head colspan={header.colSpan}>
-							{#if !header.isPlaceholder}
-								<FlexRender
-									content={header.column.columnDef.header}
-									context={header.getContext()}
-								/>
-							{/if}
-						</Table.Head>
-					{/each}
-				</Table.Row>
-			{/each}
+			<Table.Row>
+				<Table.Head>
+					<SortableHeader columnId="key" title="Key" {sorting} {toggleSort} />
+				</Table.Head>
+				<Table.Head>
+					<SortableHeader columnId="flags" title="Flags" {sorting} {toggleSort} />
+				</Table.Head>
+				<Table.Head>
+					<SortableHeader columnId="expiration" title="Expiration" {sorting} {toggleSort} />
+				</Table.Head>
+				<Table.Head>
+					<SortableHeader
+						columnId="sliding"
+						title="Sliding Duration"
+						{sorting}
+						{toggleSort}
+					/>
+				</Table.Head>
+				<Table.Head>
+					<SortableHeader columnId="encoding" title="Encoding" {sorting} {toggleSort} />
+				</Table.Head>
+				<Table.Head>
+					<SortableHeader columnId="size" title="Size" {sorting} {toggleSort} />
+				</Table.Head>
+				<Table.Head></Table.Head>
+			</Table.Row>
 		</Table.Header>
 		<Table.Body>
-			{#each table.getRowModel().rows as row (row.id)}
-				<Table.Row data-state={row.getIsSelected() && 'selected'}>
-					{#each row.getVisibleCells() as cell (cell.id)}
-						<Table.Cell>
-							<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-						</Table.Cell>
-					{/each}
+			{#each displayData as entry (entry.key)}
+				<Table.Row>
+					<Table.Cell>{entry.key}</Table.Cell>
+					<Table.Cell>
+						<FlagsBadge flags={entry.flags} />
+					</Table.Cell>
+					<Table.Cell>
+						<ExpirationBadge
+							date={entry.expiration ? new Date(entry.expiration) : undefined}
+						/>
+					</Table.Cell>
+					<Table.Cell>
+						<SlidingBadge duration={entry.sliding_duration} />
+					</Table.Cell>
+					<Table.Cell>
+						<EncodingBadge encoding={entry.encoding} />
+					</Table.Cell>
+					<Table.Cell>
+						<CacheEntryDisplay {entry} />
+					</Table.Cell>
+					<Table.Cell>
+						<CacheTableActions {entry} />
+					</Table.Cell>
 				</Table.Row>
 			{:else}
 				<Table.Row>
-					<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+					<Table.Cell colspan={7} class="h-24 text-center">No results.</Table.Cell>
 				</Table.Row>
 			{/each}
 		</Table.Body>
