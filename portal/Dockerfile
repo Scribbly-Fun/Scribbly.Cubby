@@ -30,6 +30,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY package.json .
 
 ENV NODE_ENV=production
+# adapter-node defaults reconstructed URLs to https; Aspire and other reverse
+# proxies forward the browser scheme/host so form actions and redirects match.
+ENV PROTOCOL_HEADER=x-forwarded-proto
+ENV HOST_HEADER=x-forwarded-host
 EXPOSE 3000
 
 CMD ["node", "build"]

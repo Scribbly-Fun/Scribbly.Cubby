@@ -99,6 +99,8 @@ public static class CubbyResourceBuilderExtensions
                 .WithImage(CubbyContainerImageTags.PortalImage, CubbyContainerImageTags.PortalTag)
                 .WithImageRegistry(CubbyContainerImageTags.Registry)
                 .WithEndpoint(name: "http", targetPort: 3000, scheme: "http")
+                .WithEnvironment("PROTOCOL_HEADER", "x-forwarded-proto")
+                .WithEnvironment("HOST_HEADER", "x-forwarded-host")
                 .WithEnvironment(context =>
                 {
                     if (context.Resource is CubbyPortalResource portal)

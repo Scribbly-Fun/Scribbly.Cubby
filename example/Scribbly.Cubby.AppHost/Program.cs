@@ -17,6 +17,8 @@ var cubbyDockerFile = builder
 var cubbyAdminPortal = builder
     .AddDockerfile("cubby-portal-dockerfile", "../../portal", "Dockerfile")
     .WithEndpoint(3002, 3000, "http")
+    .WithEnvironment("PROTOCOL_HEADER", "x-forwarded-proto")
+    .WithEnvironment("HOST_HEADER", "x-forwarded-host")
     .WithEnvironment(context =>
     {
         var containerEndpointRef = cubbyDockerFile.Resource.GetEndpoint("http");

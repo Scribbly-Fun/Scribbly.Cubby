@@ -13,7 +13,14 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter({
 			out: 'build'
-		})
+		}),
+		csrf: {
+			// adapter-node rebuilds request.url as https://<host> unless ORIGIN or
+			// x-forwarded-proto is set. Aspire/Docker serve this admin UI over HTTP
+			// on a published host port, so browser Origin (http://localhost:<hostPort>)
+			// never matches and form actions return 403 Cross-site POST form submissions.
+			trustedOrigins: ['*']
+		}
 	}
 };
 
