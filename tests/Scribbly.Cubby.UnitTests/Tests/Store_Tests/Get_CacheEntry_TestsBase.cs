@@ -136,10 +136,10 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
 
-        var time = new AdjustableTimeProvider(TimeSpan.FromMilliseconds(-1));
+        var time = new AdjustableTimeProvider(TimeSpan.Zero);
         using var store = CreateStore(new CubbyServerOptions(), time);
 
-        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromMilliseconds(1)));
+        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromSeconds(10)));
         
         store.Get(key).IsEmpty.Should().BeFalse();
     }
@@ -192,10 +192,10 @@ public abstract class Get_CacheEntry_TestsBase : CubbyStore_CacheEntry_TestsBase
         byte[] array = new byte[length];
         Random.Shared.NextBytes(array);
 
-        var time = new AdjustableTimeProvider(TimeSpan.FromMilliseconds(-1));
+        var time = new AdjustableTimeProvider(TimeSpan.Zero);
         using var store = CreateStore(new CubbyServerOptions(), time);
 
-        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromMilliseconds(1)));
+        store.Put(key, array, CacheEntryOptions.Sliding(time, TimeSpan.FromSeconds(10)));
         
         store.Get(key).Length.Should().Be(array.Length + 24);
     }
