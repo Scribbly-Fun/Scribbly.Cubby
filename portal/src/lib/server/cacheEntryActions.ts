@@ -115,7 +115,8 @@ export type CreateCacheEntryInput = {
 };
 
 /**
- * Inserts or updates a cache entry with the provided raw bytes, encoding, and compression flag.
+ * Inserts or updates a cache entry through the existing HTTP Put endpoint.
+ * Encoding and compression are assigned as cache metadata; the value is sent as raw bytes.
  * @returns True when the host created or updated the entry
  */
 export async function createEntry(input: CreateCacheEntryInput): Promise<boolean> {
@@ -127,19 +128,19 @@ export async function createEntry(input: CreateCacheEntryInput): Promise<boolean
 	}
 
 	const params = new URLSearchParams({
-		key: input.key,
-		encoding: input.encoding,
-		compressed: String(input.compressed)
+		key: input.key
 	});
 
 	const body = new ArrayBuffer(input.value.byteLength);
 	new Uint8Array(body).set(input.value);
 
 	try {
-		const response = await fetch(`${cubbyUrl}/cubby/portal/caches?${params.toString()}`, {
+		const response = await fetch(`${cubbyUrl}/cubby?${params.toString()}`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/octet-stream'
+				'Content-Type': 'application/octet-stream',
+				'x-cubby-encoding': input.encoding,
+				'x-cubby-flags': input.compressed ? 'Compressed' : 'None'
 			},
 			body
 		});

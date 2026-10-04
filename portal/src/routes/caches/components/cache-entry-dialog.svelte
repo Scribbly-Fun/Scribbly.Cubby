@@ -181,7 +181,7 @@
 
 			<div class="flex items-center gap-2">
 				<Checkbox id="cache-entry-compressed" bind:checked={compressed} />
-				<Label for="cache-entry-compressed">Compress value (Brotli)</Label>
+				<Label for="cache-entry-compressed">Compressed</Label>
 			</div>
 
 			<div class="grid gap-2">
