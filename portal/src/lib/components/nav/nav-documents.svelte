@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	// @ts-ignore
 	import CopyIcon from '@tabler/icons-svelte/icons/copy';
 	// @ts-ignore
@@ -11,7 +12,11 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
-	let { items }: { items: { name: string; url: string; icon: Icon }[] } = $props();
+	let {
+		items
+	}: {
+		items: { name: string; url: string; externalUrl: string; icon: Icon }[];
+	} = $props();
 
 	const sidebar = Sidebar.useSidebar();
 
@@ -39,7 +44,7 @@
 	<Sidebar.Menu>
 		{#each items as item (item.name)}
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton>
+				<Sidebar.MenuButton class={page.url.pathname === item.url ? 'bg-accent' : ''}>
 					{#snippet child({ props })}
 						<a {...props} href={item.url}>
 							<item.icon />
@@ -67,7 +72,7 @@
 					>
 						<DropdownMenu.Item
 							onclick={() => {
-								void copyLink(item.url);
+								void copyLink(item.externalUrl);
 							}}
 						>
 							<CopyIcon />
@@ -75,7 +80,7 @@
 						</DropdownMenu.Item>
 						<DropdownMenu.Item
 							onclick={() => {
-								openInNewTab(item.url);
+								openInNewTab(item.externalUrl);
 							}}
 						>
 							<ExternalLinkIcon />

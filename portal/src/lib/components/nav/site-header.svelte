@@ -16,6 +16,10 @@
 	// @ts-ignore
 	import UserCircleIcon from '@tabler/icons-svelte/icons/user-circle';
 	// @ts-ignore
+	import DatabaseIcon from '@tabler/icons-svelte/icons/database';
+	// @ts-ignore
+	import FileAiIcon from '@tabler/icons-svelte/icons/file-ai';
+	// @ts-ignore
 	import type { Icon } from '@tabler/icons-svelte';
 
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -26,7 +30,9 @@
 		'/dashboard': { title: 'Dashboard', icon: ChartBarIcon },
 		'/caches': { title: 'Caches', icon: CacheIcon },
 		'/locks': { title: 'Locks', icon: LocksIcon },
-		'/settings': { title: 'Settings', icon: UserCircleIcon }
+		'/settings': { title: 'Settings', icon: UserCircleIcon },
+		'/docs/server': { title: 'Server', icon: DatabaseIcon },
+		'/docs/client': { title: 'Client', icon: FileAiIcon }
 	};
 
 	const routeMeta = $derived(routes[page.url.pathname]);
