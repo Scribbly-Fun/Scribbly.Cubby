@@ -7,35 +7,21 @@
 	import DarkMode from '@tabler/icons-svelte/icons/brightness';
 	// @ts-ignore
 	import LightMode from '@tabler/icons-svelte/icons/brightness-up';
-	// @ts-ignore
-	import ChartBarIcon from '@tabler/icons-svelte/icons/chart-bar';
-	// @ts-ignore
-	import CacheIcon from '@tabler/icons-svelte/icons/device-sd-card';
-	// @ts-ignore
-	import LocksIcon from '@tabler/icons-svelte/icons/lock-code';
-	// @ts-ignore
-	import UserCircleIcon from '@tabler/icons-svelte/icons/user-circle';
-	// @ts-ignore
-	import DatabaseIcon from '@tabler/icons-svelte/icons/database';
-	// @ts-ignore
-	import FileAiIcon from '@tabler/icons-svelte/icons/file-ai';
-	// @ts-ignore
-	import type { Icon } from '@tabler/icons-svelte';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
-	const routes: Record<string, { title: string; icon: Icon }> = {
-		'/dashboard': { title: 'Dashboard', icon: ChartBarIcon },
-		'/caches': { title: 'Caches', icon: CacheIcon },
-		'/locks': { title: 'Locks', icon: LocksIcon },
-		'/settings': { title: 'Settings', icon: UserCircleIcon },
-		'/docs/server': { title: 'Server', icon: DatabaseIcon },
-		'/docs/client': { title: 'Client', icon: FileAiIcon }
+	const routes: Record<string, string> = {
+		'/dashboard': 'Dashboard',
+		'/caches': 'Caches',
+		'/locks': 'Locks',
+		'/settings': 'Settings',
+		'/docs/server': 'Server',
+		'/docs/client': 'Client'
 	};
 
-	const routeMeta = $derived(routes[page.url.pathname]);
+	const title = $derived(routes[page.url.pathname] ?? 'Cubby');
 </script>
 
 <header
@@ -44,12 +30,7 @@
 	<div class="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
 		<Sidebar.Trigger class="-ms-1" />
 		<Separator orientation="vertical" class="mx-2 data-[orientation=vertical]:h-4" />
-		<div class="flex items-center gap-2">
-			{#if routeMeta}
-				<routeMeta.icon class="size-4" />
-			{/if}
-			<h1 class="text-base font-medium">{routeMeta?.title ?? 'Cubby'}</h1>
-		</div>
+		<h1 class="text-base font-medium">{title}</h1>
 		<div class="ms-auto flex items-center gap-2">
 			<Button
 				onclick={toggleMode}
