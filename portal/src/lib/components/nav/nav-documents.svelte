@@ -1,21 +1,42 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	// @ts-ignore
+	import CopyIcon from '@tabler/icons-svelte/icons/copy';
 	// @ts-ignore
 	import DotsIcon from '@tabler/icons-svelte/icons/dots';
 	// @ts-ignore
-	import FolderIcon from '@tabler/icons-svelte/icons/folder';
-	// @ts-ignore
-	import Share3Icon from '@tabler/icons-svelte/icons/share-3';
-	// @ts-ignore
-	import TrashIcon from '@tabler/icons-svelte/icons/trash';
+	import ExternalLinkIcon from '@tabler/icons-svelte/icons/external-link';
 	// @ts-ignore
 	import type { Icon } from '@tabler/icons-svelte';
 
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
-	let { items }: { items: { name: string; url: string; icon: Icon }[] } = $props();
+	let {
+		items
+	}: {
+		items: { name: string; url: string; externalUrl: string; icon: Icon }[];
+	} = $props();
 
 	const sidebar = Sidebar.useSidebar();
+
+	async function copyLink(url: string) {
+		try {
+			await navigator.clipboard.writeText(url);
+		} catch {
+			// Fallback for environments without clipboard permissions.
+			const input = document.createElement('input');
+			input.value = url;
+			document.body.appendChild(input);
+			input.select();
+			document.execCommand('copy');
+			document.body.removeChild(input);
+		}
+	}
+
+	function openInNewTab(url: string) {
+		window.open(url, '_blank', 'noopener,noreferrer');
+	}
 </script>
 
 <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
@@ -23,7 +44,7 @@
 	<Sidebar.Menu>
 		{#each items as item (item.name)}
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton>
+				<Sidebar.MenuButton class={page.url.pathname === item.url ? 'bg-accent' : ''}>
 					{#snippet child({ props })}
 						<a {...props} href={item.url}>
 							<item.icon />
@@ -45,22 +66,25 @@
 						{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content
-						class="w-24 rounded-lg"
+						class="w-28 rounded-lg"
 						side={sidebar.isMobile ? 'bottom' : 'right'}
 						align={sidebar.isMobile ? 'end' : 'start'}
 					>
-						<DropdownMenu.Item>
-							<FolderIcon />
+						<DropdownMenu.Item
+							onclick={() => {
+								void copyLink(item.externalUrl);
+							}}
+						>
+							<CopyIcon />
+							<span>Copy</span>
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onclick={() => {
+								openInNewTab(item.externalUrl);
+							}}
+						>
+							<ExternalLinkIcon />
 							<span>Open</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Item>
-							<Share3Icon />
-							<span>Share</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item variant="destructive">
-							<TrashIcon />
-							<span>Delete</span>
 						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>

@@ -15,6 +15,7 @@
 	import NavUser from './nav-user.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
+	import { DOC_DOCUMENTS } from '$lib/docs/documents';
 
 	const data = {
 		user: {
@@ -38,18 +39,12 @@
 				icon: LocksIcon
 			}
 		],
-		documentation: [
-			{
-				name: 'Server',
-				url: 'https://github.com/Scribbly-Fun/Scribbly.Cubby?tab=readme-ov-file#cubby-host',
-				icon: DatabaseIcon
-			},
-			{
-				name: 'Client',
-				url: 'https://github.com/Scribbly-Fun/Scribbly.Cubby?tab=readme-ov-file#cubby-client',
-				icon: FileAiIcon
-			}
-		]
+		documentation: DOC_DOCUMENTS.map((doc) => ({
+			name: doc.name,
+			url: `/docs/${doc.slug}`,
+			externalUrl: doc.externalUrl,
+			icon: doc.slug === 'server' ? DatabaseIcon : FileAiIcon
+		}))
 	};
 
 	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
